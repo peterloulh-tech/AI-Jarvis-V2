@@ -16,5 +16,9 @@
 - [reliability-nfr.md](reliability-nfr.md)：AIJARVISV2-4 的可靠性、故障隔离、有界等待、停止清理、单实例和长稳判定要求。
 - [reliability-fault-recovery-matrix.md](reliability-fault-recovery-matrix.md)：冻结故障信号、期望动作、最大残留和验证方法矩阵。
 - [reliability-test-and-record-templates.md](reliability-test-and-record-templates.md)：故障注入、4/8 小时、停止清理、异常退出和单实例记录模板。
+- [windows-compatibility-nfr.md](windows-compatibility-nfr.md)：AIJARVISV2-5 的 Windows 正式支持、不承诺、明确排除和兼容质量边界。
+- [windows-display-capture-matrix.md](windows-display-capture-matrix.md)：分辨率/DPI、单/多显示器、显示器/窗口采集及全屏场景矩阵。
+- [windows-device-overlay-scenarios.md](windows-device-overlay-scenarios.md)：音频与显示设备变化、Overlay 可见性/点击穿透和系统事件场景。
+- [windows-validation-record-templates.md](windows-validation-record-templates.md)：Windows 真机、简体中文、采集与 Overlay 执行记录模板。
 
 任何后续工作发现候选验收与冻结需求不一致时，必须以功能冻结 V1.0、非功能冻结 V1.0 为准，并记录评审，不得直接改变范围。

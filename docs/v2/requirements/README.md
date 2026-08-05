@@ -29,5 +29,8 @@
 - [package-layout-and-version-compatibility.md](package-layout-and-version-compatibility.md)：程序包/模型包/用户配置逻辑边界、发布清单、兼容判定和回退不变量。
 - [update-observability-fields.md](update-observability-fields.md)：安装、更新、回退、卸载、诊断和主页面性能提示的版本化字段表。
 - [offline-install-update-validation-plan.md](offline-install-update-validation-plan.md)：无需开发环境、完整离线包、断网 O/V、程序/模型更新、卸载和可观测性验证步骤与记录入口。
+- [nfr-engineering-appendix-manifest-v1.0.md](nfr-engineering-appendix-manifest-v1.0.md)：AIJARVISV2-3～7 工程附录 V1.0 的文件、哈希和版本边界；不构成第二份正式 NFR。
+- [nfr-stage-gate-review.md](nfr-stage-gate-review.md)：AIJARVISV2-8 的覆盖、追踪、冲突、十类硬约束和阶段出口检查。
+- [nfr-open-risks-and-pending-validation.md](nfr-open-risks-and-pending-validation.md)：开放问题、CAL/AMB 待实测集合及禁止提前承诺的结论。
 
 任何后续工作发现候选验收与冻结需求不一致时，必须以功能冻结 V1.0、非功能冻结 V1.0 为准，并记录评审，不得直接改变范围。

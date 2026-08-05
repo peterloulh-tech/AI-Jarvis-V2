@@ -82,8 +82,8 @@ AIJARVISV2-2 新增的 `TERM-*`、`MET-*` 和 `MP-*` 分别在 [nfr-metrics-fram
 | FR-17.09 | 17.9 最小化、关闭与后台行为 | AIJARVISV2-4～5, AIJARVISV2-9, AIJARVISV2-12, AIJARVISV2-31, AIJARVISV2-37, AIJARVISV2-41, AIJARVISV2-53～55, AIJARVISV2-61～62, AIJARVISV2-79～80, AIJARVISV2-83, AIJARVISV2-86, AIJARVISV2-89 |
 | FR-17.10 | 17.10 模式、画面源和新对局 | AIJARVISV2-4～5, AIJARVISV2-9, AIJARVISV2-12, AIJARVISV2-31, AIJARVISV2-37, AIJARVISV2-41, AIJARVISV2-53～55, AIJARVISV2-61～62, AIJARVISV2-79～80, AIJARVISV2-83, AIJARVISV2-86, AIJARVISV2-89 |
 | FR-17.11 | 17.11 异常退出与单实例 | AIJARVISV2-4, AIJARVISV2-9, AIJARVISV2-12, AIJARVISV2-31, AIJARVISV2-37, AIJARVISV2-41, AIJARVISV2-53～55, AIJARVISV2-61～62, AIJARVISV2-79～80, AIJARVISV2-83, AIJARVISV2-86, AIJARVISV2-89 |
-| FR-18.01 | 18.1 当前进程内轻量历史 | AIJARVISV2-6～7, AIJARVISV2-9, AIJARVISV2-12, AIJARVISV2-35, AIJARVISV2-41, AIJARVISV2-55, AIJARVISV2-78, AIJARVISV2-80, AIJARVISV2-88～89 |
-| FR-18.02 | 18.2 当前运行会话高光时间线 | AIJARVISV2-6～7, AIJARVISV2-9, AIJARVISV2-12, AIJARVISV2-35, AIJARVISV2-41, AIJARVISV2-55, AIJARVISV2-78, AIJARVISV2-80, AIJARVISV2-88～89 |
+| FR-18.01 | 18.1 当前进程内轻量历史 | AIJARVISV2-6, AIJARVISV2-9, AIJARVISV2-12, AIJARVISV2-35, AIJARVISV2-41, AIJARVISV2-55, AIJARVISV2-78, AIJARVISV2-80, AIJARVISV2-88～89 |
+| FR-18.02 | 18.2 当前运行会话高光时间线 | AIJARVISV2-6, AIJARVISV2-9, AIJARVISV2-12, AIJARVISV2-35, AIJARVISV2-41, AIJARVISV2-55, AIJARVISV2-78, AIJARVISV2-80, AIJARVISV2-88～89 |
 | FR-18.03 | 18.3 运行诊断日志 | AIJARVISV2-6～7, AIJARVISV2-9, AIJARVISV2-12, AIJARVISV2-35, AIJARVISV2-41, AIJARVISV2-55, AIJARVISV2-78, AIJARVISV2-80, AIJARVISV2-88～89 |
 | FR-18.04 | 18.4 手动导出诊断包 | AIJARVISV2-6～7, AIJARVISV2-9, AIJARVISV2-12, AIJARVISV2-35, AIJARVISV2-41, AIJARVISV2-55, AIJARVISV2-78, AIJARVISV2-80, AIJARVISV2-88～89 |
 | FR-19 | 19 性能状态提示 | AIJARVISV2-3, AIJARVISV2-7, AIJARVISV2-9, AIJARVISV2-35, AIJARVISV2-41, AIJARVISV2-55, AIJARVISV2-78, AIJARVISV2-84～89 |
@@ -249,9 +249,19 @@ AIJARVISV2-6 不修改 AIJARVISV2-4 的恢复动作、AIJARVISV2-5 的 Windows �
 
 | 交付物 | 实际覆盖 |
 |---|---|
-| `offline-install-update-nfr.md` | 无需 Python/Node/开发环境、完整离线包、程序/模型包分离、仅手动更新、失败保留可运行版本、卸载无残留进程、个人配置默认保留、版本化日志/诊断和主页面只提示不自动降级；FR-18.03/18.04/20/21；NFR-02.01/04.02/06.01/07.01/08.01/09；AC-A01/A02、D01/D04～D06；OOS-077～080/082；CAL-030；MET-C04/C06/C07、S06 |
+| `offline-install-update-nfr.md` | 无需 Python/Node/开发环境、完整离线包、程序/模型包分离、仅手动更新、失败保留可运行版本、卸载无残留进程、个人配置默认保留、版本化日志/诊断和主页面只提示不自动降级；FR-18.03/18.04/19/20/21；NFR-02.01/04.02/06.01/07.01/08.01/09；AC-A01/A02、D01/D04～D06；OOS-077～080/082；CAL-030；MET-C04/C06/C07、S06 |
 | `package-layout-and-version-compatibility.md` | PKG-001～006 逻辑包边界、发布清单最小字段、活动版本身份元组、COMPAT-001～006 判定矩阵、precheck/stage/verify/activate/postcheck/rollback/cleanup 阶段和配置保留/删除规则；不选择安装目录、安装器、协议或回退实现 |
 | `update-observability-fields.md` | OBS-ID/UPD/UN/UI 字段表、OBS-EVT-001～007 逻辑记录事件、程序/模型/运行时/配置/log/diagnostic schema 版本一致性、卸载进程计数、主页面性能提示来源和自动配置变更为 0；引用 TERM-037、MP-24、MET-C06/C07，不新增统一测量点或阈值 |
 | `offline-install-update-validation-plan.md` 与 `templates/offline-update-validation-record.csv` | INSTALL/OFFLINE/UPDATE/COMPAT/NETWORK/UNINSTALL/OBS 可执行步骤；普通用户安装、断网 O/V、程序更新不重下模型、模型替换不重装程序、失败保护、两种卸载配置选择、无残留进程、版本化日志/诊断和只提示不自动降级的原始记录入口 |
 
 AIJARVISV2-7 不修改冻结基线、AIJARVISV2-2 的统一度量框架或 AIJARVISV2-3～6 的交付物；不实现自动更新、后台下载、强制更新、版本服务、安装器或业务代码。安装、离线、更新、回退、卸载和诊断结论均需指定构建的实际证据，不从规划文档推定已通过。
+
+## AIJARVISV2-8 阶段出口追踪
+
+| 交付物 | 实际覆盖 |
+|---|---|
+| `nfr-engineering-appendix-manifest-v1.0.md` | 冻结 AIJARVISV2-3～7 的 25 个任务专属工程附录与 SHA-256；明确 `NFR-ENG-APPENDIX-V1.0` 不是第二份正式 NFR，正式 NFR V1.0 仍是唯一正式基线 |
+| `nfr-stage-gate-review.md` | 65 条专题 NFR 覆盖、14 条间接追踪归一化、十类硬约束到验收任务和逻辑责任模块的出口签核，以及冲突/重复/ID/链接/占位/数值状态检查 |
+| `nfr-open-risks-and-pending-validation.md` | CAL-001～030、AMB-01～09、任务3～7待执行证据、六项已发现问题和阻断规则 |
+
+AIJARVISV2-8 只把工程附录提交用户评审，不把待实测值升级为承诺，不修改正式冻结基线，不选择模型或架构，也不授权或启动 AIJARVISV2-9。

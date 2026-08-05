@@ -6,6 +6,8 @@
 
 本矩阵中的任务映射表示“该任务必须读取或验证该需求”，不改变 Dashi 任务范围。范围写法 `AIJARVISV2-X～Y` 表示含首尾的连续任务。
 
+AIJARVISV2-2 新增的 `TERM-*`、`MET-*` 和 `MP-*` 分别在 [nfr-metrics-framework.md](nfr-metrics-framework.md)、[nfr-measurement-points.md](nfr-measurement-points.md) 与 [nfr-classification-and-traceability.md](nfr-classification-and-traceability.md) 中定义；它们引用既有 `NFR-*`、`AC-*`、`CAL-*`，不形成新的产品需求。
+
 ## 功能需求 → 后续 Dashi 任务
 
 | 需求 ID | 源章节与主题 | 后续任务 |
@@ -184,13 +186,13 @@
 
 | Dashi 任务范围 | 必查需求选择器 |
 |---|---|
-| AIJARVISV2-2～8 | NFR-*；FR-21.*；FR-22.*；FR-23.* |
-| AIJARVISV2-9～15 | FR-*；NFR-*；AC-* |
+| AIJARVISV2-2～8 | NFR-*；TERM-*；MET-*；MP-*；FR-21.*；FR-22.*；FR-23.* |
+| AIJARVISV2-9～15 | FR-*；NFR-*；AC-*；MET-*；MP-* |
 | AIJARVISV2-16～21 | FR-01.*；FR-02.*；FR-03.*；FR-20；FR-22；FR-24；NFR-07.*；NFR-08.* |
 | AIJARVISV2-22～29 | FR-05.*；FR-06.*；FR-20；FR-21；FR-23.*；NFR-04.*；NFR-05.*；AC-O*；AC-V* |
 | AIJARVISV2-30～36 | FR-04.*～FR-22；NFR-03.*～NFR-08.* |
 | AIJARVISV2-37～42 | FR-04.*～FR-18.*；FR-22；NFR-08.* |
-| AIJARVISV2-43～49 | FR-*；NFR-*；AC-*；OOS-*；CAL-* |
+| AIJARVISV2-43～49 | FR-*；NFR-*；AC-*；OOS-*；CAL-*；MET-*；MP-* |
 | AIJARVISV2-50～56 | FR-17.*；FR-18.*；FR-20；FR-22；NFR-02.*～NFR-08.*；AC-A*；AC-R*；AC-D* |
 | AIJARVISV2-57～63 | FR-04.*；FR-16.*；FR-17.*；FR-20；FR-22；NFR-02.*～NFR-05.*；AC-A*；AC-B*；AC-O*；AC-V* |
 | AIJARVISV2-64～66 | FR-05.*；FR-08；FR-10.*；FR-22；AC-O* |
@@ -198,4 +200,4 @@
 | AIJARVISV2-70～71 | FR-02.*；FR-03.*；FR-07.*～FR-10.*；AC-C01 |
 | AIJARVISV2-72～76 | FR-10.*～FR-16.*；FR-22；NFR-04.*；AC-C*；AC-B07 |
 | AIJARVISV2-77～79 | FR-09.*；FR-17.*～FR-19；NFR-03.*；NFR-06.*；NFR-08.*；AC-A*；AC-R*；AC-D* |
-| AIJARVISV2-80～89 | FR-*；NFR-*；AC-*；OOS-*；CAL-* |
+| AIJARVISV2-80～89 | FR-*；NFR-*；AC-*；OOS-*；CAL-*；MET-*；MP-* |

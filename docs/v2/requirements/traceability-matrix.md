@@ -201,3 +201,13 @@ AIJARVISV2-2 新增的 `TERM-*`、`MET-*` 和 `MP-*` 分别在 [nfr-metrics-fram
 | AIJARVISV2-72～76 | FR-10.*～FR-16.*；FR-22；NFR-04.*；AC-C*；AC-B07 |
 | AIJARVISV2-77～79 | FR-09.*；FR-17.*～FR-19；NFR-03.*；NFR-06.*；NFR-08.*；AC-A*；AC-R*；AC-D* |
 | AIJARVISV2-80～89 | FR-*；NFR-*；AC-*；OOS-*；CAL-*；MET-*；MP-* |
+
+## AIJARVISV2-3 实际交付追踪
+
+| 交付物 | 实际覆盖 |
+|---|---|
+| `performance-nfr.md` | FR-05.01～05.06、FR-05.08/05.09、FR-06.01～06.03、FR-06.10、FR-12、FR-13.01/13.02、FR-14、FR-21、FR-23.02；NFR-03.01/03.02、NFR-04.01/04.02、NFR-05.01/05.02、NFR-09；AC-O01/O03/O05～O08、AC-V01/V05/V06/V10；MET-T01～T13、MET-R01～R09、MET-S01/S02/S03/S08/S09、MET-C08；MP-01～23 |
+| `performance-benchmark-scenarios.md` | CAL-001～024；其中 BENCH-001～019 一一覆盖第 23.2 节登记的 CAL-006～024，BENCH-020～023 补充启动、加载、首弹幕、端到端与停止清理 |
+| `performance-record-templates.md` 与 `templates/*.csv` | AC-V10 P1 数据记录；AC-O10 选型证据与非承诺边界；O 三档/自定义预算；4h 正式和 8h 内部资源趋势；端到端阶段分解；通过/待校准标记与评审边界 |
+
+CAL-025～030 继续由质量回放、模型/运行时选型或安装包任务处理；AIJARVISV2-3 不对这些事项作结论。

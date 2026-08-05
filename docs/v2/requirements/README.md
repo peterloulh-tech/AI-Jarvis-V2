@@ -25,5 +25,9 @@
 - [threat-boundaries-and-network-behavior.md](threat-boundaries-and-network-behavior.md)：威胁边界、数据流/网络行为清单、断网/IPC/落盘/完整性验证方案。
 - [diagnostic-package-minimization.md](diagnostic-package-minimization.md)：诊断包字段允许列表、始终排除项、弹幕勾选和最小化隐私矩阵。
 - [privacy-security-validation-record-templates.md](privacy-security-validation-record-templates.md)：断网、原始音画落盘、生命周期、日志脱敏、诊断包和完整性记录模板。
+- [offline-install-update-nfr.md](offline-install-update-nfr.md)：AIJARVISV2-7 的离线安装、仅手动更新、失败保护、卸载配置选择和版本化诊断要求。
+- [package-layout-and-version-compatibility.md](package-layout-and-version-compatibility.md)：程序包/模型包/用户配置逻辑边界、发布清单、兼容判定和回退不变量。
+- [update-observability-fields.md](update-observability-fields.md)：安装、更新、回退、卸载、诊断和主页面性能提示的版本化字段表。
+- [offline-install-update-validation-plan.md](offline-install-update-validation-plan.md)：无需开发环境、完整离线包、断网 O/V、程序/模型更新、卸载和可观测性验证步骤与记录入口。
 
 任何后续工作发现候选验收与冻结需求不一致时，必须以功能冻结 V1.0、非功能冻结 V1.0 为准，并记录评审，不得直接改变范围。

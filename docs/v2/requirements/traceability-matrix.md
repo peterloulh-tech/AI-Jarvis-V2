@@ -244,3 +244,14 @@ AIJARVISV2-5 不修改 AIJARVISV2-4 的故障分类或恢复动作，不替采�
 | `privacy-security-validation-record-templates.md` 与 `templates/privacy-security-validation-record.csv` | 数据驻留/清除、网络/IPC、断网闭环、落盘/上传、日志脱敏、诊断包、包完整性、采集权限和生命周期的原始记录与逐项验收汇总 |
 
 AIJARVISV2-6 不修改 AIJARVISV2-4 的恢复动作、AIJARVISV2-5 的 Windows 支持矩阵或 AIJARVISV2-7 的安装更新流程；所有安全、无外连、清除和完整性结论均需指定构建的实际证据，不从规划文档推定已通过。
+
+## AIJARVISV2-7 实际交付追踪
+
+| 交付物 | 实际覆盖 |
+|---|---|
+| `offline-install-update-nfr.md` | 无需 Python/Node/开发环境、完整离线包、程序/模型包分离、仅手动更新、失败保留可运行版本、卸载无残留进程、个人配置默认保留、版本化日志/诊断和主页面只提示不自动降级；FR-18.03/18.04/20/21；NFR-02.01/04.02/06.01/07.01/08.01/09；AC-A01/A02、D01/D04～D06；OOS-077～080/082；CAL-030；MET-C04/C06/C07、S06 |
+| `package-layout-and-version-compatibility.md` | PKG-001～006 逻辑包边界、发布清单最小字段、活动版本身份元组、COMPAT-001～006 判定矩阵、precheck/stage/verify/activate/postcheck/rollback/cleanup 阶段和配置保留/删除规则；不选择安装目录、安装器、协议或回退实现 |
+| `update-observability-fields.md` | OBS-ID/UPD/UN/UI 字段表、OBS-EVT-001～007 逻辑记录事件、程序/模型/运行时/配置/log/diagnostic schema 版本一致性、卸载进程计数、主页面性能提示来源和自动配置变更为 0；引用 TERM-037、MP-24、MET-C06/C07，不新增统一测量点或阈值 |
+| `offline-install-update-validation-plan.md` 与 `templates/offline-update-validation-record.csv` | INSTALL/OFFLINE/UPDATE/COMPAT/NETWORK/UNINSTALL/OBS 可执行步骤；普通用户安装、断网 O/V、程序更新不重下模型、模型替换不重装程序、失败保护、两种卸载配置选择、无残留进程、版本化日志/诊断和只提示不自动降级的原始记录入口 |
+
+AIJARVISV2-7 不修改冻结基线、AIJARVISV2-2 的统一度量框架或 AIJARVISV2-3～6 的交付物；不实现自动更新、后台下载、强制更新、版本服务、安装器或业务代码。安装、离线、更新、回退、卸载和诊断结论均需指定构建的实际证据，不从规划文档推定已通过。

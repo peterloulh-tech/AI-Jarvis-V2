@@ -111,8 +111,8 @@ AIJARVISV2-2 新增的 `TERM-*`、`MET-*` 和 `MP-*` 分别在 [nfr-metrics-fram
 | NFR-05.02 | 5.2 初步硬件边界 | AIJARVISV2-3～4, AIJARVISV2-24, AIJARVISV2-27, AIJARVISV2-30, AIJARVISV2-34, AIJARVISV2-44, AIJARVISV2-53, AIJARVISV2-55, AIJARVISV2-63～69, AIJARVISV2-74, AIJARVISV2-78, AIJARVISV2-84, AIJARVISV2-86, AIJARVISV2-89 |
 | NFR-06.01 | 6.1 硬要求 | AIJARVISV2-6, AIJARVISV2-45, AIJARVISV2-55, AIJARVISV2-78, AIJARVISV2-88～89 |
 | NFR-07.01 | 7.1 硬要求 | AIJARVISV2-7, AIJARVISV2-45, AIJARVISV2-48, AIJARVISV2-50～51, AIJARVISV2-63, AIJARVISV2-87～89 |
-| NFR-08.01 | 8.1 硬要求 | AIJARVISV2-5, AIJARVISV2-7, AIJARVISV2-20, AIJARVISV2-30, AIJARVISV2-35～37, AIJARVISV2-41～42, AIJARVISV2-48, AIJARVISV2-51, AIJARVISV2-53, AIJARVISV2-55, AIJARVISV2-78, AIJARVISV2-80, AIJARVISV2-88～89 |
-| NFR-09 | 9 第一版非功能验收边界 | AIJARVISV2-5, AIJARVISV2-8, AIJARVISV2-15, AIJARVISV2-36, AIJARVISV2-42, AIJARVISV2-46, AIJARVISV2-49, AIJARVISV2-79～80, AIJARVISV2-83, AIJARVISV2-86～89 |
+| NFR-08.01 | 8.1 硬要求 | AIJARVISV2-5～7, AIJARVISV2-20, AIJARVISV2-30, AIJARVISV2-35～37, AIJARVISV2-41～42, AIJARVISV2-48, AIJARVISV2-51, AIJARVISV2-53, AIJARVISV2-55, AIJARVISV2-78, AIJARVISV2-80, AIJARVISV2-88～89 |
+| NFR-09 | 9 第一版非功能验收边界 | AIJARVISV2-5～6, AIJARVISV2-8, AIJARVISV2-15, AIJARVISV2-36, AIJARVISV2-42, AIJARVISV2-46, AIJARVISV2-49, AIJARVISV2-79～80, AIJARVISV2-83, AIJARVISV2-86～89 |
 | NFR-10 | 10 后续处理 | AIJARVISV2-2～15, AIJARVISV2-23～29, AIJARVISV2-43～49, AIJARVISV2-81～89 |
 
 ## 候选验收项 → 后续 Dashi 任务
@@ -232,3 +232,15 @@ AIJARVISV2-4 不修改 AIJARVISV2-3 的性能场景、P50/P95 或资源采样口
 | `windows-validation-record-templates.md` 与 `templates/windows-compatibility-record.csv` | 8 个简体中文检查面；正式支持/不承诺核对；真机环境、显示、采集、设备、Overlay 与系统事件记录；TERM/MET/MP 引用和自动切换违规字段 |
 
 AIJARVISV2-5 不修改 AIJARVISV2-4 的故障分类或恢复动作，不替采集/Overlay 选择技术方案；所有兼容结论仍需 Windows 真机证据。
+
+## AIJARVISV2-6 实际交付追踪
+
+| 交付物 | 实际覆盖 |
+|---|---|
+| `privacy-security-nfr.md` | 核心无需账号/联网、无自动遥测或上传、原始音画默认不持久化、本机 IPC、采集权限、日志脱敏、包完整性和安全结论边界；NFR-05.01/06.01/08.01/09；FR-04.*、17.02～17.06、18.01～18.04、20、22；AC-A02/D01～D06；MET-C04～C06/R08/R09 |
+| `data-residency-and-clearing-matrix.md` | DATA-001～016 的来源、用途、驻留位置、上限、清除时机和导出规则；原始音画、推理中间量、配置快照、轻量历史、高光时间线、滚动日志、异常锁标记、诊断包、程序/模型清单和验证证据 |
+| `threat-boundaries-and-network-behavior.md` | TB-001～009 威胁边界、FLOW-001～009 数据流、NET-001～006 网络行为；NET/IPC/DISK/INTEGRITY 可执行验证；断网核心、未声明外连、原始音画落盘和完整性检查 |
+| `diagnostic-package-minimization.md` | DIAG-001～009 字段允许列表、DIAG-X01～X08 始终排除项、默认/勾选弹幕文字隐私矩阵、内容清单和日志脱敏验证；FR-18.03/18.04、TERM-037、MP-24、MET-C06、AC-D04～D06 |
+| `privacy-security-validation-record-templates.md` 与 `templates/privacy-security-validation-record.csv` | 数据驻留/清除、网络/IPC、断网闭环、落盘/上传、日志脱敏、诊断包、包完整性、采集权限和生命周期的原始记录与逐项验收汇总 |
+
+AIJARVISV2-6 不修改 AIJARVISV2-4 的恢复动作、AIJARVISV2-5 的 Windows 支持矩阵或 AIJARVISV2-7 的安装更新流程；所有安全、无外连、清除和完整性结论均需指定构建的实际证据，不从规划文档推定已通过。

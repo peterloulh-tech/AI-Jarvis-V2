@@ -20,5 +20,10 @@
 - [windows-display-capture-matrix.md](windows-display-capture-matrix.md)：分辨率/DPI、单/多显示器、显示器/窗口采集及全屏场景矩阵。
 - [windows-device-overlay-scenarios.md](windows-device-overlay-scenarios.md)：音频与显示设备变化、Overlay 可见性/点击穿透和系统事件场景。
 - [windows-validation-record-templates.md](windows-validation-record-templates.md)：Windows 真机、简体中文、采集与 Overlay 执行记录模板。
+- [privacy-security-nfr.md](privacy-security-nfr.md)：AIJARVISV2-6 的隐私、安全、采集权限、本机 IPC、日志脱敏与包完整性约束。
+- [data-residency-and-clearing-matrix.md](data-residency-and-clearing-matrix.md)：逐类数据的来源、用途、驻留位置、上限、清除时机和导出规则。
+- [threat-boundaries-and-network-behavior.md](threat-boundaries-and-network-behavior.md)：威胁边界、数据流/网络行为清单、断网/IPC/落盘/完整性验证方案。
+- [diagnostic-package-minimization.md](diagnostic-package-minimization.md)：诊断包字段允许列表、始终排除项、弹幕勾选和最小化隐私矩阵。
+- [privacy-security-validation-record-templates.md](privacy-security-validation-record-templates.md)：断网、原始音画落盘、生命周期、日志脱敏、诊断包和完整性记录模板。
 
 任何后续工作发现候选验收与冻结需求不一致时，必须以功能冻结 V1.0、非功能冻结 V1.0 为准，并记录评审，不得直接改变范围。

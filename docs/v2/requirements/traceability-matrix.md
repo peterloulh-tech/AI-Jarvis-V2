@@ -211,3 +211,13 @@ AIJARVISV2-2 新增的 `TERM-*`、`MET-*` 和 `MP-*` 分别在 [nfr-metrics-fram
 | `performance-record-templates.md` 与 `templates/*.csv` | AC-V10 P1 数据记录；AC-O10 选型证据与非承诺边界；O 三档/自定义预算；4h 正式和 8h 内部资源趋势；端到端阶段分解；通过/待校准标记与评审边界 |
 
 CAL-025～030 继续由质量回放、模型/运行时选型或安装包任务处理；AIJARVISV2-3 不对这些事项作结论。
+
+## AIJARVISV2-4 实际交付追踪
+
+| 交付物 | 实际覆盖 |
+|---|---|
+| `reliability-nfr.md` | FR-04.*、FR-05.09/05.10、FR-06.12、FR-16.01、FR-17.03～17.11、FR-18.03；NFR-03.01/03.02、NFR-04.01/04.02、NFR-05.01、NFR-08.01、NFR-09；AC-A04/A05/A07/A08、AC-B03～B06/B08、AC-O04/O09、AC-R01～R08；CAL-005/019/021～024；MET-T11/T12、R03～R09、S01～S09、C08；MP-01～23 |
+| `reliability-fault-recovery-matrix.md` | O 既有四类显式故障信号、V 共享服务故障与全局复位、采集/音频/Overlay 故障、暂停/恢复/停止、系统事件、异常退出、孤儿清理和单实例的信号—动作—残留—验证闭环 |
+| `reliability-test-and-record-templates.md` 与 `templates/reliability-event-record.csv` | 单次故障闭环、故障不扩散、有界等待、4h P0、8h 内部压力、停止清理、异常退出和单实例记录；性能/资源原始数据继续引用 AIJARVISV2-3 模板 |
+
+AIJARVISV2-4 不修改 AIJARVISV2-3 的性能场景、P50/P95 或资源采样口径；恢复耗时、V 超时/重启保护和资源增长数值继续待实测评审。

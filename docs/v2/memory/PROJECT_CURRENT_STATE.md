@@ -6,7 +6,7 @@
 
 项目处于 **02 验收基线** 阶段。AIJARVISV2-1～8 已完成需求/NFR 基线、工程附录和阶段门；AIJARVISV2-9 已完成 60 项端到端验收矩阵；AIJARVISV2-10～12 已完成 O/V、发送、Overlay 与运行生命周期专项验收方案。AIJARVISV2-1～12 当前均为 `done`。
 
-AIJARVISV2-13 为下一项验收基线任务，需在独立会话回读 Dashi 的完整要求、评论和直接依赖后启动。
+AIJARVISV2-13 已完成录像回放语料与金标格式并进入 `in_review`，交付覆盖许可脱敏、O/V 共用场景、单调时间轴、C10 评分和 4/8 小时编排，见[任务卡](tasks/AIJARVISV2-13.md)。
 
 ## 冻结基线
 
@@ -18,7 +18,7 @@ AIJARVISV2-13 为下一项验收基线任务，需在独立会话回读 Dashi �
 
 完整登记见 [`baseline-manifest.md`](../requirements/baseline-manifest.md)。AIJARVISV2-3～7 的 25 个 NFR 工程附录已由 AIJARVISV2-8 登记为 `NFR-ENG-APPENDIX-V1.0`；它不是第二份正式 NFR。阶段门已获用户批准，收口提交为 `b433f9dbfac5c074086a8d84ce73693670a3bd89`。
 
-当前业务交付基线为 AIJARVISV2-12 提交 `32d3faf25f9b4802c04419900618fb3a4126cbc4`。项目记忆在其上独立收口，不改变该业务交付。
+当前业务交付基线为 AIJARVISV2-13 提交 `3c731e46db39e01e41cd8f0563d5c080cd4d843b`。项目记忆在其上独立收口，不改变该业务交付。
 
 ## 关键决定
 
@@ -37,11 +37,11 @@ AIJARVISV2-13 为下一项验收基线任务，需在独立会话回读 Dashi �
 
 - 候选模型、量化和运行时尚未冻结；O10 的持续音画、自主触发、结构化三批输出与 16GB 独占组合能力尚无真机证据。
 - V 候选模型和原生多图能力、许可回放/变化标注/事件高光金标、8GB/12GB+ 真机，以及 1～3 路延迟、吞吐、显存和 GPU 数据尚无实测证据。
-- O-IN 许可、脱敏、时间轴和金标资产尚待制作；事件、高光、相关性和质量阈值仍待选型后校准。
+- O/V 共用语料、许可、脱敏、时间轴和金标格式已定义，但实际授权资产与双人标注尚待制作；事件、高光、相关性和质量阈值仍待选型后校准。
 - 发送池/队列/高光安全上限与时效、Windows 11/NVIDIA 真机、1080P/2K/4K × 五档缩放、Overlay 点击穿透、故障注入和孤儿清理均待执行或校准。
 - 4 小时是 P0 正式稳定性窗口；8 小时只是内部压力目标。加载、首弹幕、P50/P95、吞吐、资源峰值/斜率、恢复/停止耗时和 V 并发数据未形成最终门槛。
 - [`nfr-stage-gate-review.md`](../requirements/nfr-stage-gate-review.md) 与 [`nfr-open-risks-and-pending-validation.md`](../requirements/nfr-open-risks-and-pending-validation.md) 末尾的任务状态是交付时历史快照；当前状态必须回读 Dashi，不能据此推断。
 
 ## 下一步注意事项
 
-AIJARVISV2-13 仅可在独立会话核对直接依赖后启动。后续文档必须复用已有追踪、度量、证据和记录入口；发现与冻结基线冲突时记录评审，不直接改范围。
+AIJARVISV2-13 评审期间继续使用当前会话；不得自行改为 `done`，不得启动 AIJARVISV2-14。后续文档必须复用已有追踪、度量、证据和记录入口；发现与冻结基线冲突时记录评审，不直接改范围。

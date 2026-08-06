@@ -40,5 +40,6 @@
 - [windows-hardware-acceptance-matrix.md](windows-hardware-acceptance-matrix.md)：AIJARVISV2-14 编排 V 8/12GB、O 16GB 独占、显示/音频/系统状态、断网及英雄联盟同机真机验收组合。
 - [acceptance-baseline-v1.0.md](acceptance-baseline-v1.0.md)：AIJARVISV2-15 登记任务 9～14 验收资产哈希，冻结覆盖、四态、P0/P1、4/8 小时出口并明确数据与设备缺口责任。
 - [v1-source-snapshot-and-asset-inventory.md](v1-source-snapshot-and-asset-inventory.md)：AIJARVISV2-16 固化原作者提交、模块/构建/测试/脚本/资产/vendor 边界及可复现哈希。
+- [v1-source-reuse-matrix.md](v1-source-reuse-matrix.md)：AIJARVISV2-17 对 V1 低层工具、采集、IPC、runtime、调度、生命周期、发送、Overlay、打包与测试形成 D/M/R/W 分级和提取门。
 
 任何后续工作发现候选验收与冻结需求不一致时，必须以功能冻结 V1.0、非功能冻结 V1.0 为准，并记录评审，不得直接改变范围。

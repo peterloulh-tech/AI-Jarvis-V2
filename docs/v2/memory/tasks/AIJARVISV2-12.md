@@ -1,6 +1,6 @@
 # AIJARVISV2-12 — 定义发送、Overlay 与运行生命周期验收方案
 
-- 状态：`in_review`（Dashi 于 2026-08-06 回读）
+- 状态：`done`（Dashi 于 2026-08-07 回读）
 - 交付提交：`32d3faf25f9b4802c04419900618fb3a4126cbc4`
 - 直接依赖：[8](AIJARVISV2-8.md)
 

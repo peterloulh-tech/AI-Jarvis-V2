@@ -32,5 +32,6 @@
 - [nfr-engineering-appendix-manifest-v1.0.md](nfr-engineering-appendix-manifest-v1.0.md)：AIJARVISV2-3～7 工程附录 V1.0 的文件、哈希和版本边界；不构成第二份正式 NFR。
 - [nfr-stage-gate-review.md](nfr-stage-gate-review.md)：AIJARVISV2-8 的覆盖、追踪、冲突、十类硬约束和阶段出口检查。
 - [nfr-open-risks-and-pending-validation.md](nfr-open-risks-and-pending-validation.md)：开放问题、CAL/AMB 待实测集合及禁止提前承诺的结论。
+- [e2e-acceptance-matrix.md](e2e-acceptance-matrix.md)：AIJARVISV2-9 对候选 60 项补充的前置条件、操作、可观察结果、FR/NFR/任务追踪、24 章覆盖与范围防扩张检查。
 
 任何后续工作发现候选验收与冻结需求不一致时，必须以功能冻结 V1.0、非功能冻结 V1.0 为准，并记录评审，不得直接改变范围。

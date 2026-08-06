@@ -4,9 +4,9 @@
 
 ## 当前阶段与进度
 
-项目处于 **02 验收基线** 阶段。AIJARVISV2-1～8 已完成需求/NFR 基线、工程附录和阶段门；AIJARVISV2-9 已完成 60 项端到端验收矩阵；AIJARVISV2-10～13 已完成 O/V、发送、Overlay、运行生命周期及回放语料与金标专项验收方案。AIJARVISV2-1～13 当前均为 `done`。
+项目处于 **02 验收基线** 阶段。AIJARVISV2-1～8 已完成需求/NFR 基线、工程附录和阶段门；AIJARVISV2-9 已完成 60 项端到端验收矩阵；AIJARVISV2-10～13 已完成 O/V、发送、Overlay、运行生命周期及回放语料与金标专项验收方案；AIJARVISV2-14 已完成 Windows 真机与硬件验收矩阵。AIJARVISV2-1～14 当前均为 `done`。
 
-AIJARVISV2-14 已完成 Windows 真机与硬件验收矩阵并进入 `in_review`，交付覆盖 V 8/12GB、O 16GB 独占、显示/音频/系统状态、断网与英雄联盟同机组合，见[任务卡](tasks/AIJARVISV2-14.md)。
+AIJARVISV2-14 交付覆盖 V 8/12GB、O 16GB 独占、显示/音频/系统状态、断网与英雄联盟同机组合，见[任务卡](tasks/AIJARVISV2-14.md)。
 
 ## 冻结基线
 
@@ -44,4 +44,4 @@ AIJARVISV2-14 已完成 Windows 真机与硬件验收矩阵并进入 `in_review`
 
 ## 下一步注意事项
 
-AIJARVISV2-14 评审期间继续使用当前会话；不得自行改为 `done`，不得启动 AIJARVISV2-15。后续文档必须复用已有追踪、度量、证据和记录入口；发现与冻结基线冲突时记录评审，不直接改范围。
+下一主任务为 AIJARVISV2-15 验收基线阶段门，须在独立会话中复用已有追踪、度量、证据和记录入口；发现与冻结基线冲突时记录评审，不直接改范围。

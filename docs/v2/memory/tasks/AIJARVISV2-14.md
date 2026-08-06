@@ -1,6 +1,6 @@
 # AIJARVISV2-14 — 定义 Windows 真机与硬件验收矩阵
 
-- 状态：`in_review`（Dashi 于 2026-08-07 回读）
+- 状态：`done`（Dashi 于 2026-08-07 回读）
 - 交付提交：`a09acf6c9b24fb60a91bad188864aafe051eebe2`
 - 直接依赖：[8](AIJARVISV2-8.md)
 

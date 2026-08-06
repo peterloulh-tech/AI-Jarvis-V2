@@ -45,4 +45,4 @@
 | AIJARVISV2-11 | V 模式验收 | `done` | V01～V10、候选保护、共享权重、全局复位 | 建立 V 模式专项验收与性能基准方案，覆盖回放输入、共享并发和复位判定。 | [tasks/AIJARVISV2-11.md](tasks/AIJARVISV2-11.md) |
 | AIJARVISV2-12 | 后处理与生命周期验收 | `done` | 配置锁、有界队列、Overlay、停止清理 | 建立发送、Overlay 与运行生命周期专项方案，覆盖边界、路由、显示、故障和资源清理。 | [tasks/AIJARVISV2-12.md](tasks/AIJARVISV2-12.md) |
 | AIJARVISV2-13 | 回放语料与金标 | `done` | 许可脱敏、单调时间轴、事件金标、C10 | 定义 O/V 共用回放语料、许可审计、金标评分和 4/8 小时编排格式。 | [tasks/AIJARVISV2-13.md](tasks/AIJARVISV2-13.md) |
-| AIJARVISV2-14 | Windows 真机矩阵 | `in_review` | 8/12/16GB、显示音频、断网、同机负载 | 编排代表性 Windows/NVIDIA 真机、显示/输入、系统状态和英雄联盟同机验收组合。 | [tasks/AIJARVISV2-14.md](tasks/AIJARVISV2-14.md) |
+| AIJARVISV2-14 | Windows 真机矩阵 | `done` | 8/12/16GB、显示音频、断网、同机负载 | 编排代表性 Windows/NVIDIA 真机、显示/输入、系统状态和英雄联盟同机验收组合。 | [tasks/AIJARVISV2-14.md](tasks/AIJARVISV2-14.md) |

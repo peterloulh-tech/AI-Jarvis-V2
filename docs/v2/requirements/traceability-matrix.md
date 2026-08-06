@@ -262,6 +262,6 @@ AIJARVISV2-7 不修改冻结基线、AIJARVISV2-2 的统一度量框架或 AIJAR
 |---|---|
 | `nfr-engineering-appendix-manifest-v1.0.md` | 冻结 AIJARVISV2-3～7 的 25 个任务专属工程附录与 SHA-256；明确 `NFR-ENG-APPENDIX-V1.0` 不是第二份正式 NFR，正式 NFR V1.0 仍是唯一正式基线 |
 | `nfr-stage-gate-review.md` | 65 条专题 NFR 覆盖、14 条间接追踪归一化、十类硬约束到验收任务和逻辑责任模块的出口签核，以及冲突/重复/ID/链接/占位/数值状态检查 |
-| `nfr-open-risks-and-pending-validation.md` | CAL-001～030、AMB-01～09、任务3～7待执行证据、六项已发现问题和阻断规则 |
+| `nfr-open-risks-and-pending-validation.md` | CAL-001～030、AMB-01～09、任务3～7待执行证据、六项已发现问题和阻断规则；SG-ISSUE-005/006 已分别由 Dashi 证据补录和用户决定关闭 |
 
-AIJARVISV2-8 只把工程附录提交用户评审，不把待实测值升级为承诺，不修改正式冻结基线，不选择模型或架构，也不授权或启动 AIJARVISV2-9。
+用户于 2026-08-06 批准阶段出口及卸载决定：默认删除程序和运行时，默认保留模型包和个人配置；“删除模型包”和“删除个人配置”为相互独立且默认均不勾选的两个选项。该决定只进入任务8的工程附录阶段出口与后续实施追踪，不把待实测值升级为承诺，不修改正式冻结基线或任务3～7专属交付物，不选择模型或架构；AIJARVISV2-8 仍保持 `in_review`，AIJARVISV2-9 不启动。

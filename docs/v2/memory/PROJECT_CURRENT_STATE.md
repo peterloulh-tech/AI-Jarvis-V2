@@ -4,9 +4,9 @@
 
 ## 当前阶段与进度
 
-项目处于 **02 验收基线** 阶段。AIJARVISV2-1～8 已完成需求/NFR 基线、工程附录和阶段门；AIJARVISV2-9 已完成 60 项端到端验收矩阵；AIJARVISV2-10～13 已完成 O/V、发送、Overlay、运行生命周期及回放语料与金标专项验收方案；AIJARVISV2-14 已完成 Windows 真机与硬件验收矩阵。AIJARVISV2-1～14 当前均为 `done`。
+项目已完成 **02 验收基线** 阶段并进入 **03 V1/开源资产审计** 阶段。AIJARVISV2-1～14 已完成需求/NFR 与验收规划；AIJARVISV2-15 已冻结验收基线。AIJARVISV2-1～15 当前均为 `done`。
 
-AIJARVISV2-15 已登记 `ACCEPTANCE-BASELINE-V1.0` 并进入 `in_review`，静态覆盖 60/60 候选项、83/83 FR、14/14 NFR 和 93/93 范围边界；真实产品验收仍为 0/60，见[任务卡](tasks/AIJARVISV2-15.md)。
+AIJARVISV2-15 已登记 `ACCEPTANCE-BASELINE-V1.0`，静态覆盖 60/60 候选项、83/83 FR、14/14 NFR 和 93/93 范围边界；真实产品验收仍为 0/60，见[任务卡](tasks/AIJARVISV2-15.md)。
 
 ## 冻结基线
 
@@ -44,4 +44,4 @@ AIJARVISV2-15 已登记 `ACCEPTANCE-BASELINE-V1.0` 并进入 `in_review`，静�
 
 ## 下一步注意事项
 
-AIJARVISV2-15 评审期间继续使用当前会话；不得自行改为 `done`，不得启动 AIJARVISV2-16。用户批准前，`READY_FOR_USER_REVIEW` 不等于验收通过或正式资产审计准入。
+下一主任务为 AIJARVISV2-16 V1/原作者只读源码快照与资产清单，须在独立会话中执行；只读审计不得执行或修改原作者源码，也不得复制未评估资产。

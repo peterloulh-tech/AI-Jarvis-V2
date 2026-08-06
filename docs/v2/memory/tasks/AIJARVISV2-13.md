@@ -1,6 +1,6 @@
 # AIJARVISV2-13 — 设计录像回放语料与金标格式
 
-- 状态：`in_review`（Dashi 于 2026-08-07 回读）
+- 状态：`done`（Dashi 于 2026-08-07 回读）
 - 交付提交：`3c731e46db39e01e41cd8f0563d5c080cd4d843b`
 - 直接依赖：[8](AIJARVISV2-8.md)
 

@@ -6,7 +6,7 @@
 
 项目处于 **02 验收基线** 阶段。AIJARVISV2-1～8 已完成需求/NFR 基线、工程附录和阶段门；AIJARVISV2-9 已完成 60 项端到端验收矩阵；AIJARVISV2-10～13 已完成 O/V、发送、Overlay、运行生命周期及回放语料与金标专项验收方案；AIJARVISV2-14 已完成 Windows 真机与硬件验收矩阵。AIJARVISV2-1～14 当前均为 `done`。
 
-AIJARVISV2-14 交付覆盖 V 8/12GB、O 16GB 独占、显示/音频/系统状态、断网与英雄联盟同机组合，见[任务卡](tasks/AIJARVISV2-14.md)。
+AIJARVISV2-15 已登记 `ACCEPTANCE-BASELINE-V1.0` 并进入 `in_review`，静态覆盖 60/60 候选项、83/83 FR、14/14 NFR 和 93/93 范围边界；真实产品验收仍为 0/60，见[任务卡](tasks/AIJARVISV2-15.md)。
 
 ## 冻结基线
 
@@ -18,7 +18,7 @@ AIJARVISV2-14 交付覆盖 V 8/12GB、O 16GB 独占、显示/音频/系统状态
 
 完整登记见 [`baseline-manifest.md`](../requirements/baseline-manifest.md)。AIJARVISV2-3～7 的 25 个 NFR 工程附录已由 AIJARVISV2-8 登记为 `NFR-ENG-APPENDIX-V1.0`；它不是第二份正式 NFR。阶段门已获用户批准，收口提交为 `b433f9dbfac5c074086a8d84ce73693670a3bd89`。
 
-当前业务交付基线为 AIJARVISV2-14 提交 `a09acf6c9b24fb60a91bad188864aafe051eebe2`。项目记忆在其上独立收口，不改变该业务交付。
+当前业务交付基线为 AIJARVISV2-15 提交 `09758acdffa0d39ece1ea6f35cea138d7cabcd8a`。项目记忆在其上独立收口，不改变该业务交付。
 
 ## 关键决定
 
@@ -44,4 +44,4 @@ AIJARVISV2-14 交付覆盖 V 8/12GB、O 16GB 独占、显示/音频/系统状态
 
 ## 下一步注意事项
 
-下一主任务为 AIJARVISV2-15 验收基线阶段门，须在独立会话中复用已有追踪、度量、证据和记录入口；发现与冻结基线冲突时记录评审，不直接改范围。
+AIJARVISV2-15 评审期间继续使用当前会话；不得自行改为 `done`，不得启动 AIJARVISV2-16。用户批准前，`READY_FOR_USER_REVIEW` 不等于验收通过或正式资产审计准入。

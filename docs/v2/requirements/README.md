@@ -36,5 +36,6 @@
 - [o-mode-acceptance-and-benchmark-plan.md](o-mode-acceptance-and-benchmark-plan.md)：AIJARVISV2-10 对 O01～O10 补充的固定输入、专项步骤、冻结判定、O10/16GB 证据与真实缺口。
 - [v-mode-acceptance-and-benchmark-plan.md](v-mode-acceptance-and-benchmark-plan.md)：AIJARVISV2-11 对 V01～V10 补充的回放输入、共享并发、候选保护、乱序/复位判定、V10 记录与真实缺口。
 - [postprocessing-overlay-lifecycle-acceptance-plan.md](postprocessing-overlay-lifecycle-acceptance-plan.md)：AIJARVISV2-12 对配置锁、发送/高光路由、Overlay 显示与全生命周期补充的边界、状态、故障及清理判定。
+- [replay-corpus-and-gold-format.md](replay-corpus-and-gold-format.md)：AIJARVISV2-13 定义 O/V 共用录像语料、许可脱敏、单调时间轴、事件金标、C10 评分与 4/8 小时回放编排。
 
 任何后续工作发现候选验收与冻结需求不一致时，必须以功能冻结 V1.0、非功能冻结 V1.0 为准，并记录评审，不得直接改变范围。

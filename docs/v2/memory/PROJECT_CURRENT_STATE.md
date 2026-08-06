@@ -8,6 +8,8 @@
 
 AIJARVISV2-16 已固化原作者提交 `dd8fbf9` 的 3,276 文件只读快照、模块/资产/vendor 边界及整体与关键文件哈希并完成评审，当前为 `done`，见[任务卡](tasks/AIJARVISV2-16.md)。
 
+AIJARVISV2-17 已完成 21 个源码边界的 `D/M/R/W` 复用分级、依赖/许可门、提取前置条件和重写缺口并进入 `in_review`，见[任务卡](tasks/AIJARVISV2-17.md)。
+
 ## 冻结基线
 
 | 基线 | 状态 | SHA-256 |
@@ -18,7 +20,7 @@ AIJARVISV2-16 已固化原作者提交 `dd8fbf9` 的 3,276 文件只读快照、
 
 完整登记见 [`baseline-manifest.md`](../requirements/baseline-manifest.md)。AIJARVISV2-3～7 的 25 个 NFR 工程附录已由 AIJARVISV2-8 登记为 `NFR-ENG-APPENDIX-V1.0`；它不是第二份正式 NFR。阶段门已获用户批准，收口提交为 `b433f9dbfac5c074086a8d84ce73693670a3bd89`。
 
-当前业务交付基线为 AIJARVISV2-16 提交 `c1f5a9c3934cd5c53bfb6063a70f5b7c760b7659`。项目记忆在其上独立收口，不改变该业务交付。
+当前业务交付基线为 AIJARVISV2-17 提交 `559c906ab25e3ac1a5f4636f720e3a15d80297ce`。项目记忆在其上独立收口，不改变该业务交付。
 
 ## 关键决定
 
@@ -41,8 +43,9 @@ AIJARVISV2-16 已固化原作者提交 `dd8fbf9` 的 3,276 文件只读快照、
 - 真机代表组合和记录入口已编排，但 Windows 11/NVIDIA 8/12/16GB 机器、1080P/2K/4K × 五档缩放、音频设备、Overlay 点击穿透、系统电源事件、断网及英雄联盟同机负载均待执行；英雄联盟与主机完全断网的兼容执行方式尚未确认。
 - 4 小时是 P0 正式稳定性窗口；8 小时只是内部压力目标。加载、首弹幕、P50/P95、吞吐、资源峰值/斜率、恢复/停止耗时和 V 并发数据未形成最终门槛。
 - V1 的 8 个非 vendor 位图缺少逐项作者、原始来源和独立许可记录；模型权重与 vendor 内依赖许可也未由仓库 MIT 覆盖，未完成任务 18/19 前不得视为可复用或可分发。
+- V1 runtime 会把原始画面/音频写入临时 BMP/WAV；V1 调度、生命周期和发送还不满足 O/V 代次、槽位、清理、高光流规则，且存在冻结范围禁止的语义相似去重，均不得原样迁移。
 - [`nfr-stage-gate-review.md`](../requirements/nfr-stage-gate-review.md) 与 [`nfr-open-risks-and-pending-validation.md`](../requirements/nfr-open-risks-and-pending-validation.md) 末尾的任务状态是交付时历史快照；当前状态必须回读 Dashi，不能据此推断。
 
 ## 下一步注意事项
 
-AIJARVISV2-16 已完成；AIJARVISV2-17 可基于其固定清单开展源码复用分级。后续复用判断必须同时指向固定提交和具体文件/模块，vendor 还须指向其子树对象或 `VENDOR.json` 上游提交。
+AIJARVISV2-17 评审期间继续使用当前会话；不得自行改为 `done`，不得启动 AIJARVISV2-18。后续实际提取必须同时指向固定提交和具体符号/路径；vendor 还须指向其子树对象或 `VENDOR.json` 上游提交，并通过任务 19 的许可门。

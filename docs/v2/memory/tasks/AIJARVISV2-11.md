@@ -1,6 +1,6 @@
 # AIJARVISV2-11 — 定义 V 模式验收与性能基准方案
 
-- 状态：`in_review`（Dashi 于 2026-08-06 回读）
+- 状态：`done`（Dashi 于 2026-08-06 回读）
 - 交付提交：`35a57ba8ea0071327686bc953ca68918c7a402a0`
 - 直接依赖：[8](AIJARVISV2-8.md)
 

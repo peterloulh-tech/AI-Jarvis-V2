@@ -4,9 +4,9 @@
 
 ## 当前阶段与进度
 
-项目处于 **02 验收基线** 阶段。AIJARVISV2-1～8 已完成需求/NFR 基线、工程附录和阶段门；AIJARVISV2-9 已完成 60 项端到端验收矩阵；AIJARVISV2-10 已完成 O 模式专项验收与基准方案。AIJARVISV2-1～10 当前均为 `done`。
+项目处于 **02 验收基线** 阶段。AIJARVISV2-1～8 已完成需求/NFR 基线、工程附录和阶段门；AIJARVISV2-9 已完成 60 项端到端验收矩阵；AIJARVISV2-10/11 已完成 O/V 模式专项验收方案。AIJARVISV2-1～11 当前均为 `done`。
 
-AIJARVISV2-11 已完成 V 模式专项验收规划并进入 `in_review`，交付覆盖 V01～V09 P0、V10 P1、回放输入及并发/乱序/复位判定，见[任务卡](tasks/AIJARVISV2-11.md)。AIJARVISV2-12 仍为 `backlog`，尚未启动。
+AIJARVISV2-12 已完成发送、Overlay 与运行生命周期专项验收规划并进入 `in_review`，交付覆盖配置锁、后处理、显示矩阵、故障隔离和停止清理，见[任务卡](tasks/AIJARVISV2-12.md)。
 
 ## 冻结基线
 
@@ -18,7 +18,7 @@ AIJARVISV2-11 已完成 V 模式专项验收规划并进入 `in_review`，交付
 
 完整登记见 [`baseline-manifest.md`](../requirements/baseline-manifest.md)。AIJARVISV2-3～7 的 25 个 NFR 工程附录已由 AIJARVISV2-8 登记为 `NFR-ENG-APPENDIX-V1.0`；它不是第二份正式 NFR。阶段门已获用户批准，收口提交为 `b433f9dbfac5c074086a8d84ce73693670a3bd89`。
 
-当前业务交付基线为 AIJARVISV2-11 提交 `35a57ba8ea0071327686bc953ca68918c7a402a0`。项目记忆在其上独立收口，不改变该业务交付。
+当前业务交付基线为 AIJARVISV2-12 提交 `32d3faf25f9b4802c04419900618fb3a4126cbc4`。项目记忆在其上独立收口，不改变该业务交付。
 
 ## 关键决定
 
@@ -38,10 +38,10 @@ AIJARVISV2-11 已完成 V 模式专项验收规划并进入 `in_review`，交付
 - 候选模型、量化和运行时尚未冻结；O10 的持续音画、自主触发、结构化三批输出与 16GB 独占组合能力尚无真机证据。
 - V 候选模型和原生多图能力、许可回放/变化标注/事件高光金标、8GB/12GB+ 真机，以及 1～3 路延迟、吞吐、显存和 GPU 数据尚无实测证据。
 - O-IN 许可、脱敏、时间轴和金标资产尚待制作；事件、高光、相关性和质量阈值仍待选型后校准。
-- Windows 11/NVIDIA 真机、1080P/2K/4K × 五档缩放、设备变化、Overlay 点击穿透、断网、原始音画落盘、安装/更新/卸载、故障注入和孤儿清理均待执行。
+- 发送池/队列/高光安全上限与时效、Windows 11/NVIDIA 真机、1080P/2K/4K × 五档缩放、Overlay 点击穿透、故障注入和孤儿清理均待执行或校准。
 - 4 小时是 P0 正式稳定性窗口；8 小时只是内部压力目标。加载、首弹幕、P50/P95、吞吐、资源峰值/斜率、恢复/停止耗时和 V 并发数据未形成最终门槛。
 - [`nfr-stage-gate-review.md`](../requirements/nfr-stage-gate-review.md) 与 [`nfr-open-risks-and-pending-validation.md`](../requirements/nfr-open-risks-and-pending-validation.md) 末尾的任务状态是交付时历史快照；当前状态必须回读 Dashi，不能据此推断。
 
 ## 下一步注意事项
 
-AIJARVISV2-11 评审期间继续使用当前会话；不得自行改为 `done`。AIJARVISV2-12 只有在独立新会话回读 Dashi 后方可启动。后续文档必须复用已有追踪、度量、证据和记录入口；发现与冻结基线冲突时记录评审，不直接改范围。
+AIJARVISV2-12 评审期间继续使用当前会话；不得自行改为 `done`，不得启动 AIJARVISV2-13。后续文档必须复用已有追踪、度量、证据和记录入口；发现与冻结基线冲突时记录评审，不直接改范围。

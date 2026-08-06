@@ -6,7 +6,7 @@
 
 项目已完成 **02 验收基线** 阶段并进入 **03 V1/开源资产审计** 阶段。AIJARVISV2-1～14 已完成需求/NFR 与验收规划；AIJARVISV2-15 已冻结验收基线。AIJARVISV2-1～15 当前均为 `done`。
 
-AIJARVISV2-16 已固化原作者提交 `dd8fbf9` 的 3,276 文件只读快照、模块/资产/vendor 边界及整体与关键文件哈希并进入 `in_review`，见[任务卡](tasks/AIJARVISV2-16.md)。
+AIJARVISV2-16 已固化原作者提交 `dd8fbf9` 的 3,276 文件只读快照、模块/资产/vendor 边界及整体与关键文件哈希并完成评审，当前为 `done`，见[任务卡](tasks/AIJARVISV2-16.md)。
 
 ## 冻结基线
 
@@ -45,4 +45,4 @@ AIJARVISV2-16 已固化原作者提交 `dd8fbf9` 的 3,276 文件只读快照、
 
 ## 下一步注意事项
 
-AIJARVISV2-16 评审期间继续使用当前会话；不得自行改为 `done`，不得启动 AIJARVISV2-17。后续复用判断必须同时指向固定提交和具体文件/模块，vendor 还须指向其子树对象或 `VENDOR.json` 上游提交。
+AIJARVISV2-16 已完成；AIJARVISV2-17 可基于其固定清单开展源码复用分级。后续复用判断必须同时指向固定提交和具体文件/模块，vendor 还须指向其子树对象或 `VENDOR.json` 上游提交。

@@ -15,12 +15,9 @@
 
 ## 最小读取路径
 
-新任务只读取：
+任务启动时先读仓库 `AGENTS.md`、[`PROJECT_CURRENT_STATE.md`](PROJECT_CURRENT_STATE.md)、当前 Dashi 任务及相关评论和任务明确列出的直接依赖，再根据编号、链接或实际需要读取命中的少量任务卡、需求文件和代码。
 
-1. [`PROJECT_CURRENT_STATE.md`](PROJECT_CURRENT_STATE.md)；
-2. Dashi 中当前任务的完整内容与评论；
-3. 当前任务的直接依赖卡片；
-4. 仅在上述入口指向时读取相关需求、代码或测试记录。
+已知当前任务编号、直接依赖和相关文件时，不必读取本索引。需要查找历史任务、定位来源、按关键词寻找摘要，或当前任务缺少明确依赖时才读取本索引；命中后只打开少量相关任务卡，不批量读取全部任务卡。
 
 任务进入 `in_review` 时，用 [`TASK_TEMPLATE.md`](TASK_TEMPLATE.md) 创建或更新卡片；用户正式通过后只更新状态等必要字段。跨任务决定才进入 [`DECISIONS.md`](DECISIONS.md)。
 
@@ -33,15 +30,16 @@
 
 ## 已收录任务
 
-| 任务 | 当前 Dashi 状态 | 最终交付提交 |
-|---|---|---|
-| [AIJARVISV2-1](tasks/AIJARVISV2-1.md) | `done` | `cfd553912de8acf35b9308cf234ccecd4c57c33b` |
-| [AIJARVISV2-2](tasks/AIJARVISV2-2.md) | `done` | `a2258691720ee503b67895b9b21e1d89d4f07035` |
-| [AIJARVISV2-3](tasks/AIJARVISV2-3.md) | `done` | `898c0d9d6bf18b2aaf41c4d40650fd03c7afcda0` |
-| [AIJARVISV2-4](tasks/AIJARVISV2-4.md) | `done` | `2ca8637f405d16bee8f04b40666208547850fe76` |
-| [AIJARVISV2-5](tasks/AIJARVISV2-5.md) | `done` | `e10bbdc90f0cc619b1064b2515a3be384c1a715e` |
-| [AIJARVISV2-6](tasks/AIJARVISV2-6.md) | `done` | `11b2c111e4a98181a73e4ed4146b3a5e4f333589` |
-| [AIJARVISV2-7](tasks/AIJARVISV2-7.md) | `done` | `c6d74dcd970e71b790f4c84d66d0ddeabb1169cf` |
-| [AIJARVISV2-8](tasks/AIJARVISV2-8.md) | `done` | `b433f9dbfac5c074086a8d84ce73693670a3bd89` |
-| [AIJARVISV2-9](tasks/AIJARVISV2-9.md) | `done` | `2c1177ad35d638b2a40daf5136a4fd7166bf6689` |
-| [AIJARVISV2-10](tasks/AIJARVISV2-10.md) | `done` | `ba28c363e44b986812a619620649bea390e5008b` |
+| 任务编号 | 模块 | 状态 | 稳定关键词 | 一句话摘要 | 任务卡路径 |
+|---|---|---|---|---|---|
+| AIJARVISV2-1 | 需求基线 | `done` | 基线哈希、追踪矩阵、FR/NFR、AC/CAL | 登记并冻结需求基线，建立覆盖功能、非功能、候选验收与范围项的统一追踪矩阵。 | [tasks/AIJARVISV2-1.md](tasks/AIJARVISV2-1.md) |
+| AIJARVISV2-2 | 度量框架 | `done` | 统一度量、TERM/MET/MP、P50/P95、测量点 | 统一非功能度量词汇、指标、测量点和分位统计口径，为后续验收提供一致基准。 | [tasks/AIJARVISV2-2.md](tasks/AIJARVISV2-2.md) |
+| AIJARVISV2-3 | 性能与资源 | `done` | PERF-NFR、基准场景、资源趋势、真机校准 | 形成性能、资源与端到端时效要求及基准场景，明确真机数据校准和承诺边界。 | [tasks/AIJARVISV2-3.md](tasks/AIJARVISV2-3.md) |
+| AIJARVISV2-4 | 可靠性与恢复 | `done` | REL-NFR、故障隔离、有界等待、停止清理 | 形成可靠性、故障恢复和长时间运行要求，统一故障及运行状态记录入口。 | [tasks/AIJARVISV2-4.md](tasks/AIJARVISV2-4.md) |
+| AIJARVISV2-5 | Windows 兼容 | `done` | Windows 11、NVIDIA、DPI、Overlay | 形成 Windows、采集与 Overlay 兼容要求，覆盖显示缩放、设备和系统事件场景。 | [tasks/AIJARVISV2-5.md](tasks/AIJARVISV2-5.md) |
+| AIJARVISV2-6 | 隐私与安全 | `done` | 数据驻留、原始音画、断网、诊断包 | 形成隐私安全与数据生命周期要求，明确离线、落盘、清除和诊断包处理边界。 | [tasks/AIJARVISV2-6.md](tasks/AIJARVISV2-6.md) |
+| AIJARVISV2-7 | 安装更新与可观测性 | `done` | 离线包、手动更新、兼容回退、卸载 | 定义离线安装、包分离、手动更新、兼容回退、卸载和可观测字段规范。 | [tasks/AIJARVISV2-7.md](tasks/AIJARVISV2-7.md) |
+| AIJARVISV2-8 | NFR 阶段门 | `done` | 工程附录、阶段门、硬约束、开放风险 | 冻结非功能工程附录并完成阶段门评审，统一硬约束、开放风险与卸载决定。 | [tasks/AIJARVISV2-8.md](tasks/AIJARVISV2-8.md) |
+| AIJARVISV2-9 | 端到端验收 | `done` | 验收矩阵、P0/P1、证据通道、范围追踪 | 建立冻结功能的端到端验收矩阵，覆盖全量候选项、追踪范围和证据通道。 | [tasks/AIJARVISV2-9.md](tasks/AIJARVISV2-9.md) |
+| AIJARVISV2-10 | O 模式验收 | `done` | O01～O10、O-IN、硬超时、16GB | 建立 O 模式专项验收与性能基准方案，覆盖输入、超时、稳定及恢复判定。 | [tasks/AIJARVISV2-10.md](tasks/AIJARVISV2-10.md) |
+| AIJARVISV2-11 | V 模式验收 | `in_review` | V01～V10、候选保护、共享权重、全局复位 | 建立 V 模式专项验收与性能基准方案，覆盖回放输入、共享并发和复位判定。 | [tasks/AIJARVISV2-11.md](tasks/AIJARVISV2-11.md) |

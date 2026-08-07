@@ -10,6 +10,8 @@ AIJARVISV2-16 已固化原作者提交 `dd8fbf9` 的 3,276 文件只读快照、
 
 AIJARVISV2-17 已完成 21 个源码边界的 `D/M/R/W` 复用分级、依赖/许可门、提取前置条件和重写缺口，当前为 `done`，见[任务卡](tasks/AIJARVISV2-17.md)。
 
+AIJARVISV2-18 已完成 V1 UI、资源、配置、脚本和测试资产复用/禁用矩阵并进入 `in_review`，见[任务卡](tasks/AIJARVISV2-18.md)。
+
 ## 冻结基线
 
 | 基线 | 状态 | SHA-256 |
@@ -20,7 +22,7 @@ AIJARVISV2-17 已完成 21 个源码边界的 `D/M/R/W` 复用分级、依赖/�
 
 完整登记见 [`baseline-manifest.md`](../requirements/baseline-manifest.md)。AIJARVISV2-3～7 的 25 个 NFR 工程附录已由 AIJARVISV2-8 登记为 `NFR-ENG-APPENDIX-V1.0`；它不是第二份正式 NFR。阶段门已获用户批准，收口提交为 `b433f9dbfac5c074086a8d84ce73693670a3bd89`。
 
-当前业务交付基线为 AIJARVISV2-17 提交 `559c906ab25e3ac1a5f4636f720e3a15d80297ce`。项目记忆在其上独立收口，不改变该业务交付。
+当前业务交付基线为 AIJARVISV2-18 提交 `84ec3a8027a5306415116eb37c12c3dd873d2804`。项目记忆在其上独立收口，不改变该业务交付。
 
 ## 关键决定
 
@@ -42,10 +44,10 @@ AIJARVISV2-17 已完成 21 个源码边界的 `D/M/R/W` 复用分级、依赖/�
 - O/V 共用语料、许可、脱敏、时间轴和金标格式已定义，但实际授权资产与双人标注尚待制作；事件、高光、相关性和质量阈值仍待选型后校准。
 - 真机代表组合和记录入口已编排，但 Windows 11/NVIDIA 8/12/16GB 机器、1080P/2K/4K × 五档缩放、音频设备、Overlay 点击穿透、系统电源事件、断网及英雄联盟同机负载均待执行；英雄联盟与主机完全断网的兼容执行方式尚未确认。
 - 4 小时是 P0 正式稳定性窗口；8 小时只是内部压力目标。加载、首弹幕、P50/P95、吞吐、资源峰值/斜率、恢复/停止耗时和 V 并发数据未形成最终门槛。
-- V1 的 8 个非 vendor 位图缺少逐项作者、原始来源和独立许可记录；模型权重与 vendor 内依赖许可也未由仓库 MIT 覆盖，未完成任务 18/19 前不得视为可复用或可分发。
+- V1 的 8 个非 vendor 位图均因缺少逐项作者、原始来源和独立许可而被任务 18 禁用；模型权重与 vendor/桌面依赖许可仍待任务 19，未通过前不得视为可复用或可分发。
 - V1 runtime 会把原始画面/音频写入临时 BMP/WAV；V1 调度、生命周期和发送还不满足 O/V 代次、槽位、清理、高光流规则，且存在冻结范围禁止的语义相似去重，均不得原样迁移。
 - [`nfr-stage-gate-review.md`](../requirements/nfr-stage-gate-review.md) 与 [`nfr-open-risks-and-pending-validation.md`](../requirements/nfr-open-risks-and-pending-validation.md) 末尾的任务状态是交付时历史快照；当前状态必须回读 Dashi，不能据此推断。
 
 ## 下一步注意事项
 
-AIJARVISV2-18 应在独立会话中基于当前业务与记忆基线审计 UI、资源、配置和测试资产。后续实际提取必须同时指向固定提交和具体符号/路径；vendor 还须指向其子树对象或 `VENDOR.json` 上游提交，并通过任务 19 的许可门。
+AIJARVISV2-18 评审期间继续使用当前会话；不得自行改为 `done`，不得启动 AIJARVISV2-19。后续实际提取必须同时指向固定提交和具体符号/路径；vendor 还须指向其子树对象或 `VENDOR.json` 上游提交，并通过任务 19 的许可门。

@@ -16,7 +16,7 @@ AIJARVISV2-19 已分离审计 V1 代码、vendor、MiniCPM 权重和桌面依赖
 
 AIJARVISV2-20 已定义五类依赖准入、来源锁定、CycloneDX SBOM、vendor/patch、许可与漏洞门及替换策略并完成评审，当前为 `done`，见[任务卡](tasks/AIJARVISV2-20.md)。
 
-AIJARVISV2-21 已合并源码、UI/资源、许可与依赖审计，冻结 3 个直接复用候选符号、修改/参考/重写清单、黑名单、许可门及 12 类 V2 缺口并进入 `in_review`，见[任务卡](tasks/AIJARVISV2-21.md)。
+AIJARVISV2-21 已合并源码、UI/资源、许可与依赖审计，冻结 3 个直接复用候选符号、修改/参考/重写清单、黑名单、许可门及 12 类 V2 缺口并完成评审，当前为 `done`，见[任务卡](tasks/AIJARVISV2-21.md)。
 
 ## 冻结基线
 
@@ -57,4 +57,4 @@ AIJARVISV2-21 已合并源码、UI/资源、许可与依赖审计，冻结 3 个
 
 ## 下一步注意事项
 
-AIJARVISV2-21 评审期间继续使用当前会话；不得自行改为 `done`，不得启动 AIJARVISV2-22。后续实际提取必须同时指向固定提交和具体符号/路径，vendor/model/依赖变化必须重新通过许可门。
+AIJARVISV2-21 已完成，下一任务为 AIJARVISV2-22。后续实际提取必须同时指向固定提交和具体符号/路径，vendor/model/依赖变化必须重新通过许可门。

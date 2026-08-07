@@ -1,6 +1,6 @@
-# AIJARVISV2-23 Windows 现场 PoC 包
+# AIJARVISV2-23 Windows 便携 PoC 包
 
-本目录只为任务 23 的 O-C01 P-02～P-04 动态验证提供一次性入口，不是产品运行时、安装包或任务 24 基准实现。当前非 Windows 环境不得执行本包，也不得把模板、构建成功或空结果记为动态通过。
+GitHub Actions Artifact `AIJARVISV2-23-windows-x64-cuda-portable` 只为任务 23 的 O-C01 P-02～P-04 动态验证提供一次性入口，不是产品运行时、安装包或任务 24 基准实现。当前非 Windows 环境不得执行本包，也不得把 Artifact 构建成功、模板或空结果记为动态通过。
 
 ## 现场放置
 
@@ -13,20 +13,20 @@
 
 ## 机器前置
 
-- Windows 11 x64（build 22000+），NVIDIA 独显由 `nvidia-smi` 报告 15360～17408 MiB；运行前关闭其他 GPU compute 进程并断开物理网络。
-- Visual Studio 2022 C++ Build Tools、CUDA Toolkit（含 `nvcc`）、CMake 3.24+、Git，以及 PowerShell 5.1 或 7 已在 `PATH`。
-- 仓库、模型和输入目录位于本地磁盘；执行账户可写仓库的 `build/task23-poc/`。
+- Windows 11 x64（build 22000+）、正常 NVIDIA 驱动及 PowerShell 5.1 或 7；无需安装 VS Build Tools、CMake、Git、Python、Node 或 CUDA Toolkit。
+- NVIDIA 显卡至少 12GB 标称显存；脚本记录 `nvidia-smi` 的实际型号和容量，不设上限。低于 16GB 的结果只作补充证据，不能替代任务 23 的正式 16GB 最低环境。
+- 运行前关闭其他 GPU compute 进程并断开物理网络；便携目录、模型和输入目录位于本地磁盘且可写。
 
 ## 单一入口
 
-在 Windows PowerShell 5.1 或 PowerShell 7 中，从仓库根执行：
+解压 Artifact 后，在其根目录执行：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\tools\aijarvisv2-23\run-aijarvisv2-23.ps1 `
+powershell -ExecutionPolicy Bypass -File .\run-aijarvisv2-23.ps1 `
   -ModelRoot D:\AIJarvis-PoC\models\MiniCPM-o-4_5-gguf `
   -InputRoot D:\AIJarvis-PoC\o-in-07
 ```
 
-现场准备完成后只需执行上述一个主命令。入口按前检、CUDA 构建、P-02/P-04 套件、P-03 正常结束/重建及 12 秒硬超时强杀四阶段执行；用例间无需人工干预。任何身份、许可材料、输入哈希、Windows/NVIDIA 16GB、独占 GPU 或离线条件不满足时，都会在模型加载前停止。
+现场准备完成后只需执行上述一个主命令。入口验证 Artifact/模型/输入哈希后直接运行预编译执行器，再按原有 P-02/P-04 套件及 P-03 正常结束/重建/12 秒硬超时强杀执行；用例间无需人工干预。模型或 O-IN-07 缺失时只列出固定放置槽位，不检查或提示编译工具。
 
-结果写入 `build/task23-poc/results/<run-id>/`：`preflight.json` 和 `build-manifest.json` 固定身份/构建，`evidence.jsonl` 保存完整原始响应和调用时间轴，三个既有格式 CSV 保存性能/资源/故障，`summary.json` 分开记录证据完整性与可行性，`sha256sums.txt` 固定全部结果文件。原始授权音画不会复制进结果目录；执行完成后人工只需保存整个 `<run-id>` 目录。
+结果写入便携目录的 `results/<run-id>/`：`preflight.json` 和 `build-manifest.json` 固定身份/构建，`evidence.jsonl` 保存完整原始响应和调用时间轴，三个既有格式 CSV 保存性能/资源/故障，`summary.json` 分开记录证据完整性、GPU 证据范围与可行性，`sha256sums.txt` 固定全部结果文件。原始授权音画不会复制进结果目录；执行完成后人工只需保存整个 `<run-id>` 目录。

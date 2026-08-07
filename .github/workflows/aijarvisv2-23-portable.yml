@@ -1,0 +1,117 @@
+name: AIJARVISV2-23 Windows portable PoC
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - codex/aijarvisv2-23
+    paths:
+      - .github/workflows/aijarvisv2-23-portable.yml
+      - tools/aijarvisv2-23/**
+      - third_party/runtime/**
+      - docs/v2/requirements/templates/**
+
+permissions:
+  contents: read
+
+env:
+  ARTIFACT_NAME: AIJARVISV2-23-windows-x64-cuda-portable
+  CUDA_VERSION: 12.8.1
+
+jobs:
+  build-portable:
+    runs-on: windows-2022
+    timeout-minutes: 180
+    steps:
+      - name: Check out pinned source
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
+      - name: Install pinned CUDA build toolkit
+        uses: Jimver/cuda-toolkit@1a3c14e26833ccf292b268f9a790fb47dea7b2da
+        with:
+          cuda: ${{ env.CUDA_VERSION }}
+          method: network
+          sub-packages: '["nvcc", "cudart", "cublas", "cublas_dev", "visual_studio_integration"]'
+
+      - name: Prepare pinned runtime source
+        shell: pwsh
+        run: |
+          $runtimeSource = Join-Path $env:RUNNER_TEMP "aijarvisv2-23-runtime"
+          Copy-Item -LiteralPath "third_party/runtime/vendor" -Destination $runtimeSource -Recurse
+          Remove-Item -LiteralPath (Join-Path $runtimeSource "tools/omni/assets/default_ref_audio") -Recurse -Force
+          Push-Location $runtimeSource
+          try {
+            git apply "$env:GITHUB_WORKSPACE/third_party/runtime/patches/0001-text-input-runtime.patch"
+            if ($LASTEXITCODE -ne 0) { throw "Pinned runtime patch failed" }
+          } finally {
+            Pop-Location
+          }
+          "TASK23_RUNTIME_SOURCE=$runtimeSource" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: Configure and build
+        shell: pwsh
+        run: |
+          cmake -S tools/aijarvisv2-23 -B build/task23-portable -G "Visual Studio 17 2022" -A x64 `
+            -DGGML_CUDA=ON -DGGML_CUDA_NCCL=OFF -DBUILD_SHARED_LIBS=OFF `
+            "-DJARVIS_RUNTIME_UPSTREAM_SOURCE_DIR=$env:TASK23_RUNTIME_SOURCE"
+          if ($LASTEXITCODE -ne 0) { throw "CMake configure failed" }
+          cmake --build build/task23-portable --config Release --target aijarvisv2-task23-poc --parallel
+          if ($LASTEXITCODE -ne 0) { throw "Portable PoC build failed" }
+
+      - name: Install runtime dependencies and package
+        shell: pwsh
+        run: |
+          $packageRoot = Join-Path $env:GITHUB_WORKSPACE "build/artifact/$env:ARTIFACT_NAME"
+          cmake --install build/task23-portable --config Release --prefix $packageRoot
+          if ($LASTEXITCODE -ne 0) { throw "Portable dependency install failed" }
+          ./tools/aijarvisv2-23/package-portable.ps1 `
+            -RepositoryRoot $env:GITHUB_WORKSPACE `
+            -PackageRoot $packageRoot `
+            -SourceCommit $env:GITHUB_SHA `
+            -CudaVersion $env:CUDA_VERSION `
+            -ArtifactName $env:ARTIFACT_NAME
+          "TASK23_PACKAGE_ROOT=$packageRoot" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: Verify portable preflight and GPU gates
+        shell: pwsh
+        run: |
+          . (Join-Path $env:TASK23_PACKAGE_ROOT "gpu-capacity.ps1")
+          $expectations = @(
+            @{ mib = 11999; run = $false; formal = $false },
+            @{ mib = 12000; run = $true; formal = $false },
+            @{ mib = 16000; run = $true; formal = $true },
+            @{ mib = 24576; run = $true; formal = $true },
+            @{ mib = 32768; run = $true; formal = $true }
+          )
+          foreach ($expected in $expectations) {
+            $actual = Get-Task23GpuEligibility -MemoryTotalMiB $expected.mib
+            if ($actual.portable_run_gate_met -ne $expected.run -or
+                $actual.task23_formal_minimum_met -ne $expected.formal) {
+              throw "GPU capacity classification failed for $($expected.mib) MiB"
+            }
+          }
+
+          $emptyModels = Join-Path $env:RUNNER_TEMP "missing-models"
+          $emptyInput = Join-Path $env:RUNNER_TEMP "missing-o-in-07"
+          New-Item -ItemType Directory -Path $emptyModels, $emptyInput -Force | Out-Null
+          $message = ""
+          try {
+            & (Join-Path $env:TASK23_PACKAGE_ROOT "run-aijarvisv2-23.ps1") `
+              -ModelRoot $emptyModels -InputRoot $emptyInput
+            throw "Portable preflight unexpectedly accepted missing field inputs"
+          } catch {
+            $message = $_.Exception.Message
+          }
+          if ($message -notmatch "MODEL_ROOT" -or $message -notmatch "O_IN_07_ROOT" -or
+              $message -match "git\.exe|cmake\.exe|nvcc\.exe") {
+            throw "Portable missing-input guidance is not self-contained: $message"
+          }
+          Remove-Item -LiteralPath (Join-Path $env:TASK23_PACKAGE_ROOT "results") -Recurse -Force -ErrorAction SilentlyContinue
+
+      - name: Upload portable Artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: ${{ env.ARTIFACT_NAME }}
+          path: build/artifact/${{ env.ARTIFACT_NAME }}
+          if-no-files-found: error
+          retention-days: 14

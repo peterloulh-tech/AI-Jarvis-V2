@@ -2,8 +2,8 @@
 
 [CmdletBinding()]
 param(
-    [Parameter(Mandatory = $true)][string]$ModelRoot,
-    [Parameter(Mandatory = $true)][string]$InputRoot,
+    [string]$ModelRoot,
+    [string]$InputRoot,
     [string]$ResultRoot,
     [ValidateRange(250, 5000)][int]$SamplingIntervalMs = 500,
     [ValidateRange(1, 5)][int]$Repetitions = 1,
@@ -14,12 +14,21 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
 $ToolRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
+$PortableManifestPath = Join-Path $ToolRoot "portable-manifest.json"
+$PortableMode = Test-Path -LiteralPath $PortableManifestPath -PathType Leaf
 $RepositoryRoot = [IO.Path]::GetFullPath((Join-Path $ToolRoot "..\.."))
+if (-not $ModelRoot -or -not $InputRoot) {
+    throw "Specify -ModelRoot and -InputRoot. See README.md beside this script for the fixed MODEL_ROOT and O_IN_07_ROOT layouts."
+}
 $ModelRoot = [IO.Path]::GetFullPath($ModelRoot)
 $InputRoot = [IO.Path]::GetFullPath($InputRoot)
 $RunId = "O10-P23-{0}-WIN-01" -f (Get-Date).ToUniversalTime().ToString("yyyyMMdd-HHmmss")
 if (-not $ResultRoot) {
-    $ResultRoot = Join-Path $RepositoryRoot "build\task23-poc\results\$RunId"
+    $ResultRoot = if ($PortableMode) {
+        Join-Path $ToolRoot "results\$RunId"
+    } else {
+        Join-Path $RepositoryRoot "build\task23-poc\results\$RunId"
+    }
 }
 $ResultRoot = [IO.Path]::GetFullPath($ResultRoot)
 $BuildRoot = Join-Path $RepositoryRoot "build\task23-poc\windows-x64-cuda"
@@ -30,10 +39,16 @@ $PreflightPath = Join-Path $ResultRoot "preflight.json"
 $SummaryPath = Join-Path $ResultRoot "summary.json"
 $InputManifestPath = Join-Path $InputRoot "manifest.json"
 $ModelProvenancePath = Join-Path $ModelRoot "MODEL_PROVENANCE.json"
-$PerformanceTemplate = Join-Path $RepositoryRoot "docs\v2\requirements\templates\performance-sample-record.csv"
-$ResourceTemplate = Join-Path $RepositoryRoot "docs\v2\requirements\templates\resource-trend-record.csv"
-$ReliabilityTemplate = Join-Path $RepositoryRoot "docs\v2\requirements\templates\reliability-event-record.csv"
+$TemplateRoot = if ($PortableMode) { Join-Path $ToolRoot "templates" } else { Join-Path $RepositoryRoot "docs\v2\requirements\templates" }
+$PerformanceTemplate = Join-Path $TemplateRoot "performance-sample-record.csv"
+$ResourceTemplate = Join-Path $TemplateRoot "resource-trend-record.csv"
+$ReliabilityTemplate = Join-Path $TemplateRoot "reliability-event-record.csv"
 $ConfigSnapshotHash = ""
+$ApplicationVersion = ""
+$HardwareProfileId = ""
+$PortableManifest = $null
+
+. (Join-Path $ToolRoot "gpu-capacity.ps1")
 
 New-Item -ItemType Directory -Path $ResultRoot -Force | Out-Null
 
@@ -56,7 +71,7 @@ function Get-Sha256 {
 function Assert-File {
     param([Parameter(Mandatory = $true)][string]$Path, [string]$Label = "file")
     if (-not (Test-Path -LiteralPath $Path -PathType Leaf)) {
-        throw "Missing $Label: $Path"
+        throw "Missing ${Label}: $Path"
     }
 }
 
@@ -87,6 +102,53 @@ function Assert-Sha256 {
     if ((Get-Sha256 -Path $Path) -ne $Sha256.ToLowerInvariant()) {
         throw "$Label SHA-256 mismatch: $Path"
     }
+}
+
+function Assert-FieldInputSlots {
+    $requiredSlots = @(
+        @{ root = $ModelRoot; path = "MiniCPM-o-4_5-Q4_K_M.gguf"; label = "MODEL_ROOT" },
+        @{ root = $ModelRoot; path = "vision\MiniCPM-o-4_5-vision-F16.gguf"; label = "MODEL_ROOT" },
+        @{ root = $ModelRoot; path = "audio\MiniCPM-o-4_5-audio-F16.gguf"; label = "MODEL_ROOT" },
+        @{ root = $ModelRoot; path = "LICENSE.Apache-2.0.txt"; label = "MODEL_ROOT" },
+        @{ root = $ModelRoot; path = "MODEL_CARD.md"; label = "MODEL_ROOT" },
+        @{ root = $ModelRoot; path = "MODEL_PROVENANCE.json"; label = "MODEL_ROOT" },
+        @{ root = $InputRoot; path = "manifest.json"; label = "O_IN_07_ROOT" }
+    )
+    $missing = @($requiredSlots | Where-Object {
+        -not (Test-Path -LiteralPath (Join-Path $_.root $_.path) -PathType Leaf)
+    } | ForEach-Object { "$($_.label)\$($_.path)" })
+    if ($missing.Count -ne 0) {
+        throw "Field inputs are incomplete. Place the fixed files under MODEL_ROOT=$ModelRoot and O_IN_07_ROOT=$InputRoot. Missing: $($missing -join ', '). Use the templates beside this script; no compiler or download is attempted."
+    }
+}
+
+function Get-PortableManifest {
+    if ($null -ne $script:PortableManifest) { return $script:PortableManifest }
+    Assert-File -Path $PortableManifestPath -Label "portable manifest"
+    $manifest = Get-Content -LiteralPath $PortableManifestPath -Raw -Encoding UTF8 | ConvertFrom-Json
+    if ($manifest.artifact_name -ne "AIJARVISV2-23-windows-x64-cuda-portable" -or
+        $manifest.runtime_revision -ne "b9d15b83ee353b2eaeee4d9318c98a35a1347486" -or
+        $manifest.runtime_patch_sha256 -ne "cc8b1c4abb62a736cf190da3fdb1c29a260130f4b6cb3651696479703150783e" -or
+        $manifest.runtime_license_sha256 -ne "94f29bbed6a22c35b992c5c6ebf0e7c92f13b836b90f36f461c9cf2f0f1d010d") {
+        throw "Portable package identity does not match O-C01"
+    }
+    foreach ($entry in @($manifest.files)) {
+        $relativePath = [string]$entry.path
+        if ([IO.Path]::IsPathRooted($relativePath) -or $relativePath -match "(^|[\\/])\.\.([\\/]|$)") {
+            throw "Portable manifest contains an unsafe path: $relativePath"
+        }
+        Assert-ExactFile -Path (Join-Path $ToolRoot $relativePath.Replace("/", "\")) `
+            -Size ([int64]$entry.size) -Sha256 ([string]$entry.sha256)
+    }
+    $script:PortableManifest = $manifest
+    return $script:PortableManifest
+}
+
+function Get-SourceCommit {
+    if ($PortableMode) {
+        return [string](Get-PortableManifest).source_commit
+    }
+    return (& git.exe -C $RepositoryRoot rev-parse HEAD).Trim()
 }
 
 function Test-JsonlEvent {
@@ -176,17 +238,24 @@ function Get-NearestRank {
 }
 
 function Invoke-Preflight {
+    Assert-FieldInputSlots
     if (-not [Environment]::Is64BitOperatingSystem -or [Environment]::OSVersion.Platform -ne [PlatformID]::Win32NT) {
         throw "Windows x64 is required"
     }
     if ([Environment]::OSVersion.Version.Build -lt 22000) {
         throw "Windows 11 build 22000 or later is required"
     }
-    foreach ($command in @("git.exe", "cmake.exe", "nvcc.exe", "nvidia-smi.exe")) {
+    $requiredCommands = if ($PortableMode) {
+        @("nvidia-smi.exe")
+    } else {
+        @("git.exe", "cmake.exe", "nvcc.exe", "nvidia-smi.exe")
+    }
+    foreach ($command in $requiredCommands) {
         if (-not (Get-Command $command -ErrorAction SilentlyContinue)) {
             throw "Required command is missing: $command"
         }
     }
+    $portableManifest = if ($PortableMode) { Get-PortableManifest } else { $null }
 
     $physicalAdapters = @(Get-NetAdapter -Physical -ErrorAction Stop | Where-Object Status -eq "Up")
     if ($physicalAdapters.Count -ne 0) {
@@ -194,8 +263,9 @@ function Invoke-Preflight {
     }
 
     $gpu = Get-GpuSnapshot
-    if ($gpu.memory_total_mib -lt 15360 -or $gpu.memory_total_mib -gt 17408) {
-        throw "A 16GB NVIDIA GPU is required; nvidia-smi reports $($gpu.memory_total_mib) MiB"
+    $gpuEligibility = Get-Task23GpuEligibility -MemoryTotalMiB $gpu.memory_total_mib
+    if (-not $gpuEligibility.portable_run_gate_met) {
+        throw "The portable PoC requires an NVIDIA GPU with at least 12GB nominal VRAM; nvidia-smi reports $($gpu.memory_total_mib) MiB"
     }
     $existingGpuProcesses = @(Get-ComputeApplications)
     if ($existingGpuProcesses.Count -ne 0) {
@@ -280,17 +350,26 @@ function Invoke-Preflight {
     }
     if ($previousOffset -lt 30000) { throw "O-IN-07 chunk timeline must reach at least 30000 ms" }
 
-    $vendorManifestPath = Join-Path $RepositoryRoot "third_party\runtime\VENDOR.json"
-    $vendorManifest = Get-Content -LiteralPath $vendorManifestPath -Raw -Encoding UTF8 | ConvertFrom-Json
-    if ($vendorManifest.upstream.revision -ne "b9d15b83ee353b2eaeee4d9318c98a35a1347486") {
-        throw "Pinned runtime revision mismatch"
+    if ($PortableMode) {
+        $runtimeRevision = [string]$portableManifest.runtime_revision
+        $runtimePatchSha256 = [string]$portableManifest.runtime_patch_sha256
+        $runtimeLicenseSha256 = [string]$portableManifest.runtime_license_sha256
+    } else {
+        $vendorManifestPath = Join-Path $RepositoryRoot "third_party\runtime\VENDOR.json"
+        $vendorManifest = Get-Content -LiteralPath $vendorManifestPath -Raw -Encoding UTF8 | ConvertFrom-Json
+        if ($vendorManifest.upstream.revision -ne "b9d15b83ee353b2eaeee4d9318c98a35a1347486") {
+            throw "Pinned runtime revision mismatch"
+        }
+        Assert-Sha256 -Path (Join-Path $RepositoryRoot "third_party\runtime\patches\0001-text-input-runtime.patch") `
+            -Sha256 "cc8b1c4abb62a736cf190da3fdb1c29a260130f4b6cb3651696479703150783e" -Label "runtime patch"
+        Assert-Sha256 -Path (Join-Path $RepositoryRoot "third_party\runtime\LICENSE.llama.cpp-omni") `
+            -Sha256 "94f29bbed6a22c35b992c5c6ebf0e7c92f13b836b90f36f461c9cf2f0f1d010d" -Label "runtime license"
+        $runtimeRevision = [string]$vendorManifest.upstream.revision
+        $runtimePatchSha256 = [string]$vendorManifest.patches[0].sha256
+        $runtimeLicenseSha256 = Get-Sha256 -Path (Join-Path $RepositoryRoot "third_party\runtime\LICENSE.llama.cpp-omni")
     }
-    Assert-Sha256 -Path (Join-Path $RepositoryRoot "third_party\runtime\patches\0001-text-input-runtime.patch") `
-        -Sha256 "cc8b1c4abb62a736cf190da3fdb1c29a260130f4b6cb3651696479703150783e" -Label "runtime patch"
-    Assert-Sha256 -Path (Join-Path $RepositoryRoot "third_party\runtime\LICENSE.llama.cpp-omni") `
-        -Sha256 "94f29bbed6a22c35b992c5c6ebf0e7c92f13b836b90f36f461c9cf2f0f1d010d" -Label "runtime license"
 
-    $head = (& git.exe -C $RepositoryRoot rev-parse HEAD).Trim()
+    $head = Get-SourceCommit
     $cpu = Get-CimInstance Win32_Processor | Select-Object -First 1 Name, NumberOfCores, NumberOfLogicalProcessors
     $computer = Get-CimInstance Win32_ComputerSystem | Select-Object -First 1 Manufacturer, Model, TotalPhysicalMemory
     $powerScheme = (& powercfg.exe /getactivescheme 2>$null | Out-String).Trim()
@@ -298,6 +377,7 @@ function Invoke-Preflight {
         schema_version = 1
         run_id = $RunId
         status = "passed"
+        execution_mode = if ($PortableMode) { "portable_prebuilt" } else { "source_build" }
         checked_at = (Get-Date).ToUniversalTime().ToString("o")
         repository_head = $head
         os_version = [Environment]::OSVersion.Version.ToString()
@@ -306,6 +386,8 @@ function Invoke-Preflight {
         computer = $computer
         active_power_scheme = $powerScheme
         gpu = $gpu
+        gpu_eligibility = $gpuEligibility
+        task23_formal_minimum_met = $gpuEligibility.task23_formal_minimum_met
         initial_compute_applications = $existingGpuProcesses
         model_root = $ModelRoot
         model_provenance_sha256 = Get-Sha256 -Path $ModelProvenancePath
@@ -318,9 +400,9 @@ function Invoke-Preflight {
         input_manifest_sha256 = Get-Sha256 -Path $InputManifestPath
         authorization_record_sha256 = Get-Sha256 -Path (Join-Path $InputRoot ([string]$manifest.authorization_record))
         gold_record_sha256 = Get-Sha256 -Path (Join-Path $InputRoot ([string]$manifest.gold_record))
-        runtime_revision = $vendorManifest.upstream.revision
-        runtime_patch_sha256 = $vendorManifest.patches[0].sha256
-        runtime_license_sha256 = Get-Sha256 -Path (Join-Path $RepositoryRoot "third_party\runtime\LICENSE.llama.cpp-omni")
+        runtime_revision = $runtimeRevision
+        runtime_patch_sha256 = $runtimePatchSha256
+        runtime_license_sha256 = $runtimeLicenseSha256
         tts_files_present = 0
         reference_audio_present = $false
         physical_network_adapters_up = 0
@@ -378,6 +460,16 @@ function Build-Harness {
         default_reference_audio_present = Test-Path -LiteralPath (Join-Path $RuntimeSource "tools\omni\assets\default_ref_audio\default_ref_audio.wav")
         generated_at = (Get-Date).ToUniversalTime().ToString("o")
     })
+    return $executable
+}
+
+function Resolve-Harness {
+    if (-not $PortableMode) { return (Build-Harness) }
+    $executable = Join-Path $ToolRoot "bin\aijarvisv2-task23-poc.exe"
+    Assert-File -Path $executable -Label "prebuilt PoC harness"
+    $portableBuildManifest = Join-Path $ToolRoot "portable-build-manifest.json"
+    Assert-File -Path $portableBuildManifest -Label "portable build manifest"
+    Copy-Item -LiteralPath $portableBuildManifest -Destination (Join-Path $ResultRoot "build-manifest.json") -Force
     return $executable
 }
 
@@ -542,9 +634,9 @@ function Invoke-HardKillCheck {
     return [pscustomobject]@{
         schema_version = 1; reliability_run_id = $RunId; scenario_id = "BENCH-023"
         fault_id = "P03-HARD-KILL"; run_id = $RunId; run_generation = 900; mode = "O"
-        sample_group = $Case.id; app_version = (& git.exe -C $RepositoryRoot rev-parse --short HEAD).Trim()
+        sample_group = $Case.id; app_version = $ApplicationVersion
         config_snapshot_hash = $ConfigSnapshotHash; input_asset_hash = Get-Sha256 -Path $InputManifestPath
-        hardware_profile_id = "windows11-nvidia-16gb"; model_id = "MiniCPM-o-4_5-gguf"
+        hardware_profile_id = $HardwareProfileId; model_id = "MiniCPM-o-4_5-gguf"
         model_version = "502eec5b03eaee9d0d2ce17a176e3490103c9a63"; quantization = "Q4_K_M"
         runtime_version = "b9d15b83ee353b2eaeee4d9318c98a35a1347486"; component = "O-C01-poc"
         event_name = "hard_timeout_kill"; monotonic_timestamp_us = $killRequestedAt
@@ -591,6 +683,7 @@ function Write-RunConfig {
     $path = Join-Path $ResultRoot "run-config.json"
     Write-JsonFile -Path $path -Value ([ordered]@{
         schema_version = 1; run_id = $RunId; task_id = "AIJARVISV2-23"; candidate = "O-C01"
+        execution_mode = if ($PortableMode) { "portable_prebuilt" } else { "source_build" }
         model_root = $ModelRoot; input_manifest = $InputManifestPath
         sampling_interval_ms = $SamplingIntervalMs; repetitions = $Repetitions
         case_timeout_minutes = $CaseTimeoutMinutes; hard_kill_timeout_seconds = 12
@@ -628,7 +721,7 @@ function Finalize-Results {
             mode = "O"; app_version = $Preflight.repository_head; model_id = "MiniCPM-o-4_5-gguf"
             model_version = "502eec5b03eaee9d0d2ce17a176e3490103c9a63"
             quantization = "Q4_K_M"; runtime_version = "b9d15b83ee353b2eaeee4d9318c98a35a1347486"
-            hardware_profile_id = "windows11-nvidia-16gb"; driver_version = $Preflight.gpu.driver_version
+            hardware_profile_id = $HardwareProfileId; driver_version = $Preflight.gpu.driver_version
             config_snapshot_hash = $ConfigSnapshotHash; input_asset_hash = $Preflight.input_manifest_sha256
             concurrency = 1; image_count = 1; tier = $event.tier; budget_chars = $event.budget_chars
             timeout_limit_s = $event.hard_timeout_seconds; route = "duplex"; event_name = "duplex_result"
@@ -649,7 +742,7 @@ function Finalize-Results {
             app_version = $Preflight.repository_head; model_id = "MiniCPM-o-4_5-gguf"
             model_version = "502eec5b03eaee9d0d2ce17a176e3490103c9a63"; quantization = "Q4_K_M"
             runtime_version = "b9d15b83ee353b2eaeee4d9318c98a35a1347486"
-            hardware_profile_id = "windows11-nvidia-16gb"; driver_version = $sample.gpu.driver_version
+            hardware_profile_id = $HardwareProfileId; driver_version = $sample.gpu.driver_version
             config_snapshot_hash = $ConfigSnapshotHash; input_asset_hash = $Preflight.input_manifest_sha256
             sampling_tool = "nvidia-smi+Get-Process"; sampling_interval_ms = $SamplingIntervalMs
             monotonic_timestamp_us = $sample.monotonic_timestamp_us; utc_timestamp = $sample.utc_timestamp
@@ -704,7 +797,9 @@ function Finalize-Results {
     $p03Recorded = $normalStopRecorded -and $rebuildRecorded -and $hardKillRecorded
     $p03Passed = $normalStopPassed -and $rebuildPassed -and $hardKillPassed
     $evidenceComplete = $p02Recorded -and $p03Recorded -and $p04Covered
+    $formalEvidenceComplete = $evidenceComplete -and [bool]$Preflight.task23_formal_minimum_met
     $candidateAssessment = if (-not $evidenceComplete) { "not_demonstrated" } `
+        elseif (-not $Preflight.task23_formal_minimum_met) { "supplemental_only_pending_review" } `
         elseif ($p02Passed -and $p03Passed) { "feasible_pending_review" } `
         else { "infeasible_pending_review" }
     $summary = [ordered]@{
@@ -717,8 +812,11 @@ function Finalize-Results {
         p03_hard_timeout_kill_cleanup = $hardKillPassed
         p04_required_groups_recorded = $p04Covered; p04_missing_groups = $missingGroups
         evidence_complete = $evidenceComplete
+        task23_formal_minimum_met = [bool]$Preflight.task23_formal_minimum_met
+        task23_formal_evidence_complete = $formalEvidenceComplete
+        evidence_scope = $Preflight.gpu_eligibility.evidence_scope
         candidate_assessment = $candidateAssessment
-        o_risk_23_01 = if ($evidenceComplete) { "candidate_for_review_and_closure" } else { "open" }
+        o_risk_23_01 = if ($formalEvidenceComplete) { "candidate_for_review_and_closure" } else { "open" }
         statistics_rule = "nearest-rank Q(p)=x[ceil(p*N)]; failures and timeouts excluded from success latency percentiles"
         groups = $groups; case_runs = $CaseRuns
         evidence_files = @("evidence.jsonl", "resource-samples.jsonl", "performance-sample-record.csv", "resource-trend-record.csv", "reliability-event-record.csv")
@@ -748,10 +846,18 @@ try {
 $ConfigSnapshotHash = Write-RunConfig
 $preflight | Add-Member -NotePropertyName config_snapshot_sha256 -NotePropertyValue $ConfigSnapshotHash -Force
 Write-JsonFile -Value $preflight -Path $PreflightPath
+$ApplicationVersion = if ($preflight.repository_head.Length -gt 12) {
+    $preflight.repository_head.Substring(0, 12)
+} else {
+    $preflight.repository_head
+}
+$gpuNameSlug = ([string]$preflight.gpu.name).ToLowerInvariant() -replace "[^a-z0-9]+", "-"
+$gpuNameSlug = $gpuNameSlug.Trim("-")
+$HardwareProfileId = "windows11-nvidia-$gpuNameSlug-$($preflight.gpu.memory_total_mib)mib"
 $caseRuns = @()
 $reliabilityRows = @()
 try {
-    $executable = Build-Harness
+    $executable = Resolve-Harness
     $generation = 1
     foreach ($case in New-CaseMatrix) {
         $caseRuns += Invoke-Harness -Executable $executable -Case $case -Mode "case" -Generation $generation

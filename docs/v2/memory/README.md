@@ -52,3 +52,4 @@
 | AIJARVISV2-18 | V1 UI/资产复用矩阵 | `done` | Electron、位图许可、配置、smoke、单实例 | 覆盖 V1 UI、配置、脚本和测试资产，禁用排除域与无许可媒体并登记迁移缺口。 | [tasks/AIJARVISV2-18.md](tasks/AIJARVISV2-18.md) |
 | AIJARVISV2-19 | V1 运行时与许可审计 | `done` | MIT、Apache-2.0、vendor、MiniCPM、CUDA、离线分发 | 分离代码、vendor、模型和桌面依赖许可，确认宽松许可边界并阻断当前 provider 与安装包分发。 | [tasks/AIJARVISV2-19.md](tasks/AIJARVISV2-19.md) |
 | AIJARVISV2-20 | 依赖治理与 SBOM | `done` | CycloneDX、来源锁定、vendor、patch、许可门、漏洞门 | 定义五类生态的准入、可追溯 SBOM、补丁记录、阻断规则与高风险替换路径。 | [tasks/AIJARVISV2-20.md](tasks/AIJARVISV2-20.md) |
+| AIJARVISV2-21 | V1 资产复用阶段门 | `in_review` | 主要参考、局部复用、白名单、黑名单、V2 缺口 | 合并源码、资源、许可和依赖审计，冻结最终复用边界、发布门及缺失能力责任。 | [tasks/AIJARVISV2-21.md](tasks/AIJARVISV2-21.md) |

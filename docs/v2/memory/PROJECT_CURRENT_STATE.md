@@ -16,6 +16,8 @@ AIJARVISV2-19 已分离审计 V1 代码、vendor、MiniCPM 权重和桌面依赖
 
 AIJARVISV2-20 已定义五类依赖准入、来源锁定、CycloneDX SBOM、vendor/patch、许可与漏洞门及替换策略并完成评审，当前为 `done`，见[任务卡](tasks/AIJARVISV2-20.md)。
 
+AIJARVISV2-21 已合并源码、UI/资源、许可与依赖审计，冻结 3 个直接复用候选符号、修改/参考/重写清单、黑名单、许可门及 12 类 V2 缺口并进入 `in_review`，见[任务卡](tasks/AIJARVISV2-21.md)。
+
 ## 冻结基线
 
 | 基线 | 状态 | SHA-256 |
@@ -26,7 +28,7 @@ AIJARVISV2-20 已定义五类依赖准入、来源锁定、CycloneDX SBOM、vend
 
 完整登记见 [`baseline-manifest.md`](../requirements/baseline-manifest.md)。AIJARVISV2-3～7 的 25 个 NFR 工程附录已由 AIJARVISV2-8 登记为 `NFR-ENG-APPENDIX-V1.0`；它不是第二份正式 NFR。阶段门已获用户批准，收口提交为 `b433f9dbfac5c074086a8d84ce73693670a3bd89`。
 
-当前业务交付基线为 AIJARVISV2-20 提交 `26c235376c45926ff2a692e7f5f59bea2730fb8c`。项目记忆在其上独立收口，不改变该业务交付。
+当前业务交付基线为 AIJARVISV2-21 提交 `495d422f30336b45ef37e4499200e08f22a805ec`。项目记忆在其上独立收口，不改变该业务交付。
 
 ## 关键决定
 
@@ -55,4 +57,4 @@ AIJARVISV2-20 已定义五类依赖准入、来源锁定、CycloneDX SBOM、vend
 
 ## 下一步注意事项
 
-AIJARVISV2-21 应在独立会话评审并冻结 V1/开源资产复用结论；后续实际提取必须同时指向固定提交和具体符号/路径，vendor/model/依赖变化必须重新通过许可门。
+AIJARVISV2-21 评审期间继续使用当前会话；不得自行改为 `done`，不得启动 AIJARVISV2-22。后续实际提取必须同时指向固定提交和具体符号/路径，vendor/model/依赖变化必须重新通过许可门。

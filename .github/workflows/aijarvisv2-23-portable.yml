@@ -26,6 +26,14 @@ jobs:
       - name: Check out pinned source
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
 
+      - name: Check out pinned mtmd model sources
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          repository: tc-mb/llama.cpp-omni
+          ref: b9d15b83ee353b2eaeee4d9318c98a35a1347486
+          path: build/task23-mtmd-source
+          sparse-checkout: tools/mtmd/models
+
       - name: Install pinned CUDA build toolkit
         shell: pwsh
         run: |
@@ -51,6 +59,8 @@ jobs:
         run: |
           $runtimeSource = Join-Path $env:RUNNER_TEMP "aijarvisv2-23-runtime"
           Copy-Item -LiteralPath "third_party/runtime/vendor" -Destination $runtimeSource -Recurse
+          Copy-Item -LiteralPath "build/task23-mtmd-source/tools/mtmd/models" `
+            -Destination (Join-Path $runtimeSource "tools/mtmd/models") -Recurse
           Remove-Item -LiteralPath (Join-Path $runtimeSource "tools/omni/assets/default_ref_audio") -Recurse -Force
           Push-Location $runtimeSource
           try {

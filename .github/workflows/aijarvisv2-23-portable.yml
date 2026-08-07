@@ -33,7 +33,7 @@ jobs:
           method: network
           sub-packages: '["nvcc", "cudart", "cublas", "cublas_dev", "visual_studio_integration"]'
           use-github-cache: false
-          use-local-cache: false
+          use-local-cache: true
 
       - name: Prepare pinned runtime source
         shell: pwsh

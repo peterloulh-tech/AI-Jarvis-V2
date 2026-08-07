@@ -1,6 +1,6 @@
 # AIJARVISV2-22 — 筛选 O 模型与运行时候选
 
-- 状态：`in_review`（Dashi 于 2026-08-07 回读）
+- 状态：`done`（Dashi 于 2026-08-07 回读）
 - 交付提交：`361215800d79cef09910ac38e9b1d9538e85c38d`
 - 直接依赖：[AIJARVISV2-21](AIJARVISV2-21.md)
 

@@ -18,7 +18,7 @@ AIJARVISV2-20 已定义五类依赖准入、来源锁定、CycloneDX SBOM、vend
 
 AIJARVISV2-21 已合并源码、UI/资源、许可与依赖审计，冻结 3 个直接复用候选符号、修改/参考/重写清单、黑名单、许可门及 12 类 V2 缺口并完成评审，当前为 `done`，见[任务卡](tasks/AIJARVISV2-21.md)。
 
-AIJARVISV2-22 已筛选 4 个 O 模型/运行时组合，唯一准入任务 23 的 PoC 组合为固定 MiniCPM-o 4.5 GGUF 与固定 `llama.cpp-omni` TTS 关闭双工路径；Qwen2.5-Omni 保持候补、不进 PoC，当前为 `in_review`，见[任务卡](tasks/AIJARVISV2-22.md)。
+AIJARVISV2-22 已筛选 4 个 O 模型/运行时组合，唯一准入任务 23 的 PoC 组合为固定 MiniCPM-o 4.5 GGUF 与固定 `llama.cpp-omni` TTS 关闭双工路径；Qwen2.5-Omni 保持候补、不进 PoC，当前为 `done`，见[任务卡](tasks/AIJARVISV2-22.md)。
 
 ## 冻结基线
 
@@ -59,4 +59,4 @@ AIJARVISV2-22 已筛选 4 个 O 模型/运行时组合，唯一准入任务 23 �
 
 ## 下一步注意事项
 
-AIJARVISV2-22 评审期间继续使用当前会话；不得自行改为 `done`，不得启动 AIJARVISV2-23。后续 PoC 只能使用 O-C01 固定来源并先完成许可/TTS/参考音频前检；vendor/model/依赖变化必须重新通过许可门。
+AIJARVISV2-23 可在独立会话中启动。PoC 只能使用 O-C01 固定来源并先完成许可/TTS/参考音频前检；vendor/model/依赖变化必须重新通过许可门。

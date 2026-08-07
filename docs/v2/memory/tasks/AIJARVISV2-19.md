@@ -1,6 +1,6 @@
 # AIJARVISV2-19 — 审计运行时、模型权重与第三方许可
 
-- 状态：`in_review`（Dashi 于 2026-08-07 回读）
+- 状态：`done`（Dashi 于 2026-08-07 回读）
 - 交付提交：`d9901d5e68210c6ecb7d908d31c2e3a7cc2f9840`
 - 直接依赖：[16](AIJARVISV2-16.md)
 

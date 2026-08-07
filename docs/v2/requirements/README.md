@@ -44,5 +44,6 @@
 - [v1-ui-resource-config-test-reuse-matrix.md](v1-ui-resource-config-test-reuse-matrix.md)：AIJARVISV2-18 对 V1 Electron UI、位图、配置、构建安装脚本和测试资产形成复用/禁用矩阵，并单列点击穿透与单实例样例缺口。
 - [v1-runtime-model-third-party-license-audit.md](v1-runtime-model-third-party-license-audit.md)：AIJARVISV2-19 分离 V1 代码、vendor、MiniCPM 权重和桌面依赖的许可结论，登记商业/离线分发义务与阻断门。
 - [dependency-governance-sbom-and-replacement-strategy.md](dependency-governance-sbom-and-replacement-strategy.md)：AIJARVISV2-20 定义五类依赖准入、来源锁定、CycloneDX SBOM、vendor/patch、许可与漏洞门及替换策略。
+- [v1-open-source-asset-reuse-final-audit.md](v1-open-source-asset-reuse-final-audit.md)：AIJARVISV2-21 合并源码、UI/资源、许可与依赖审计，冻结最终白名单、修改/参考/重写清单、许可门和 V2 缺失能力。
 
 任何后续工作发现候选验收与冻结需求不一致时，必须以功能冻结 V1.0、非功能冻结 V1.0 为准，并记录评审，不得直接改变范围。

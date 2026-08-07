@@ -14,6 +14,8 @@ AIJARVISV2-18 已完成 V1 UI、资源、配置、脚本和测试资产复用/�
 
 AIJARVISV2-19 已分离审计 V1 代码、vendor、MiniCPM 权重和桌面依赖的商业/离线分发条件并完成评审，当前为 `done`，见[任务卡](tasks/AIJARVISV2-19.md)。
 
+AIJARVISV2-20 已定义五类依赖准入、来源锁定、CycloneDX SBOM、vendor/patch、许可与漏洞门及替换策略并进入 `in_review`，见[任务卡](tasks/AIJARVISV2-20.md)。
+
 ## 冻结基线
 
 | 基线 | 状态 | SHA-256 |
@@ -24,7 +26,7 @@ AIJARVISV2-19 已分离审计 V1 代码、vendor、MiniCPM 权重和桌面依赖
 
 完整登记见 [`baseline-manifest.md`](../requirements/baseline-manifest.md)。AIJARVISV2-3～7 的 25 个 NFR 工程附录已由 AIJARVISV2-8 登记为 `NFR-ENG-APPENDIX-V1.0`；它不是第二份正式 NFR。阶段门已获用户批准，收口提交为 `b433f9dbfac5c074086a8d84ce73693670a3bd89`。
 
-当前业务交付基线为 AIJARVISV2-19 提交 `d9901d5e68210c6ecb7d908d31c2e3a7cc2f9840`。项目记忆在其上独立收口，不改变该业务交付。
+当前业务交付基线为 AIJARVISV2-20 提交 `26c235376c45926ff2a692e7f5f59bea2730fb8c`。项目记忆在其上独立收口，不改变该业务交付。
 
 ## 关键决定
 
@@ -47,9 +49,10 @@ AIJARVISV2-19 已分离审计 V1 代码、vendor、MiniCPM 权重和桌面依赖
 - 真机代表组合和记录入口已编排，但 Windows 11/NVIDIA 8/12/16GB 机器、1080P/2K/4K × 五档缩放、音频设备、Overlay 点击穿透、系统电源事件、断网及英雄联盟同机负载均待执行；英雄联盟与主机完全断网的兼容执行方式尚未确认。
 - 4 小时是 P0 正式稳定性窗口；8 小时只是内部压力目标。加载、首弹幕、P50/P95、吞吐、资源峰值/斜率、恢复/停止耗时和 V 并发数据未形成最终门槛。
 - V1 根代码 MIT 与三份固定 MiniCPM 权重 Apache-2.0 已确认；当前 vendor provider 因参考音频权利和随包 notices 不明而阻塞，桌面包还缺 npm/Python/CUDA 固定来源及完整许可清单，均不得视为可分发。
+- 依赖治理和 SBOM 字段已定义，但尚无 V2 仓库、真实锁文件、构建产物或漏洞扫描批次；规划资产不得当作实际准入或发布通过。
 - V1 runtime 会把原始画面/音频写入临时 BMP/WAV；V1 调度、生命周期和发送还不满足 O/V 代次、槽位、清理、高光流规则，且存在冻结范围禁止的语义相似去重，均不得原样迁移。
 - [`nfr-stage-gate-review.md`](../requirements/nfr-stage-gate-review.md) 与 [`nfr-open-risks-and-pending-validation.md`](../requirements/nfr-open-risks-and-pending-validation.md) 末尾的任务状态是交付时历史快照；当前状态必须回读 Dashi，不能据此推断。
 
 ## 下一步注意事项
 
-AIJARVISV2-20 应在独立会话中基于当前 HEAD 执行。后续实际提取必须同时指向固定提交和具体符号/路径；vendor/model/依赖变化必须重新通过许可门。
+AIJARVISV2-20 评审期间继续使用当前会话；不得自行改为 `done`，不得启动 AIJARVISV2-21。后续实际提取必须同时指向固定提交和具体符号/路径；vendor/model/依赖变化必须重新通过许可门。

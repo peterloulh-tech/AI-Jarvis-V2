@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "repo_id": "openbmb/MiniCPM-o-4_5-gguf",
+  "revision": "502eec5b03eaee9d0d2ce17a176e3490103c9a63",
+  "attribution": "OpenBMB MiniCPM-o 4.5 GGUF",
+  "quantization": "Q4_K_M LLM with F16 vision and audio projectors",
+  "license_file": "LICENSE.Apache-2.0.txt",
+  "model_card_file": "MODEL_CARD.md",
+  "upstream_notice": "No separate upstream NOTICE was present at the pinned revision; record verified by the operator.",
+  "files": [
+    {
+      "path": "MiniCPM-o-4_5-Q4_K_M.gguf",
+      "size": 5026714400,
+      "sha256": "1237a97ee081b8abebc47aa7dad565701e8f5f904cdc92f6723ac4281bbc0932"
+    },
+    {
+      "path": "vision/MiniCPM-o-4_5-vision-F16.gguf",
+      "size": 1095113184,
+      "sha256": "1453678cc4e4fe18de241952962e234f265cb8dda780773526103ab8ba82f421"
+    },
+    {
+      "path": "audio/MiniCPM-o-4_5-audio-F16.gguf",
+      "size": 660167904,
+      "sha256": "d5b188ac7feaf98e17175c3f9bd14bf269301bfd187439fdaa3e3a494fc32ef7"
+    }
+  ]
+}

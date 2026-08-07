@@ -27,13 +27,24 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
 
       - name: Install pinned CUDA build toolkit
-        uses: Jimver/cuda-toolkit@1a3c14e26833ccf292b268f9a790fb47dea7b2da
-        with:
-          cuda: ${{ env.CUDA_VERSION }}
-          method: network
-          sub-packages: '["nvcc", "cudart", "cublas", "cublas_dev", "visual_studio_integration"]'
-          use-github-cache: false
-          use-local-cache: true
+        shell: pwsh
+        run: |
+          $installer = Join-Path $env:RUNNER_TEMP "cuda_$env:CUDA_VERSION`_windows_network.exe"
+          Invoke-WebRequest `
+            -Uri "https://developer.download.nvidia.com/compute/cuda/$env:CUDA_VERSION/network_installers/cuda_$env:CUDA_VERSION`_windows_network.exe" `
+            -OutFile $installer
+          $cudaMinor = ($env:CUDA_VERSION -split '\.')[0..1] -join '.'
+          $process = Start-Process -FilePath $installer -ArgumentList @(
+            '-s', "nvcc_$cudaMinor", "cudart_$cudaMinor", "cublas_$cudaMinor",
+            "cublas_dev_$cudaMinor", "visual_studio_integration_$cudaMinor"
+          ) -Wait -PassThru
+          if ($process.ExitCode -ne 0) { throw "CUDA network installer failed: $($process.ExitCode)" }
+          $cudaPath = "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v$cudaMinor"
+          if (-not (Test-Path -LiteralPath (Join-Path $cudaPath 'bin\nvcc.exe'))) {
+            throw "CUDA nvcc was not installed under $cudaPath"
+          }
+          "CUDA_PATH=$cudaPath" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          (Join-Path $cudaPath 'bin') | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
       - name: Prepare pinned runtime source
         shell: pwsh

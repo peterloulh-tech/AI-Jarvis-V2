@@ -1,12 +1,12 @@
 # AIJARVISV2-23 — 验证 O 持续全双工与自主文字输出 PoC
 
 - 状态：`in_review`（Dashi 于 2026-08-07 回读）
-- 交付提交：`58afd14436ead08c743c90847f4cb8730d4f948f`
+- 交付提交：`58afd14436ead08c743c90847f4cb8730d4f948f`；现场包 `fee379b3803ca5abe22a8502c08fc3da4ca325f7`
 - 直接依赖：[AIJARVISV2-22](AIJARVISV2-22.md)
 
 ## 最终结果与关键文件
 
-[PoC 记录](../../requirements/o-duplex-autonomous-text-poc.md)完成 O-C01 的 P-01 前检：固定运行时 revision、patch 与许可哈希通过；三项模型/配套许可材料、O-IN-07 授权输入、Windows 11/NVIDIA 16GB 环境和三批完整记录入口缺失，故在下载、构建和推理前停止。动态接口调用 0/4、五项组合能力通过 0/5，结论为`阻塞`而非模型失败。
+[PoC 记录](../../requirements/o-duplex-autonomous-text-poc.md)完成 O-C01 P-01 前检；[`tools/aijarvisv2-23`](../../../../tools/aijarvisv2-23/)补齐单入口 Windows CUDA 执行器、固定三模型/输入哈希门、无参考音频三批 JSON、正常结束/重建/硬强杀及 P50/P95/资源采集。当前环境未构建或运行模型，动态接口仍为 0/4，结论保持`阻塞`。
 
 ## 后续不得破坏的约束
 
@@ -14,6 +14,6 @@
 
 ## 验证与遗留
 
-前检 6/6 有结论（1 通过、5 阻塞），四候选边界 4/4 保持；接口、空输出、停止/性能缺口和风险出口均已记录。仍需在合格真机补齐模型许可包、授权输入、任务专用完整 JSONL/三批校验入口及 P-02～04 动态证据。
+前检 6/6 有结论（1 通过、5 阻塞），四候选边界 4/4 保持；现场入口通过 C++17 语法、JSON、patch 应用及范围静态检查。仍需外部提供固定模型许可包和 O-IN-07，并在合格真机生成 P-02～04 动态证据；PowerShell/MSVC/CUDA 当前环境不可执行。
 
-- 检索关键词：O-C01，O10，P-01，SPEAK/LISTEN，O-RISK-23-01，三批，TTS 0
+- 检索关键词：O-C01，O10，P-01～04，SPEAK/LISTEN，O-RISK-23-01，Windows 现场包，三批，TTS 0

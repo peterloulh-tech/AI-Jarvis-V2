@@ -20,7 +20,7 @@ AIJARVISV2-21 已合并源码、UI/资源、许可与依赖审计，冻结 3 个
 
 AIJARVISV2-22 已筛选 4 个 O 模型/运行时组合，唯一准入任务 23 的 PoC 组合为固定 MiniCPM-o 4.5 GGUF 与固定 `llama.cpp-omni` TTS 关闭双工路径；Qwen2.5-Omni 保持候补、不进 PoC，当前为 `done`，见[任务卡](tasks/AIJARVISV2-22.md)。
 
-AIJARVISV2-23 已完成 O-C01 PoC 前检并触发 `O-RISK-23-01`；现已补齐单入口 Windows 现场包、固定资产/输入校验及 P-02～04 JSONL/CSV 采集，但三项模型许可包、O-IN-07 授权输入和 Windows 11/NVIDIA 16GB 真机仍缺，未产生动态证据，当前为 `in_review`，见[任务卡](tasks/AIJARVISV2-23.md)。
+AIJARVISV2-23 已完成 O-C01 PoC 前检并触发 `O-RISK-23-01`；现已补齐 GitHub Actions 预编译便携 Artifact 工作流、单入口 Windows 现场包、固定资产/输入校验及 P-02～04 JSONL/CSV 采集。工作流通过静态与容器化包验证，但当前仓库无可写 GitHub 远端/登录态，尚无云端构建记录；三项模型许可包、O-IN-07 授权输入和 Windows 11/NVIDIA 16GB 正式验收真机仍缺，未产生动态证据，当前为 `in_review`，见[任务卡](tasks/AIJARVISV2-23.md)。
 
 ## 冻结基线
 
@@ -32,7 +32,7 @@ AIJARVISV2-23 已完成 O-C01 PoC 前检并触发 `O-RISK-23-01`；现已补齐�
 
 完整登记见 [`baseline-manifest.md`](../requirements/baseline-manifest.md)。AIJARVISV2-3～7 的 25 个 NFR 工程附录已由 AIJARVISV2-8 登记为 `NFR-ENG-APPENDIX-V1.0`；它不是第二份正式 NFR。阶段门已获用户批准，收口提交为 `b433f9dbfac5c074086a8d84ce73693670a3bd89`。
 
-当前业务交付基线为 AIJARVISV2-23 现场包提交 `fee379b3803ca5abe22a8502c08fc3da4ca325f7`。项目记忆在其上独立收口，不改变该业务交付。
+当前业务交付基线为 AIJARVISV2-23 Windows 便携 PoC 包提交 `d77d57356f85a545216b9213d78d4c025fa6aab0`。项目记忆在其上独立收口，不改变该业务交付。
 
 ## 关键决定
 
@@ -61,4 +61,4 @@ AIJARVISV2-23 已完成 O-C01 PoC 前检并触发 `O-RISK-23-01`；现已补齐�
 
 ## 下一步注意事项
 
-AIJARVISV2-23 下一步只允许在同一任务向现场包放入固定模型许可材料和 O-IN-07，并在合格 Windows/NVIDIA 真机执行单入口；或退回任务 22 重审候选。`O-RISK-23-01` 关闭前不得宣称 O-C01 可行，不得启动 AIJARVISV2-24。
+AIJARVISV2-23 下一步只允许在同一任务从可写 GitHub Actions 仓库生成固定便携 Artifact，现场另行放置固定模型许可材料和 O-IN-07，并在合格 Windows/NVIDIA 真机执行单入口；或退回任务 22 重审候选。12GB～不足 16GB 的结果只作补充证据，不能替代正式 16GB 最低环境。`O-RISK-23-01` 关闭前不得宣称 O-C01 可行，不得启动 AIJARVISV2-24。

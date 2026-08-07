@@ -1,6 +1,6 @@
 # AIJARVISV2-20 — 建立依赖治理、SBOM 与替换策略
 
-- 状态：`in_review`（Dashi 于 2026-08-07 回读）
+- 状态：`done`（Dashi 于 2026-08-07 回读）
 - 交付提交：`26c235376c45926ff2a692e7f5f59bea2730fb8c`
 - 直接依赖：[16](AIJARVISV2-16.md)
 

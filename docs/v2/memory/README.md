@@ -48,4 +48,4 @@
 | AIJARVISV2-14 | Windows 真机矩阵 | `done` | 8/12/16GB、显示音频、断网、同机负载 | 编排代表性 Windows/NVIDIA 真机、显示/输入、系统状态和英雄联盟同机验收组合。 | [tasks/AIJARVISV2-14.md](tasks/AIJARVISV2-14.md) |
 | AIJARVISV2-15 | 验收基线阶段门 | `done` | ACCEPTANCE-BASELINE-V1.0、P0/P1、4/8 小时、责任入口 | 登记任务 9～14 资产并冻结覆盖、四态、出口及真实数据和设备缺口责任。 | [tasks/AIJARVISV2-15.md](tasks/AIJARVISV2-15.md) |
 | AIJARVISV2-16 | V1 源码快照清单 | `done` | dd8fbf9、根树、模块地图、vendor 边界、资产哈希 | 固化原作者只读提交及源码、构建、测试、脚本、资产与第三方边界，为后续文件级复用评审提供入口。 | [tasks/AIJARVISV2-16.md](tasks/AIJARVISV2-16.md) |
-| AIJARVISV2-17 | V1 源码复用矩阵 | `in_review` | D/M/R/W、提取白名单、runtime、重写缺口 | 对 21 个源码边界形成复用等级、依赖许可门、提取前置条件和 V2 重写缺口。 | [tasks/AIJARVISV2-17.md](tasks/AIJARVISV2-17.md) |
+| AIJARVISV2-17 | V1 源码复用矩阵 | `done` | D/M/R/W、提取白名单、runtime、重写缺口 | 对 21 个源码边界形成复用等级、依赖许可门、提取前置条件和 V2 重写缺口。 | [tasks/AIJARVISV2-17.md](tasks/AIJARVISV2-17.md) |

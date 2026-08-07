@@ -1,6 +1,6 @@
 # AIJARVISV2-17 — 形成 V1 源码复用分级矩阵与提取边界
 
-- 状态：`in_review`（Dashi 于 2026-08-07 回读）
+- 状态：`done`（Dashi 于 2026-08-07 回读）
 - 交付提交：`559c906ab25e3ac1a5f4636f720e3a15d80297ce`
 - 直接依赖：[16](AIJARVISV2-16.md)
 

@@ -49,4 +49,4 @@
 | AIJARVISV2-15 | 验收基线阶段门 | `done` | ACCEPTANCE-BASELINE-V1.0、P0/P1、4/8 小时、责任入口 | 登记任务 9～14 资产并冻结覆盖、四态、出口及真实数据和设备缺口责任。 | [tasks/AIJARVISV2-15.md](tasks/AIJARVISV2-15.md) |
 | AIJARVISV2-16 | V1 源码快照清单 | `done` | dd8fbf9、根树、模块地图、vendor 边界、资产哈希 | 固化原作者只读提交及源码、构建、测试、脚本、资产与第三方边界，为后续文件级复用评审提供入口。 | [tasks/AIJARVISV2-16.md](tasks/AIJARVISV2-16.md) |
 | AIJARVISV2-17 | V1 源码复用矩阵 | `done` | D/M/R/W、提取白名单、runtime、重写缺口 | 对 21 个源码边界形成复用等级、依赖许可门、提取前置条件和 V2 重写缺口。 | [tasks/AIJARVISV2-17.md](tasks/AIJARVISV2-17.md) |
-| AIJARVISV2-18 | V1 UI/资产复用矩阵 | `in_review` | Electron、位图许可、配置、smoke、单实例 | 覆盖 V1 UI、配置、脚本和测试资产，禁用排除域与无许可媒体并登记迁移缺口。 | [tasks/AIJARVISV2-18.md](tasks/AIJARVISV2-18.md) |
+| AIJARVISV2-18 | V1 UI/资产复用矩阵 | `done` | Electron、位图许可、配置、smoke、单实例 | 覆盖 V1 UI、配置、脚本和测试资产，禁用排除域与无许可媒体并登记迁移缺口。 | [tasks/AIJARVISV2-18.md](tasks/AIJARVISV2-18.md) |

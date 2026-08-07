@@ -27,6 +27,7 @@ if(NOT DEFINED JARVIS_RUNTIME_UPSTREAM_SOURCE_DIR)
       "${AIJARVIS_REPOSITORY_ROOT}/third_party/runtime/vendor" CACHE PATH "")
 endif()
 
+find_package(Threads REQUIRED)
 add_subdirectory(
   "${AIJARVIS_REPOSITORY_ROOT}/third_party/runtime"
   "${CMAKE_CURRENT_BINARY_DIR}/runtime")

@@ -72,6 +72,7 @@ jobs:
           cmake -S tools/aijarvisv2-23 -B build/task23-portable -G "Visual Studio 17 2022" -A x64 `
             -T "cuda=$env:CUDA_PATH" `
             -DGGML_CUDA=ON -DGGML_CUDA_NCCL=OFF -DBUILD_SHARED_LIBS=OFF `
+            -DGGML_NATIVE=OFF '-DCMAKE_CUDA_ARCHITECTURES=86;89;120' `
             "-DJARVIS_RUNTIME_UPSTREAM_SOURCE_DIR=$env:TASK23_RUNTIME_SOURCE"
           if ($LASTEXITCODE -ne 0) { throw "CMake configure failed" }
           cmake --build build/task23-portable --config Release --target aijarvisv2-task23-poc --parallel

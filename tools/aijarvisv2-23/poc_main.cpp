@@ -7,6 +7,7 @@
 #include <atomic>
 #include <chrono>
 #include <cstdint>
+#include <ctime>
 #include <filesystem>
 #include <fstream>
 #include <iomanip>
@@ -18,6 +19,7 @@
 #include <stdexcept>
 #include <string>
 #include <thread>
+#include <utility>
 #include <vector>
 
 #include <windows.h>
@@ -48,6 +50,22 @@ std::string utc_timestamp() {
   value << std::put_time(&utc, "%Y-%m-%dT%H:%M:%S") << '.' << std::setfill('0')
         << std::setw(3) << millis.count() << 'Z';
   return value.str();
+}
+
+std::string path_to_utf8(const fs::path& path) {
+  const auto& native = path.native();
+  if (native.empty()) return {};
+  const auto size = WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS, native.data(),
+                                        static_cast<int>(native.size()), nullptr, 0,
+                                        nullptr, nullptr);
+  if (size <= 0) throw std::runtime_error("cannot encode filesystem path as UTF-8");
+  std::string value(static_cast<std::size_t>(size), '\0');
+  if (WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS, native.data(),
+                          static_cast<int>(native.size()), value.data(), size,
+                          nullptr, nullptr) != size) {
+    throw std::runtime_error("cannot encode filesystem path as UTF-8");
+  }
+  return value;
 }
 
 class EvidenceWriter {
@@ -173,7 +191,7 @@ Options load_options(int argc, char** argv) {
 
 json read_json(const fs::path& path) {
   std::ifstream stream(path, std::ios::binary);
-  if (!stream) throw std::runtime_error("cannot open JSON file: " + path.u8string());
+  if (!stream) throw std::runtime_error("cannot open JSON file: " + path_to_utf8(path));
   json value;
   stream >> value;
   return value;
@@ -288,11 +306,11 @@ json validate_batches(const std::string& raw, const Options& options,
 omni_context* load_model(const Options& options, EvidenceWriter& evidence,
                          common_params& params) {
   common_init();
-  params.model.path = (options.model_root / "MiniCPM-o-4_5-Q4_K_M.gguf").u8string();
+  params.model.path = path_to_utf8(options.model_root / "MiniCPM-o-4_5-Q4_K_M.gguf");
   params.vpm_model =
-      (options.model_root / "vision/MiniCPM-o-4_5-vision-F16.gguf").u8string();
+      path_to_utf8(options.model_root / "vision/MiniCPM-o-4_5-vision-F16.gguf");
   params.apm_model =
-      (options.model_root / "audio/MiniCPM-o-4_5-audio-F16.gguf").u8string();
+      path_to_utf8(options.model_root / "audio/MiniCPM-o-4_5-audio-F16.gguf");
   params.n_ctx = 4096;
   params.n_batch = 512;
   params.n_ubatch = 256;
@@ -309,7 +327,7 @@ omni_context* load_model(const Options& options, EvidenceWriter& evidence,
                   {"reference_audio", ""},
                   {"extra_model_calls", 0}});
   auto* context = omni_init(&params, 2, false, "", -1, "gpu:0", true, nullptr,
-                            nullptr, options.output.parent_path().u8string());
+                            nullptr, path_to_utf8(options.output.parent_path()));
   if (context == nullptr) throw std::runtime_error("omni_init failed");
   context->async = true;
   context->duplex_mode = true;
@@ -340,7 +358,7 @@ json run_session(omni_context* context, const Options& options,
                   {"session_begin_calls", 1},
                   {"tts_enabled", false},
                   {"reference_audio", ""}});
-  if (!omni_duplex_session_begin(context, "", debug_dir.u8string())) {
+  if (!omni_duplex_session_begin(context, "", path_to_utf8(debug_dir))) {
     throw std::runtime_error("omni_duplex_session_begin failed");
   }
   evidence.write({{"event", "session_ready"}, {"run_generation", generation}});
@@ -362,8 +380,8 @@ json run_session(omni_context* context, const Options& options,
       const auto user_seq = (static_cast<std::int64_t>(generation) << 32) |
                             static_cast<std::uint32_t>(chunk.sequence);
       OmniDuplexFrame frame;
-      frame.aud_fname = chunk.audio.u8string();
-      frame.img_fname = chunk.image.u8string();
+      frame.aud_fname = path_to_utf8(chunk.audio);
+      frame.img_fname = path_to_utf8(chunk.image);
       frame.max_slice_nums = -1;
       frame.user_seq = user_seq;
       const auto pushed_at = monotonic_us();
@@ -529,15 +547,15 @@ int run(const Options& options) {
       context->ref_audio_path.clear();
       const auto debug_dir = options.output.parent_path() / "runtime-debug" / options.case_id;
       fs::create_directories(debug_dir);
-      if (!omni_duplex_session_begin(context, "", debug_dir.u8string())) {
+      if (!omni_duplex_session_begin(context, "", path_to_utf8(debug_dir))) {
         throw std::runtime_error("hard-kill fixture session begin failed");
       }
       const auto& chunk = manifest.chunks.front();
       const auto user_seq = (static_cast<std::int64_t>(options.run_generation) << 32) |
                             static_cast<std::uint32_t>(chunk.sequence);
       OmniDuplexFrame frame;
-      frame.aud_fname = chunk.audio.u8string();
-      frame.img_fname = chunk.image.u8string();
+      frame.aud_fname = path_to_utf8(chunk.audio);
+      frame.img_fname = path_to_utf8(chunk.image);
       frame.max_slice_nums = -1;
       frame.user_seq = user_seq;
       const auto frame_id = omni_duplex_push_frame(context, frame);

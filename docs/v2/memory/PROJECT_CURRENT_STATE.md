@@ -1,6 +1,6 @@
 # AI Jarvis V2 当前状态
 
-> 快照日期：2026-08-07。任务状态以 Dashi 项目 `ai-jarvis-v2` 的当前回读为准。
+> 快照日期：2026-08-08。任务状态以 Dashi 项目 `ai-jarvis-v2` 的当前回读为准。
 
 ## 当前阶段与进度
 
@@ -20,7 +20,7 @@ AIJARVISV2-21 已合并源码、UI/资源、许可与依赖审计，冻结 3 个
 
 AIJARVISV2-22 已筛选 4 个 O 模型/运行时组合，唯一准入任务 23 的 PoC 组合为固定 MiniCPM-o 4.5 GGUF 与固定 `llama.cpp-omni` TTS 关闭双工路径；Qwen2.5-Omni 保持候补、不进 PoC，当前为 `done`，见[任务卡](tasks/AIJARVISV2-22.md)。
 
-AIJARVISV2-23 已完成 O-C01 PoC 前检并触发 `O-RISK-23-01`；现已补齐 GitHub Actions 预编译便携 Artifact 工作流、单入口 Windows 现场包、固定资产/输入校验及 P-02～04 JSONL/CSV 采集。工作流通过静态与容器化包验证，但当前仓库无可写 GitHub 远端/登录态，尚无云端构建记录；三项模型许可包、O-IN-07 授权输入和 Windows 11/NVIDIA 16GB 正式验收真机仍缺，未产生动态证据，当前为 `in_review`，见[任务卡](tasks/AIJARVISV2-23.md)。
+AIJARVISV2-23 已完成 O-C01 PoC 前检并触发 `O-RISK-23-01`；现已补齐 GitHub Actions 预编译便携 Artifact 工作流、单入口 Windows 现场包、固定资产/输入校验及 P-02～04 JSONL/CSV 采集。最新云端工作流已通过 Windows/MSVC/CUDA 编译链接，portable 打包对 `CUDA_PATH` 内 EULA 的错误假设已改为构建前获取并锁定 NVIDIA 官方 `cuda_cudart` 与 `libcublas` redistributable 许可；完整 Artifact 尚待该修复后的工作流生成。三项模型许可包、O-IN-07 授权输入和 Windows 11/NVIDIA 16GB 正式验收真机仍缺，未产生动态证据，当前为 `in_review`，见[任务卡](tasks/AIJARVISV2-23.md)。
 
 ## 冻结基线
 
@@ -32,7 +32,7 @@ AIJARVISV2-23 已完成 O-C01 PoC 前检并触发 `O-RISK-23-01`；现已补齐 
 
 完整登记见 [`baseline-manifest.md`](../requirements/baseline-manifest.md)。AIJARVISV2-3～7 的 25 个 NFR 工程附录已由 AIJARVISV2-8 登记为 `NFR-ENG-APPENDIX-V1.0`；它不是第二份正式 NFR。阶段门已获用户批准，收口提交为 `b433f9dbfac5c074086a8d84ce73693670a3bd89`。
 
-当前业务交付基线为 AIJARVISV2-23 Windows 便携 PoC 包提交 `d77d57356f85a545216b9213d78d4c025fa6aab0`。项目记忆在其上独立收口，不改变该业务交付。
+当前业务交付基线为 AIJARVISV2-23 Windows 便携 PoC 包；最新云端记录已证明 Windows/MSVC/CUDA 编译链接通过，本次继续修正其 portable 许可收集链。项目记忆只记录事实，不改变业务交付。
 
 ## 关键决定
 

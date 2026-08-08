@@ -33,6 +33,40 @@ jobs:
           ref: b9d15b83ee353b2eaeee4d9318c98a35a1347486
           path: build/task23-runtime-source
 
+      - name: Fetch pinned CUDA redistributable licenses
+        shell: pwsh
+        run: |
+          $redistribBase = "https://developer.download.nvidia.com/compute/cuda/redist"
+          $licenseRoot = Join-Path $env:RUNNER_TEMP "task23-cuda-redistributable-licenses"
+          New-Item -ItemType Directory -Path $licenseRoot -Force | Out-Null
+          $manifestPath = Join-Path $licenseRoot "redistrib_$env:CUDA_VERSION.json"
+          Invoke-WebRequest -Uri "$redistribBase/redistrib_$env:CUDA_VERSION.json" -OutFile $manifestPath
+          $manifestSha256 = (Get-FileHash -LiteralPath $manifestPath -Algorithm SHA256).Hash.ToLowerInvariant()
+          if ($manifestSha256 -ne "249e28a83008d711d5f72880541c8be6253f6d61608461de4fcb715554a6cf17") {
+            throw "CUDA redistributable manifest hash mismatch: $manifestSha256"
+          }
+          $manifest = Get-Content -LiteralPath $manifestPath -Raw -Encoding UTF8 | ConvertFrom-Json
+          $components = @(
+            [pscustomobject]@{ name = "cuda_cudart"; version = "12.8.90"; license_path = "cuda_cudart/LICENSE.txt"; output = "cuda_cudart-LICENSE.txt" },
+            [pscustomobject]@{ name = "libcublas"; version = "12.8.4.1"; license_path = "libcublas/LICENSE.txt"; output = "libcublas-LICENSE.txt" }
+          )
+          foreach ($component in $components) {
+            $metadata = $manifest.PSObject.Properties[$component.name].Value
+            if ($null -eq $metadata -or $metadata.version -ne $component.version -or
+                $metadata.license -ne "CUDA Toolkit" -or
+                $metadata.license_path -ne $component.license_path -or
+                $null -eq $metadata.PSObject.Properties["windows-x86_64"].Value) {
+              throw "CUDA redistributable metadata mismatch for $($component.name)"
+            }
+            $licensePath = Join-Path $licenseRoot $component.output
+            Invoke-WebRequest -Uri "$redistribBase/$($component.license_path)" -OutFile $licensePath
+            $licenseSha256 = (Get-FileHash -LiteralPath $licensePath -Algorithm SHA256).Hash.ToLowerInvariant()
+            if ($licenseSha256 -ne "e2c71babfd18a8e69542dd7e9ca018f9caa438094001a58e6bc4d8c999bf0d07") {
+              throw "CUDA redistributable license hash mismatch for $($component.name): $licenseSha256"
+            }
+          }
+          "TASK23_CUDA_LICENSE_ROOT=$licenseRoot" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
       - name: Install pinned CUDA build toolkit
         shell: pwsh
         run: |
@@ -100,12 +134,32 @@ jobs:
             -PackageRoot $packageRoot `
             -SourceCommit $env:GITHUB_SHA `
             -CudaVersion $env:CUDA_VERSION `
+            -CudaLicenseRoot $env:TASK23_CUDA_LICENSE_ROOT `
             -ArtifactName $env:ARTIFACT_NAME
           "TASK23_PACKAGE_ROOT=$packageRoot" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
       - name: Verify portable preflight and GPU gates
         shell: pwsh
         run: |
+          $portableManifestPath = Join-Path $env:TASK23_PACKAGE_ROOT "portable-manifest.json"
+          $portableManifest = Get-Content -LiteralPath $portableManifestPath -Raw -Encoding UTF8 | ConvertFrom-Json
+          $requiredLicenses = @(
+            "licenses/NVIDIA-CUDA/cuda_cudart-LICENSE.txt",
+            "licenses/NVIDIA-CUDA/libcublas-LICENSE.txt"
+          )
+          foreach ($relativePath in $requiredLicenses) {
+            $licensePath = Join-Path $env:TASK23_PACKAGE_ROOT $relativePath.Replace("/", "\")
+            if (-not (Test-Path -LiteralPath $licensePath -PathType Leaf)) {
+              throw "Portable Artifact is missing CUDA redistributable license: $relativePath"
+            }
+            $licenseSha256 = (Get-FileHash -LiteralPath $licensePath -Algorithm SHA256).Hash.ToLowerInvariant()
+            $manifestEntries = @($portableManifest.files | Where-Object path -eq $relativePath)
+            if ($licenseSha256 -ne "e2c71babfd18a8e69542dd7e9ca018f9caa438094001a58e6bc4d8c999bf0d07" -or
+                $manifestEntries.Count -ne 1 -or $manifestEntries[0].sha256 -ne $licenseSha256) {
+              throw "Portable Artifact CUDA license verification failed: $relativePath"
+            }
+          }
+
           . (Join-Path $env:TASK23_PACKAGE_ROOT "gpu-capacity.ps1")
           $expectations = @(
             @{ mib = 11999; run = $false; formal = $false },

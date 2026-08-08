@@ -6,6 +6,7 @@ param(
     [Parameter(Mandatory = $true)][string]$PackageRoot,
     [Parameter(Mandatory = $true)][string]$SourceCommit,
     [Parameter(Mandatory = $true)][string]$CudaVersion,
+    [Parameter(Mandatory = $true)][string]$CudaLicenseRoot,
     [string]$ArtifactName = "AIJARVISV2-23-windows-x64-cuda-portable"
 )
 
@@ -13,10 +14,41 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 $RepositoryRoot = [IO.Path]::GetFullPath($RepositoryRoot)
 $PackageRoot = [IO.Path]::GetFullPath($PackageRoot)
+$CudaLicenseRoot = [IO.Path]::GetFullPath($CudaLicenseRoot)
 
 function Get-Sha256 {
     param([Parameter(Mandatory = $true)][string]$Path)
     return (Get-FileHash -LiteralPath $Path -Algorithm SHA256).Hash.ToLowerInvariant()
+}
+
+$cudaRedistributableLicenses = @(
+    [pscustomobject]@{
+        component = "cuda_cudart"
+        version = "12.8.90"
+        source_path = "cuda_cudart-LICENSE.txt"
+        package_path = "licenses\NVIDIA-CUDA\cuda_cudart-LICENSE.txt"
+        sha256 = "e2c71babfd18a8e69542dd7e9ca018f9caa438094001a58e6bc4d8c999bf0d07"
+    },
+    [pscustomobject]@{
+        component = "libcublas"
+        version = "12.8.4.1"
+        source_path = "libcublas-LICENSE.txt"
+        package_path = "licenses\NVIDIA-CUDA\libcublas-LICENSE.txt"
+        sha256 = "e2c71babfd18a8e69542dd7e9ca018f9caa438094001a58e6bc4d8c999bf0d07"
+    }
+)
+foreach ($license in $cudaRedistributableLicenses) {
+    $sourcePath = Join-Path $CudaLicenseRoot $license.source_path
+    if (-not (Test-Path -LiteralPath $sourcePath -PathType Leaf)) {
+        throw "Official NVIDIA redistributable license is missing for $($license.component): $sourcePath"
+    }
+    $actualSha256 = Get-Sha256 -Path $sourcePath
+    if ($actualSha256 -ne $license.sha256) {
+        throw "Official NVIDIA redistributable license hash mismatch for $($license.component): $actualSha256"
+    }
+    $destinationPath = Join-Path $PackageRoot $license.package_path
+    New-Item -ItemType Directory -Path (Split-Path -Parent $destinationPath) -Force | Out-Null
+    Copy-Item -LiteralPath $sourcePath -Destination $destinationPath -Force
 }
 
 $requiredFiles = @(
@@ -30,7 +62,9 @@ $requiredFiles = @(
     "templates\resource-trend-record.csv",
     "templates\reliability-event-record.csv",
     "licenses\llama.cpp-omni\LICENSE.llama.cpp-omni",
-    "licenses\llama.cpp-omni\NOTICE.md"
+    "licenses\llama.cpp-omni\NOTICE.md",
+    "licenses\NVIDIA-CUDA\cuda_cudart-LICENSE.txt",
+    "licenses\NVIDIA-CUDA\libcublas-LICENSE.txt"
 )
 foreach ($relativePath in $requiredFiles) {
     if (-not (Test-Path -LiteralPath (Join-Path $PackageRoot $relativePath) -PathType Leaf)) {
@@ -38,18 +72,14 @@ foreach ($relativePath in $requiredFiles) {
     }
 }
 
-$cudaEulaCandidates = @(
-    (Join-Path $env:CUDA_PATH "EULA.txt"),
-    (Join-Path $env:CUDA_PATH "doc\EULA.txt")
-)
-$cudaEula = $cudaEulaCandidates | Where-Object { Test-Path -LiteralPath $_ -PathType Leaf } | Select-Object -First 1
-if (-not $cudaEula) { throw "CUDA EULA was not found under CUDA_PATH" }
-Copy-Item -LiteralPath $cudaEula -Destination (Join-Path $PackageRoot "licenses\NVIDIA-CUDA-EULA.txt") -Force
-
 $dlls = @(Get-ChildItem -LiteralPath (Join-Path $PackageRoot "bin") -Filter "*.dll" -File)
-if (@($dlls | Where-Object Name -Like "cublas64_*.dll").Count -eq 0 -or
-    @($dlls | Where-Object Name -Like "cublasLt64_*.dll").Count -eq 0) {
-    throw "Portable package does not contain the required cuBLAS runtime DLLs"
+$requiredDllPatterns = @("cudart64_*.dll", "cublas64_*.dll", "cublasLt64_*.dll")
+$missingDllPatterns = @($requiredDllPatterns | ForEach-Object {
+    $pattern = $_
+    if (@($dlls | Where-Object Name -Like $pattern).Count -eq 0) { $pattern }
+})
+if ($missingDllPatterns.Count -ne 0) {
+    throw "Portable package does not contain required CUDA runtime DLLs: $($missingDllPatterns -join ', ')"
 }
 
 $forbidden = @(Get-ChildItem -LiteralPath $PackageRoot -Recurse -File | Where-Object {
@@ -70,6 +100,14 @@ $buildManifest = [ordered]@{
     runtime_revision = "b9d15b83ee353b2eaeee4d9318c98a35a1347486"
     runtime_patch_sha256 = "cc8b1c4abb62a736cf190da3fdb1c29a260130f4b6cb3651696479703150783e"
     runtime_license_sha256 = "94f29bbed6a22c35b992c5c6ebf0e7c92f13b836b90f36f461c9cf2f0f1d010d"
+    cuda_redistributable_licenses = @($cudaRedistributableLicenses | ForEach-Object {
+        [ordered]@{
+            component = $_.component
+            version = $_.version
+            path = $_.package_path.Replace("\", "/")
+            sha256 = $_.sha256
+        }
+    })
     harness_source_sha256 = Get-Sha256 -Path (Join-Path $toolRoot "poc_main.cpp")
     cmake_source_sha256 = Get-Sha256 -Path (Join-Path $toolRoot "CMakeLists.txt")
     executable_sha256 = Get-Sha256 -Path (Join-Path $PackageRoot "bin\aijarvisv2-task23-poc.exe")

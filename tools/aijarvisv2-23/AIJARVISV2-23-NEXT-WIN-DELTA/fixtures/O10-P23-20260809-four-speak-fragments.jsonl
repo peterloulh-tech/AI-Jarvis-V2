@@ -1,0 +1,4 @@
+{"event":"duplex_result","run_generation":4,"asset_sequence":4,"user_seq":17179869188,"frame_id":4,"ok":true,"is_speak":true,"decision":"SPEAK","raw_response":"{\"batches\": [{\"style_id\":\"style-"}
+{"event":"duplex_result","run_generation":4,"asset_sequence":5,"user_seq":17179869189,"frame_id":5,"ok":true,"is_speak":true,"decision":"SPEAK","raw_response":"1\", \"items\": [\"01 \u5f00"}
+{"event":"duplex_result","run_generation":4,"asset_sequence":6,"user_seq":17179869190,"frame_id":6,"ok":true,"is_speak":true,"decision":"SPEAK","raw_response":"\u59cb\u3002\"]}, {\"style_id\":\"style-"}
+{"event":"duplex_result","run_generation":4,"asset_sequence":7,"user_seq":17179869191,"frame_id":7,"ok":true,"is_speak":true,"decision":"SPEAK","raw_response":"2\", \"items\": [\"0"}

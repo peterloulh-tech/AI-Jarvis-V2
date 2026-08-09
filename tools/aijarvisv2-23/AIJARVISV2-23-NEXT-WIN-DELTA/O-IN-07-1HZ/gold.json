@@ -1,0 +1,288 @@
+{
+  "schema_version": 1,
+  "input_id": "O-IN-07",
+  "diagnostic_label": "1Hz official-alignment diagnostic",
+  "description": "The exact O-IN-07 content used by O10-P23-20260809-100451-WIN-01 split into 33 consecutive one-second audio units; each source image is repeated for its three derived units.",
+  "source_manifest_sha256": "ac62f16f20bcdb2718ace751f595ded5b4206a627c69b3116ece2a89d5e1fc4b",
+  "mapping": {
+    "audio": "Each source 3-second 16 kHz mono PCM WAV is split into three exact 1-second PCM WAV files without resampling.",
+    "vision": "Each source JPG is byte-identically repeated for the three one-second units derived from that source chunk.",
+    "markers": "Each source marker is suffixed with part-N-of-3."
+  },
+  "expected_behavior": {
+    "autonomous_trigger_source_sequence": 3,
+    "autonomous_trigger_sequences": [
+      7,
+      8,
+      9
+    ],
+    "continued_input_required_after_trigger": true,
+    "continued_input_required_during_generation": true
+  },
+  "chunks": [
+    {
+      "sequence": 1,
+      "offset_ms": 0,
+      "duration_ms": 1000,
+      "marker": "before-generation-01-part-1-of-3",
+      "source_sequence": 1,
+      "source_part": 1
+    },
+    {
+      "sequence": 2,
+      "offset_ms": 1000,
+      "duration_ms": 1000,
+      "marker": "before-generation-01-part-2-of-3",
+      "source_sequence": 1,
+      "source_part": 2
+    },
+    {
+      "sequence": 3,
+      "offset_ms": 2000,
+      "duration_ms": 1000,
+      "marker": "before-generation-01-part-3-of-3",
+      "source_sequence": 1,
+      "source_part": 3
+    },
+    {
+      "sequence": 4,
+      "offset_ms": 3000,
+      "duration_ms": 1000,
+      "marker": "before-generation-02-part-1-of-3",
+      "source_sequence": 2,
+      "source_part": 1
+    },
+    {
+      "sequence": 5,
+      "offset_ms": 4000,
+      "duration_ms": 1000,
+      "marker": "before-generation-02-part-2-of-3",
+      "source_sequence": 2,
+      "source_part": 2
+    },
+    {
+      "sequence": 6,
+      "offset_ms": 5000,
+      "duration_ms": 1000,
+      "marker": "before-generation-02-part-3-of-3",
+      "source_sequence": 2,
+      "source_part": 3
+    },
+    {
+      "sequence": 7,
+      "offset_ms": 6000,
+      "duration_ms": 1000,
+      "marker": "autonomous-trigger-opportunity-01-part-1-of-3",
+      "source_sequence": 3,
+      "source_part": 1
+    },
+    {
+      "sequence": 8,
+      "offset_ms": 7000,
+      "duration_ms": 1000,
+      "marker": "autonomous-trigger-opportunity-01-part-2-of-3",
+      "source_sequence": 3,
+      "source_part": 2
+    },
+    {
+      "sequence": 9,
+      "offset_ms": 8000,
+      "duration_ms": 1000,
+      "marker": "autonomous-trigger-opportunity-01-part-3-of-3",
+      "source_sequence": 3,
+      "source_part": 3
+    },
+    {
+      "sequence": 10,
+      "offset_ms": 9000,
+      "duration_ms": 1000,
+      "marker": "during-generation-candidate-01-part-1-of-3",
+      "source_sequence": 4,
+      "source_part": 1
+    },
+    {
+      "sequence": 11,
+      "offset_ms": 10000,
+      "duration_ms": 1000,
+      "marker": "during-generation-candidate-01-part-2-of-3",
+      "source_sequence": 4,
+      "source_part": 2
+    },
+    {
+      "sequence": 12,
+      "offset_ms": 11000,
+      "duration_ms": 1000,
+      "marker": "during-generation-candidate-01-part-3-of-3",
+      "source_sequence": 4,
+      "source_part": 3
+    },
+    {
+      "sequence": 13,
+      "offset_ms": 12000,
+      "duration_ms": 1000,
+      "marker": "during-generation-candidate-02-part-1-of-3",
+      "source_sequence": 5,
+      "source_part": 1
+    },
+    {
+      "sequence": 14,
+      "offset_ms": 13000,
+      "duration_ms": 1000,
+      "marker": "during-generation-candidate-02-part-2-of-3",
+      "source_sequence": 5,
+      "source_part": 2
+    },
+    {
+      "sequence": 15,
+      "offset_ms": 14000,
+      "duration_ms": 1000,
+      "marker": "during-generation-candidate-02-part-3-of-3",
+      "source_sequence": 5,
+      "source_part": 3
+    },
+    {
+      "sequence": 16,
+      "offset_ms": 15000,
+      "duration_ms": 1000,
+      "marker": "context-15s-boundary-part-1-of-3",
+      "source_sequence": 6,
+      "source_part": 1
+    },
+    {
+      "sequence": 17,
+      "offset_ms": 16000,
+      "duration_ms": 1000,
+      "marker": "context-15s-boundary-part-2-of-3",
+      "source_sequence": 6,
+      "source_part": 2
+    },
+    {
+      "sequence": 18,
+      "offset_ms": 17000,
+      "duration_ms": 1000,
+      "marker": "context-15s-boundary-part-3-of-3",
+      "source_sequence": 6,
+      "source_part": 3
+    },
+    {
+      "sequence": 19,
+      "offset_ms": 18000,
+      "duration_ms": 1000,
+      "marker": "after-generation-candidate-01-part-1-of-3",
+      "source_sequence": 7,
+      "source_part": 1
+    },
+    {
+      "sequence": 20,
+      "offset_ms": 19000,
+      "duration_ms": 1000,
+      "marker": "after-generation-candidate-01-part-2-of-3",
+      "source_sequence": 7,
+      "source_part": 2
+    },
+    {
+      "sequence": 21,
+      "offset_ms": 20000,
+      "duration_ms": 1000,
+      "marker": "after-generation-candidate-01-part-3-of-3",
+      "source_sequence": 7,
+      "source_part": 3
+    },
+    {
+      "sequence": 22,
+      "offset_ms": 21000,
+      "duration_ms": 1000,
+      "marker": "context-20s-post-boundary-part-1-of-3",
+      "source_sequence": 8,
+      "source_part": 1
+    },
+    {
+      "sequence": 23,
+      "offset_ms": 22000,
+      "duration_ms": 1000,
+      "marker": "context-20s-post-boundary-part-2-of-3",
+      "source_sequence": 8,
+      "source_part": 2
+    },
+    {
+      "sequence": 24,
+      "offset_ms": 23000,
+      "duration_ms": 1000,
+      "marker": "context-20s-post-boundary-part-3-of-3",
+      "source_sequence": 8,
+      "source_part": 3
+    },
+    {
+      "sequence": 25,
+      "offset_ms": 24000,
+      "duration_ms": 1000,
+      "marker": "continued-input-01-part-1-of-3",
+      "source_sequence": 9,
+      "source_part": 1
+    },
+    {
+      "sequence": 26,
+      "offset_ms": 25000,
+      "duration_ms": 1000,
+      "marker": "continued-input-01-part-2-of-3",
+      "source_sequence": 9,
+      "source_part": 2
+    },
+    {
+      "sequence": 27,
+      "offset_ms": 26000,
+      "duration_ms": 1000,
+      "marker": "continued-input-01-part-3-of-3",
+      "source_sequence": 9,
+      "source_part": 3
+    },
+    {
+      "sequence": 28,
+      "offset_ms": 27000,
+      "duration_ms": 1000,
+      "marker": "continued-input-02-part-1-of-3",
+      "source_sequence": 10,
+      "source_part": 1
+    },
+    {
+      "sequence": 29,
+      "offset_ms": 28000,
+      "duration_ms": 1000,
+      "marker": "continued-input-02-part-2-of-3",
+      "source_sequence": 10,
+      "source_part": 2
+    },
+    {
+      "sequence": 30,
+      "offset_ms": 29000,
+      "duration_ms": 1000,
+      "marker": "continued-input-02-part-3-of-3",
+      "source_sequence": 10,
+      "source_part": 3
+    },
+    {
+      "sequence": 31,
+      "offset_ms": 30000,
+      "duration_ms": 1000,
+      "marker": "context-30s-boundary-part-1-of-3",
+      "source_sequence": 11,
+      "source_part": 1
+    },
+    {
+      "sequence": 32,
+      "offset_ms": 31000,
+      "duration_ms": 1000,
+      "marker": "context-30s-boundary-part-2-of-3",
+      "source_sequence": 11,
+      "source_part": 2
+    },
+    {
+      "sequence": 33,
+      "offset_ms": 32000,
+      "duration_ms": 1000,
+      "marker": "context-30s-boundary-part-3-of-3",
+      "source_sequence": 11,
+      "source_part": 3
+    }
+  ]
+}

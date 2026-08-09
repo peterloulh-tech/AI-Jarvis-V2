@@ -6,7 +6,9 @@
 
 ## 最终结果与关键文件
 
-[PoC 记录](../../requirements/o-duplex-autonomous-text-poc.md)与[`现场包`](../../../../tools/aijarvisv2-23/)提供 O-C01 前检、便携入口及 P-02～04 采集。三层 Reuse-First 与 Local O 基线已固化；[`O Runtime 四方 Delta`](../O_RUNTIME_FOUR_WAY_DELTA.md)确认 Task23 绕过正式 adapter/worker/IPC、代表性为 `PARTIAL`，3 秒素材实际只产生 3 秒一次 decision，Locked C API 到 V2 没有 `is_speak` 语义反转。本轮未改 runner、产品代码或 LISTEN/SPEAK 逻辑。
+[PoC 记录](../../requirements/o-duplex-autonomous-text-poc.md)与[`现场包`](../../../../tools/aijarvisv2-23/)提供 O-C01 前检、便携入口及 P-02～04 采集。2026-08-09 完整运行已确认 73/73 result `ok:true`、69 LISTEN/4 SPEAK；4 个连续 SPEAK fragment 拼接为同一未闭合 multi-batch JSON 前缀。Locked result 不提供 completion 字段，当前 harness 又逐 fragment 做完整 JSON parse。
+
+[`NEXT-WIN-DELTA`](../../../../tools/aijarvisv2-23/AIJARVISV2-23-NEXT-WIN-DELTA/)在不改 C++/产品代码且不重建的前提下，复用现有 EXE/model/runtime：O-A 聚合 3 秒路径 fragment 并延长至完整 33 秒观察；O-B 提供 33×1 秒 `1Hz official-alignment diagnostic`。零 GPU fixture、timeline、WAV、映射和 SHA-256 自检已通过；动态模型行为仍待真机。
 
 ## 后续不得破坏的约束
 
@@ -14,6 +16,6 @@
 
 ## 验证与遗留
 
-runner 修复既有验证为 `diff --check`、8/8 静态断言及 Formal/cleanup truth table；四方审计完成 14/14 段 source/reference/symbol 核对，确认前三次 LISTEN 不会在单 case 反复归零、async 正常路径持续消费、plain no-ref/no-TTS prompt 结构有效。仍需先把 fixture 对齐约 1 秒 cadence 做单变量真机复验，再决定是否检查 result failure 或 prompt 分布。
+下一步只执行 O-A/O-B 真机诊断并带回两个独立 results；其中 O-B 不是严格单变量 A/B。`O-RISK-23-01` 保持开放，任务保持 `in_review`。
 
-- 检索关键词：O-C01，Four-Way Delta，PARTIAL，3 秒 cadence，SPEAK/LISTEN，O-RISK-23-01，TTS 0
+- 检索关键词：O-C01，Four-Way Delta，streaming fragment，completion boundary，1Hz official-alignment diagnostic，O-RISK-23-01

@@ -1,0 +1,129 @@
+{
+  "schema_version": 1,
+  "input_id": "O-IN-07",
+  "authorization_ref": "O-IN-07-SELF-CREATED-TEST-ASSET",
+  "authorization_record": "authorization.md",
+  "authorization_sha256": "e90739507d5639e06c3c1b8e0c2bf08fab66c7e9681bf80d94b8660660b05f62",
+  "gold_record": "gold.json",
+  "gold_sha256": "9f8f1279fb0189a4b1181488b13ee739f4468ab835d35925489a2d24dda189b5",
+  "deidentified": true,
+  "rights_confirmed": true,
+  "duration_ms": 33000,
+  "style_ids": [
+    "style-1",
+    "style-2",
+    "style-3"
+  ],
+  "chunks": [
+    {
+      "sequence": 1,
+      "offset_ms": 0,
+      "duration_ms": 3000,
+      "marker": "before-generation-01",
+      "audio": "chunks/0001.wav",
+      "audio_sha256": "15d95dc2b8acfd0630fee9e4e5f41bbe6b1fa2f539c4c35b1146502b5e9aceb3",
+      "image": "chunks/0001.jpg",
+      "image_sha256": "4a84f74fdc394585fe874177aaaed28f6a322cd7e8b77420714be622af920f20"
+    },
+    {
+      "sequence": 2,
+      "offset_ms": 3000,
+      "duration_ms": 3000,
+      "marker": "before-generation-02",
+      "audio": "chunks/0002.wav",
+      "audio_sha256": "bdae618d0913592b5b93963f76cd4c360837ff63e26dbc52a922a80f50051ca8",
+      "image": "chunks/0002.jpg",
+      "image_sha256": "ed084e383b1e7c76a914d82af4ff8d01c1e81b8fbce71bf52a9d9c6ccf947bf5"
+    },
+    {
+      "sequence": 3,
+      "offset_ms": 6000,
+      "duration_ms": 3000,
+      "marker": "autonomous-trigger-opportunity-01",
+      "audio": "chunks/0003.wav",
+      "audio_sha256": "09ef04faf470ce8691ee80e6590df9c2944296e2af1d31bc8508e299ae2bf646",
+      "image": "chunks/0003.jpg",
+      "image_sha256": "6d1922a5c748b67a3832b8f8ef0a6e42bc41e8911efaa2423a38b695adc9a94d"
+    },
+    {
+      "sequence": 4,
+      "offset_ms": 9000,
+      "duration_ms": 3000,
+      "marker": "during-generation-candidate-01",
+      "audio": "chunks/0004.wav",
+      "audio_sha256": "87d46cbeebe9dac3a1dcb7f61566dab5a25b30b6fa76962cf43a5890c52ffac8",
+      "image": "chunks/0004.jpg",
+      "image_sha256": "098bdef53600acb17248ea8ca14f7dd6b1f9c8d1e09c56cdaba8f5e4249def7a"
+    },
+    {
+      "sequence": 5,
+      "offset_ms": 12000,
+      "duration_ms": 3000,
+      "marker": "during-generation-candidate-02",
+      "audio": "chunks/0005.wav",
+      "audio_sha256": "6f9f32b36b364e1c51093bdc30f3aa716e9c018c38c6eeba70c9fa3963352df6",
+      "image": "chunks/0005.jpg",
+      "image_sha256": "0799585c7596aefe47b883a528eb9876666b287a49e3cc8e7b379aeb19c746e1"
+    },
+    {
+      "sequence": 6,
+      "offset_ms": 15000,
+      "duration_ms": 3000,
+      "marker": "context-15s-boundary",
+      "audio": "chunks/0006.wav",
+      "audio_sha256": "ae3406148bd9a446f7d05ccad060f1a0b3be1ef7bf1df082a065c0be4c01d0b7",
+      "image": "chunks/0006.jpg",
+      "image_sha256": "1ad978a45c2887a9e76b0f693d8fe707487f57e7ea792b166db8096096cf57fb"
+    },
+    {
+      "sequence": 7,
+      "offset_ms": 18000,
+      "duration_ms": 3000,
+      "marker": "after-generation-candidate-01",
+      "audio": "chunks/0007.wav",
+      "audio_sha256": "5170f7ebdc393ad5c7147999b55c4a8e0089d5a0243fefe54ddf9e95197e0130",
+      "image": "chunks/0007.jpg",
+      "image_sha256": "11e6728b4912176717ca32150bb29ca3990e89ee207459b4e3985bb2797697be"
+    },
+    {
+      "sequence": 8,
+      "offset_ms": 21000,
+      "duration_ms": 3000,
+      "marker": "context-20s-post-boundary",
+      "audio": "chunks/0008.wav",
+      "audio_sha256": "4e551612712e7a3e7b4018f4a631ad26bc294d8e438ee139b09d78014228514c",
+      "image": "chunks/0008.jpg",
+      "image_sha256": "0da6a58da02d0bdaaa077637fb5374e58edabdb331ee37a4847c593cbe597f64"
+    },
+    {
+      "sequence": 9,
+      "offset_ms": 24000,
+      "duration_ms": 3000,
+      "marker": "continued-input-01",
+      "audio": "chunks/0009.wav",
+      "audio_sha256": "acd2ef4916d6c6929690cd96cc02fd7bd5584592608959d82489e16da4656812",
+      "image": "chunks/0009.jpg",
+      "image_sha256": "ff87bef4182c885cdf6feae757039ab9d54d392fece86057c4ad8dd7d5088482"
+    },
+    {
+      "sequence": 10,
+      "offset_ms": 27000,
+      "duration_ms": 3000,
+      "marker": "continued-input-02",
+      "audio": "chunks/0010.wav",
+      "audio_sha256": "0cf1a9a7f3fbb749778201a05f8067362ecda08b133e9d31bd3a93c7d2104ae2",
+      "image": "chunks/0010.jpg",
+      "image_sha256": "fd2d2bdb3cb58fd7929e879e7ea620183917fb9788f1cf8d32e0a13e249e0107"
+    },
+    {
+      "sequence": 11,
+      "offset_ms": 30000,
+      "duration_ms": 3000,
+      "marker": "context-30s-boundary",
+      "audio": "chunks/0011.wav",
+      "audio_sha256": "1d135f3b53bbdc9d3a67719fed27a65ef340ceb7c9ab7f19a2643390f16006eb",
+      "image": "chunks/0011.jpg",
+      "image_sha256": "bb08a85c56ae6c69d95d792e3ee32e76642349991d9ccd8d685d40ff58a233f1"
+    }
+  ]
+}

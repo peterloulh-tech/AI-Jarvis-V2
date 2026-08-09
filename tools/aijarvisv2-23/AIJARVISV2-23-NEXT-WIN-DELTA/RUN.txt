@@ -1,0 +1,5 @@
+1. 把整个 AIJARVISV2-23-NEXT-WIN-DELTA 放到 G:\AIJarvis-PoC\；保持现有 portable、models\MiniCPM-o-4_5-gguf 和 o-in-07 为同级目录。
+2. O-CASE-A：powershell -ExecutionPolicy Bypass -File G:\AIJarvis-PoC\AIJARVISV2-23-NEXT-WIN-DELTA\run-next-win-diagnostic.ps1 -Case O-CASE-A
+3. O-CASE-B：powershell -ExecutionPolicy Bypass -File G:\AIJarvis-PoC\AIJARVISV2-23-NEXT-WIN-DELTA\run-next-win-diagnostic.ps1 -Case O-CASE-B
+4. 结果分别在 AIJARVISV2-23-NEXT-WIN-DELTA\results\O-CASE-A\<run-id> 和 results\O-CASE-B\<run-id>。
+5. 跑完拷回上述两个完整 <run-id> 目录；不要覆盖或删除 2026-08-09 的旧 results。

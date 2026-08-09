@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "task_id": "AIJARVISV2-23",
+  "candidate": "O-C01",
+  "portable_artifact": "AIJARVISV2-23-windows-x64-cuda-portable",
+  "portable_source_commit": "9869933d07bb7e962a73887347d84235691d72a4",
+  "portable_manifest_sha256": "1e914dcf84260377632e577fa32bed39ab41ca5b5c27c832945ec37a7bf85cd8",
+  "portable_build_manifest_sha256": "3577fd508fe95a0953e093c912c0110cce95c7ca852a39689bdc536005cabaae",
+  "executable": {
+    "path": "bin/aijarvisv2-task23-poc.exe",
+    "size": 136059904,
+    "sha256": "b486bad3f2ca535b1f97622cb81a97f6dd128f570cdf50ddcc0426a7dddefc1a"
+  },
+  "runtime_revision": "b9d15b83ee353b2eaeee4d9318c98a35a1347486",
+  "runtime_patch_sha256": "cc8b1c4abb62a736cf190da3fdb1c29a260130f4b6cb3651696479703150783e",
+  "runtime_dlls": [
+    {"path": "bin/cublas64_12.dll", "size": 113716224, "sha256": "9513540e4ec4c51ee9e7304138c2cc255c29a8c181f9e80c38efa25738becd99"},
+    {"path": "bin/cublasLt64_12.dll", "size": 674667520, "sha256": "b199d1ff892a81b7fd3d57ba1781549609b41500b36008fef326038393ad46c7"},
+    {"path": "bin/cudart64_12.dll", "size": 573952, "sha256": "c2c9a9c22a9bcba90e261825968836787b331038047a26770cffb7a583c28344"}
+  ],
+  "model_revision": "502eec5b03eaee9d0d2ce17a176e3490103c9a63",
+  "model_files": [
+    {"path": "MiniCPM-o-4_5-Q4_K_M.gguf", "size": 5026714400, "sha256": "1237a97ee081b8abebc47aa7dad565701e8f5f904cdc92f6723ac4281bbc0932"},
+    {"path": "vision/MiniCPM-o-4_5-vision-F16.gguf", "size": 1095113184, "sha256": "1453678cc4e4fe18de241952962e234f265cb8dda780773526103ab8ba82f421"},
+    {"path": "audio/MiniCPM-o-4_5-audio-F16.gguf", "size": 660167904, "sha256": "d5b188ac7feaf98e17175c3f9bd14bf269301bfd187439fdaa3e3a494fc32ef7"}
+  ],
+  "source_manifest_sha256": "ac62f16f20bcdb2718ace751f595ded5b4206a627c69b3116ece2a89d5e1fc4b",
+  "one_hz_manifest_sha256": "37fded1f3a3f6006780fb9a0adfe5d99de51ac0d9c3df06544277768e29168b0",
+  "style_ids": ["style-1", "style-2", "style-3"],
+  "cases": {
+    "O-CASE-A": {
+      "case_id": "o-case-a-budget225-context30-3s",
+      "diagnostic_label": "3-second path streaming-output closure diagnostic",
+      "input_kind": "original-3s",
+      "expected_chunk_count": 11,
+      "expected_chunk_duration_ms": 3000,
+      "context_seconds": 30,
+      "expected_selected_rounds": 11,
+      "expected_autonomous_rounds_after_guard": 8,
+      "tier": "custom",
+      "budget_chars": 225,
+      "hard_timeout_seconds": 12,
+      "run_generation": 2301
+    },
+    "O-CASE-B": {
+      "case_id": "o-case-b-budget225-context20-1hz",
+      "diagnostic_label": "1Hz official-alignment diagnostic",
+      "input_kind": "derived-1hz",
+      "expected_chunk_count": 33,
+      "expected_chunk_duration_ms": 1000,
+      "context_seconds": 20,
+      "expected_selected_rounds": 21,
+      "expected_autonomous_rounds_after_guard": 18,
+      "tier": "custom",
+      "budget_chars": 225,
+      "hard_timeout_seconds": 12,
+      "run_generation": 2302
+    }
+  }
+}

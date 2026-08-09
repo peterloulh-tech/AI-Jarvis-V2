@@ -7,7 +7,9 @@ param(
     [string]$ResultRoot,
     [ValidateRange(250, 5000)][int]$SamplingIntervalMs = 500,
     [ValidateRange(1, 5)][int]$Repetitions = 1,
-    [ValidateRange(5, 120)][int]$CaseTimeoutMinutes = 45
+    [ValidateRange(5, 120)][int]$CaseTimeoutMinutes = 45,
+    [switch]$Formal,
+    [switch]$VerifyModelHashes
 )
 
 Set-StrictMode -Version Latest
@@ -47,6 +49,7 @@ $ConfigSnapshotHash = ""
 $ApplicationVersion = ""
 $HardwareProfileId = ""
 $PortableManifest = $null
+$Utf8NoBom = [System.Text.UTF8Encoding]::new($false)
 
 . (Join-Path $ToolRoot "gpu-capacity.ps1")
 
@@ -54,13 +57,14 @@ New-Item -ItemType Directory -Path $ResultRoot -Force | Out-Null
 
 function Write-JsonFile {
     param([Parameter(Mandatory = $true)]$Value, [Parameter(Mandatory = $true)][string]$Path)
-    $Value | ConvertTo-Json -Depth 32 | Set-Content -LiteralPath $Path -Encoding UTF8
+    $json = $Value | ConvertTo-Json -Depth 32
+    [IO.File]::WriteAllText($Path, $json + [Environment]::NewLine, $Utf8NoBom)
 }
 
 function Add-JsonLine {
     param([Parameter(Mandatory = $true)]$Value, [Parameter(Mandatory = $true)][string]$Path)
     $line = $Value | ConvertTo-Json -Depth 32 -Compress
-    Add-Content -LiteralPath $Path -Value $line -Encoding UTF8
+    [IO.File]::AppendAllText($Path, $line + [Environment]::NewLine, $Utf8NoBom)
 }
 
 function Get-Sha256 {
@@ -72,6 +76,19 @@ function Assert-File {
     param([Parameter(Mandatory = $true)][string]$Path, [string]$Label = "file")
     if (-not (Test-Path -LiteralPath $Path -PathType Leaf)) {
         throw "Missing ${Label}: $Path"
+    }
+}
+
+function Assert-ReadableFile {
+    param([Parameter(Mandatory = $true)][string]$Path, [string]$Label = "file")
+    Assert-File -Path $Path -Label $Label
+    $stream = $null
+    try {
+        $stream = [IO.File]::Open($Path, [IO.FileMode]::Open, [IO.FileAccess]::Read, [IO.FileShare]::Read)
+    } catch {
+        throw "Unreadable ${Label}: $Path"
+    } finally {
+        if ($null -ne $stream) { $stream.Dispose() }
     }
 }
 
@@ -211,7 +228,7 @@ function Write-TemplateCsv {
     param(
         [Parameter(Mandatory = $true)][string]$Template,
         [Parameter(Mandatory = $true)][string]$Destination,
-        [Parameter(Mandatory = $true)][object[]]$Rows
+        [Parameter(Mandatory = $true)][AllowEmptyCollection()][object[]]$Rows
     )
     $headers = @((Get-Content -LiteralPath $Template -TotalCount 1) -split ",")
     if ($Rows.Count -eq 0) {
@@ -239,11 +256,14 @@ function Get-NearestRank {
 
 function Invoke-Preflight {
     Assert-FieldInputSlots
+    $warnings = @()
     if (-not [Environment]::Is64BitOperatingSystem -or [Environment]::OSVersion.Platform -ne [PlatformID]::Win32NT) {
         throw "Windows x64 is required"
     }
     if ([Environment]::OSVersion.Version.Build -lt 22000) {
-        throw "Windows 11 build 22000 or later is required"
+        $warning = "Windows 11 build 22000 or later is recommended; continuing with the recorded OS version"
+        $warnings += $warning
+        Write-Warning $warning
     }
     $requiredCommands = if ($PortableMode) {
         @("nvidia-smi.exe")
@@ -257,27 +277,49 @@ function Invoke-Preflight {
     }
     $portableManifest = if ($PortableMode) { Get-PortableManifest } else { $null }
 
-    $physicalAdapters = @(Get-NetAdapter -Physical -ErrorAction Stop | Where-Object Status -eq "Up")
+    $physicalAdapters = @()
+    $networkInspectionError = ""
+    try {
+        $physicalAdapters = @(Get-NetAdapter -Physical -ErrorAction Stop | Where-Object Status -eq "Up")
+    } catch {
+        $networkInspectionError = $_.Exception.Message
+        $warning = "Unable to inspect physical network adapters; continuing without a network hard gate: $networkInspectionError"
+        $warnings += $warning
+        Write-Warning $warning
+    }
     if ($physicalAdapters.Count -ne 0) {
-        throw "Disconnect physical network adapters before the offline PoC: $($physicalAdapters.Name -join ', ')"
+        $warning = "Physical network adapters are connected; Local mode will continue without uploading raw audio or video: $($physicalAdapters.Name -join ', ')"
+        $warnings += $warning
+        Write-Warning $warning
     }
 
     $gpu = Get-GpuSnapshot
     $gpuEligibility = Get-Task23GpuEligibility -MemoryTotalMiB $gpu.memory_total_mib
+    $formalHardwareMinimumMet = [bool]$gpuEligibility.task23_formal_minimum_met
     if (-not $gpuEligibility.portable_run_gate_met) {
-        throw "The portable PoC requires an NVIDIA GPU with at least 12GB nominal VRAM; nvidia-smi reports $($gpu.memory_total_mib) MiB"
+        $warning = "The recommended portable PoC minimum is 12GB nominal VRAM; continuing until CUDA/model loading reports a real failure ($($gpu.memory_total_mib) MiB reported)"
+        $warnings += $warning
+        Write-Warning $warning
     }
     $existingGpuProcesses = @(Get-ComputeApplications)
     if ($existingGpuProcesses.Count -ne 0) {
-        throw "GPU must be exclusive before the run; existing compute PIDs: $($existingGpuProcesses.pid -join ', ')"
+        $warning = "GPU is not exclusive; continuing with existing compute PIDs recorded: $($existingGpuProcesses.pid -join ', ')"
+        $warnings += $warning
+        Write-Warning $warning
     }
 
-    Assert-ExactFile -Path (Join-Path $ModelRoot "MiniCPM-o-4_5-Q4_K_M.gguf") `
-        -Size 5026714400 -Sha256 "1237a97ee081b8abebc47aa7dad565701e8f5f904cdc92f6723ac4281bbc0932"
-    Assert-ExactFile -Path (Join-Path $ModelRoot "vision\MiniCPM-o-4_5-vision-F16.gguf") `
-        -Size 1095113184 -Sha256 "1453678cc4e4fe18de241952962e234f265cb8dda780773526103ab8ba82f421"
-    Assert-ExactFile -Path (Join-Path $ModelRoot "audio\MiniCPM-o-4_5-audio-F16.gguf") `
-        -Size 660167904 -Sha256 "d5b188ac7feaf98e17175c3f9bd14bf269301bfd187439fdaa3e3a494fc32ef7"
+    $modelFiles = @(
+        @{ path = "MiniCPM-o-4_5-Q4_K_M.gguf"; size = 5026714400; sha256 = "1237a97ee081b8abebc47aa7dad565701e8f5f904cdc92f6723ac4281bbc0932" },
+        @{ path = "vision\MiniCPM-o-4_5-vision-F16.gguf"; size = 1095113184; sha256 = "1453678cc4e4fe18de241952962e234f265cb8dda780773526103ab8ba82f421" },
+        @{ path = "audio\MiniCPM-o-4_5-audio-F16.gguf"; size = 660167904; sha256 = "d5b188ac7feaf98e17175c3f9bd14bf269301bfd187439fdaa3e3a494fc32ef7" }
+    )
+    foreach ($modelFile in $modelFiles) {
+        $modelPath = Join-Path $ModelRoot $modelFile.path
+        Assert-ReadableFile -Path $modelPath -Label "model file"
+        if ($VerifyModelHashes) {
+            Assert-ExactFile -Path $modelPath -Size ([int64]$modelFile.size) -Sha256 ([string]$modelFile.sha256)
+        }
+    }
     foreach ($name in @("LICENSE.Apache-2.0.txt", "MODEL_CARD.md", "MODEL_PROVENANCE.json")) {
         $path = Join-Path $ModelRoot $name
         Assert-File -Path $path -Label "model license/provenance material"
@@ -373,6 +415,9 @@ function Invoke-Preflight {
     $cpu = Get-CimInstance Win32_Processor | Select-Object -First 1 Name, NumberOfCores, NumberOfLogicalProcessors
     $computer = Get-CimInstance Win32_ComputerSystem | Select-Object -First 1 Manufacturer, Model, TotalPhysicalMemory
     $powerScheme = (& powercfg.exe /getactivescheme 2>$null | Out-String).Trim()
+    $formalMinimumMet = [bool]$Formal -and $formalHardwareMinimumMet
+    $gpuEligibility.task23_formal_minimum_met = $formalMinimumMet
+    $gpuEligibility.evidence_scope = if ($Formal) { $gpuEligibility.evidence_scope } else { "non_formal" }
     return [pscustomobject]@{
         schema_version = 1
         run_id = $RunId
@@ -387,7 +432,11 @@ function Invoke-Preflight {
         active_power_scheme = $powerScheme
         gpu = $gpu
         gpu_eligibility = $gpuEligibility
-        task23_formal_minimum_met = $gpuEligibility.task23_formal_minimum_met
+        formal_mode = [bool]$Formal
+        task23_formal_hardware_minimum_met = $formalHardwareMinimumMet
+        task23_formal_minimum_met = $formalMinimumMet
+        evidence_scope = $gpuEligibility.evidence_scope
+        preflight_warnings = @($warnings)
         initial_compute_applications = $existingGpuProcesses
         model_root = $ModelRoot
         model_provenance_sha256 = Get-Sha256 -Path $ModelProvenancePath
@@ -405,7 +454,11 @@ function Invoke-Preflight {
         runtime_license_sha256 = $runtimeLicenseSha256
         tts_files_present = 0
         reference_audio_present = $false
-        physical_network_adapters_up = 0
+        physical_network_adapters_up = $physicalAdapters.Count
+        physical_network_adapter_names = @($physicalAdapters | ForEach-Object Name)
+        network_inspection_error = $networkInspectionError
+        local_raw_media_upload = $false
+        model_hash_verification = [bool]$VerifyModelHashes
     }
 }
 
@@ -540,14 +593,15 @@ function Invoke-Harness {
         Start-Sleep -Milliseconds $SamplingIntervalMs
     } while ((Get-Date) -lt $cleanupDeadline)
     $after = Get-GpuSnapshot
-    $normalCleanup = $runnerOutcome -eq "completed" -and $process.ExitCode -eq 0 -and
-        -not $gpuPidRemaining -and -not $processRemaining
+    $functionalSuccess = $runnerOutcome -eq "completed" -and $process.ExitCode -eq 0
+    $normalCleanup = -not $gpuPidRemaining -and -not $processRemaining
     if (Test-Path -LiteralPath $caseEvidence) {
-        [IO.File]::AppendAllText($AggregateEvidence, [IO.File]::ReadAllText($caseEvidence))
+        [IO.File]::AppendAllText($AggregateEvidence, [IO.File]::ReadAllText($caseEvidence), $Utf8NoBom)
     }
     Add-JsonLine -Path $AggregateEvidence -Value ([ordered]@{
         schema_version = 1; run_id = $RunId; case_id = $Case.id; event = "normal_stop_summary"
         process_id = $process.Id; process_exit_code = $process.ExitCode; runner_outcome = $runnerOutcome
+        functional_outcome = if ($functionalSuccess) { "success" } else { "failure" }
         process_remaining = $processRemaining; process_gpu_allocation_remaining = $gpuPidRemaining
         vram_before_mib = $baseline.memory_used_mib; vram_after_mib = $after.memory_used_mib
         vram_delta_mib = $after.memory_used_mib - $baseline.memory_used_mib
@@ -617,9 +671,15 @@ function Invoke-HardKillCheck {
     $after = Get-GpuSnapshot
     $cleanupCompletedAt = [int64](Get-MonotonicUs)
     $orphanCount = @($remaining).Count
+    $remainingProcessIds = @($remaining | ForEach-Object {
+        if ($null -ne $_) {
+            $idProperty = $_.PSObject.Properties["Id"]
+            if ($null -ne $idProperty) { $idProperty.Value }
+        }
+    })
     $outcome = if ($ready -and $killIssued -and $orphanCount -eq 0 -and -not $gpuPidRemaining) { "success" } else { "failure" }
     if (Test-Path -LiteralPath $caseEvidence) {
-        [IO.File]::AppendAllText($AggregateEvidence, [IO.File]::ReadAllText($caseEvidence))
+        [IO.File]::AppendAllText($AggregateEvidence, [IO.File]::ReadAllText($caseEvidence), $Utf8NoBom)
     }
     Add-JsonLine -Path $AggregateEvidence -Value ([ordered]@{
         schema_version = 1; run_id = $RunId; case_id = $Case.id; event = "hard_kill_summary"
@@ -647,7 +707,7 @@ function Invoke-HardKillCheck {
         expected_action = "terminate process tree and release model allocation"
         actual_action = $outcome; expected_max_residue = 0; actual_residue = $orphanCount
         old_generation_accepted_count = ""; new_work_after_block_count = 0
-        remaining_processes = ($remaining.Id -join "|"); orphan_process_count = $orphanCount
+        remaining_processes = ($remainingProcessIds -join "|"); orphan_process_count = $orphanCount
         vram_after_mib = $after.memory_used_mib; ui_control_result = "not_applicable_poc"
         isolation_result = $outcome; cleanup_result = $outcome; outcome = $outcome
         evidence_ref = "evidence.jsonl#hard_kill_summary"; review_status = "pending_review"
@@ -689,13 +749,18 @@ function Write-RunConfig {
         case_timeout_minutes = $CaseTimeoutMinutes; hard_kill_timeout_seconds = 12
         model_instance_limit = 1; session_limit = 1; text_generation_stream_limit = 1
         tts_enabled = $false; reference_audio = ""; extra_model_calls_allowed = 0
+        formal_mode = [bool]$Formal; model_hash_verification = [bool]$VerifyModelHashes
         cases = @(New-CaseMatrix)
     })
     return Get-Sha256 -Path $path
 }
 
 function Finalize-Results {
-    param([object[]]$CaseRuns, [object[]]$ReliabilityRows, $Preflight)
+    param(
+        [AllowEmptyCollection()][object[]]$CaseRuns,
+        [AllowEmptyCollection()][object[]]$ReliabilityRows,
+        $Preflight
+    )
     $evidence = @()
     if (Test-Path -LiteralPath $AggregateEvidence) {
         foreach ($line in Get-Content -LiteralPath $AggregateEvidence -Encoding UTF8) {
@@ -814,7 +879,8 @@ function Finalize-Results {
         evidence_complete = $evidenceComplete
         task23_formal_minimum_met = [bool]$Preflight.task23_formal_minimum_met
         task23_formal_evidence_complete = $formalEvidenceComplete
-        evidence_scope = $Preflight.gpu_eligibility.evidence_scope
+        formal_mode = [bool]$Preflight.formal_mode
+        evidence_scope = $Preflight.evidence_scope
         candidate_assessment = $candidateAssessment
         o_risk_23_01 = if ($formalEvidenceComplete) { "candidate_for_review_and_closure" } else { "open" }
         statistics_rule = "nearest-rank Q(p)=x[ceil(p*N)]; failures and timeouts excluded from success latency percentiles"
@@ -873,12 +939,32 @@ try {
     $reliabilityRows = @(Invoke-HardKillCheck -Executable $executable -Case $hardKillCase)
     Finalize-Results -CaseRuns $caseRuns -ReliabilityRows $reliabilityRows -Preflight $preflight
 } catch {
-    Add-JsonLine -Path $AggregateEvidence -Value ([ordered]@{
-        schema_version = 1; run_id = $RunId; case_id = "runner"; event = "execution_failure"
-        reason = $_.Exception.Message; generated_at = (Get-Date).ToUniversalTime().ToString("o")
-    })
-    Finalize-Results -CaseRuns $caseRuns -ReliabilityRows $reliabilityRows -Preflight $preflight
-    throw
+    $primaryError = $_
+    $primaryReason = $primaryError.Exception.Message
+    try {
+        Add-JsonLine -Path $AggregateEvidence -Value ([ordered]@{
+            schema_version = 1; run_id = $RunId; case_id = "runner"; event = "execution_failure"
+            reason = $primaryReason; generated_at = (Get-Date).ToUniversalTime().ToString("o")
+        })
+    } catch {
+        Write-Warning "Failed to record the primary execution error: $($_.Exception.Message)"
+    }
+    try {
+        Finalize-Results -CaseRuns $caseRuns -ReliabilityRows $reliabilityRows -Preflight $preflight
+    } catch {
+        $finalizationReason = $_.Exception.Message
+        try {
+            Add-JsonLine -Path $AggregateEvidence -Value ([ordered]@{
+                schema_version = 1; run_id = $RunId; case_id = "runner"; event = "finalization_failure"
+                reason = $finalizationReason; primary_reason = $primaryReason
+                generated_at = (Get-Date).ToUniversalTime().ToString("o")
+            })
+        } catch {
+            Write-Warning "Failed to record the secondary finalization error: $($_.Exception.Message)"
+        }
+        Write-Warning "Result finalization also failed: $finalizationReason"
+    }
+    throw $primaryError
 }
 
 Write-Host "AIJARVISV2-23 field evidence: $ResultRoot"

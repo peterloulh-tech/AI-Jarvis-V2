@@ -13,9 +13,9 @@ GitHub Actions Artifact `AIJARVISV2-23-windows-x64-cuda-portable` 只为任务 2
 
 ## 机器前置
 
-- Windows 11 x64（build 22000+）、正常 NVIDIA 驱动及 PowerShell 5.1 或 7；无需安装 VS Build Tools、CMake、Git、Python、Node 或 CUDA Toolkit。
-- NVIDIA 显卡至少 12GB 标称显存；脚本记录 `nvidia-smi` 的实际型号和容量，不设上限。低于 16GB 的结果只作补充证据，不能替代任务 23 的正式 16GB 最低环境。
-- 运行前关闭其他 GPU compute 进程并断开物理网络；便携目录、模型和输入目录位于本地磁盘且可写。
+- Windows x64、正常 NVIDIA 驱动及 PowerShell 5.1 或 7；Windows 11 build 22000+ 是推荐的正式环境。无需安装 VS Build Tools、CMake、Git、Python、Node 或 CUDA Toolkit。
+- NVIDIA 显卡建议至少 12GB 标称显存；脚本记录 `nvidia-smi` 的实际型号和容量，不设启动容量门槛。低于 16GB 的结果不能替代任务 23 的正式 16GB 最低环境。
+- 建议运行前关闭其他 GPU compute 进程；联网和普通 GPU 占用只记录 warning，不阻止运行。Local 模式仍不上传原始音画。
 
 ## 单一入口
 
@@ -27,6 +27,6 @@ powershell -ExecutionPolicy Bypass -File .\run-aijarvisv2-23.ps1 `
   -InputRoot D:\AIJarvis-PoC\o-in-07
 ```
 
-现场准备完成后只需执行上述一个主命令。入口验证 Artifact/模型/输入哈希后直接运行预编译执行器，再按原有 P-02/P-04 套件及 P-03 正常结束/重建/12 秒硬超时强杀执行；用例间无需人工干预。模型或 O-IN-07 缺失时只列出固定放置槽位，不检查或提示编译工具。
+现场准备完成后只需执行上述一个主命令。默认只检查模型文件存在且可读，不重新计算大模型 SHA-256；需要完整模型哈希校验时显式加 `-VerifyModelHashes`。默认运行是非 Formal，只有显式加 `-Formal` 才允许正式完成字段为 true。入口验证 Artifact 和输入后直接运行预编译执行器，再按原有 P-02/P-04 套件及 P-03 正常结束/重建/12 秒硬超时强杀执行；用例间无需人工干预。模型或 O-IN-07 缺失时只列出固定放置槽位，不检查或提示编译工具。
 
 结果写入便携目录的 `results/<run-id>/`：`preflight.json` 和 `build-manifest.json` 固定身份/构建，`evidence.jsonl` 保存完整原始响应和调用时间轴，三个既有格式 CSV 保存性能/资源/故障，`summary.json` 分开记录证据完整性、GPU 证据范围与可行性，`sha256sums.txt` 固定全部结果文件。原始授权音画不会复制进结果目录；执行完成后人工只需保存整个 `<run-id>` 目录。

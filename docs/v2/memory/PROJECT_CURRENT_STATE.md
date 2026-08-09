@@ -22,6 +22,8 @@ AIJARVISV2-22 已筛选 4 个 O 模型/运行时组合，唯一准入任务 23 �
 
 AIJARVISV2-23 已冻结为 `Legacy Diagnostic PoC / 2026-08-09 Real-machine Baseline` 并完成：RTX 5070 Ti 16GB Windows/NVIDIA 完整运行确认 73/73 result `ok:true`、69 LISTEN/4 SPEAK，连续 4 个 SPEAK fragment 拼接为未闭合 multi-batch JSON 前缀；同时保留 Locked 官方基线、四方 Delta、33×1 秒输入与零 GPU fixture/hash 验证。新任务链为 AIJARVISV2-23 → AIJARVISV2-92 Reference Harness 离线重建 → AIJARVISV2-93 Windows/NVIDIA 动态验收 → AIJARVISV2-24；任务 24 保持 `backlog`，见[任务卡](tasks/AIJARVISV2-23.md)。
 
+AIJARVISV2-92 已完成独立 Reference Harness v2、两个分离 profile、manifest 驱动的 33×1 秒/11×3 秒固定输入、streaming aggregation 与 completion 分层、三批 validator、离线 fixture/unit/static/dry-run、薄 Locked C API shim，以及既有 Windows/CUDA 构建链的最小接入准备，当前为 `in_review`，见[任务卡](tasks/AIJARVISV2-92.md)。新增 binary 需要在 AIJARVISV2-93 执行 Windows/MSVC/CUDA 构建与真实模型动态验收；本轮未启动 Actions 或长构建。
+
 三层 Reuse-First 固定规则已启用：第一层使用 V2 当前实现和 AIJARVISV2-17/18 原作者复用结论，第二层使用 [`OFFICIAL_BASELINE_INDEX.md`](OFFICIAL_BASELINE_INDEX.md)，第三层只实现 V2 当前需求缺失的 Delta。当前已建立 MiniCPM-o 4.5、MiniCPM-o-Demo 与 `llama.cpp-omni` 基线；相同锁定版本默认不重复全量官方审计。
 
 ## 冻结基线
@@ -51,7 +53,7 @@ AIJARVISV2-23 已冻结为 `Legacy Diagnostic PoC / 2026-08-09 Real-machine Base
 
 ## 开放风险与待实测项
 
-- O-C01 仍是唯一 PoC 准入组合；2026-08-09 Windows/NVIDIA Smoke 已触达模型运行，但 runner 修复尚未真机复验，O10 的持续音画、自主触发、结构化三批输出与 TTS 关闭仍没有正式动态通过证据。Qwen2.5-Omni 候补还缺权重 revision/许可材料、自主触发、20 秒 16GB 与 Windows 自包含包证据。
+- O-C01 仍是唯一 PoC 准入组合；Reference Harness v2 的离线与构建准备已完成，但 Windows/NVIDIA 动态 build/run 尚未由 AIJARVISV2-93 执行，Locked runtime 的 startup LISTEN、自主 LISTEN/SPEAK、streaming、三批契约、延迟、显存与清理仍没有 Reference Harness 正式动态通过证据。Qwen2.5-Omni 候补还缺权重 revision/许可材料、自主触发、20 秒 16GB 与 Windows 自包含包证据。
 - V 候选模型和原生多图能力、许可回放/变化标注/事件高光金标、8GB/12GB+ 真机，以及 1～3 路延迟、吞吐、显存和 GPU 数据尚无实测证据。
 - O/V 共用语料、许可、脱敏、时间轴和金标格式已定义，但实际授权资产与双人标注尚待制作；事件、高光、相关性和质量阈值仍待选型后校准。
 - 真机代表组合和记录入口已编排，但 Windows 11/NVIDIA 8/12/16GB 机器、1080P/2K/4K × 五档缩放、音频设备、Overlay 点击穿透、系统电源事件、断网及英雄联盟同机负载均待执行；英雄联盟与主机完全断网的兼容执行方式尚未确认。
@@ -63,4 +65,4 @@ AIJARVISV2-23 已冻结为 `Legacy Diagnostic PoC / 2026-08-09 Real-machine Base
 
 ## 下一步注意事项
 
-AIJARVISV2-92 只完成 Reference Harness v2 的设计、实现、fixture/unit/static/dry-run 与 Windows 构建准备；Windows/NVIDIA/CUDA 动态 build/run 仅由 AIJARVISV2-93 执行。两项完成前不得宣称 O-C01 正式可行，不得启动 AIJARVISV2-24。
+下一步仅在独立会话执行 AIJARVISV2-93：使用已准备的手动 workflow/runner 完成 Windows/NVIDIA/CUDA build、portable 与真实模型动态验收。验收完成前不得宣称 O-C01 正式可行，不得启动 AIJARVISV2-24。

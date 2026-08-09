@@ -24,6 +24,7 @@
 ## 文件职责
 
 - [`PROJECT_CURRENT_STATE.md`](PROJECT_CURRENT_STATE.md)：当前有效阶段、冻结基线、公共约定、开放风险和下一步注意事项。
+- [`OFFICIAL_BASELINE_INDEX.md`](OFFICIAL_BASELINE_INDEX.md)：当前 Local O 锁定版本、第一方官方行为及原作者/V2 数据链复用入口。
 - [`DECISIONS.md`](DECISIONS.md)：已批准且会约束多个后续任务的决定。
 - [`TASK_TEMPLATE.md`](TASK_TEMPLATE.md)：唯一任务卡模板。
 - [`tasks/`](tasks/)：只收录已进入 `in_review` 或 `done` 的真实任务。
@@ -54,4 +55,4 @@
 | AIJARVISV2-20 | 依赖治理与 SBOM | `done` | CycloneDX、来源锁定、vendor、patch、许可门、漏洞门 | 定义五类生态的准入、可追溯 SBOM、补丁记录、阻断规则与高风险替换路径。 | [tasks/AIJARVISV2-20.md](tasks/AIJARVISV2-20.md) |
 | AIJARVISV2-21 | V1 资产复用阶段门 | `done` | 主要参考、局部复用、白名单、黑名单、V2 缺口 | 合并源码、资源、许可和依赖审计，冻结最终复用边界、发布门及缺失能力责任。 | [tasks/AIJARVISV2-21.md](tasks/AIJARVISV2-21.md) |
 | AIJARVISV2-22 | O 模型与运行时候选 | `done` | MiniCPM-o、llama.cpp-omni、SPEAK/LISTEN、O-C01、Qwen HOLD | 以八项硬门筛选 O 组合，准入唯一 PoC 路径并冻结自主触发、TTS 关闭及 P1 取证计划。 | [tasks/AIJARVISV2-22.md](tasks/AIJARVISV2-22.md) |
-| AIJARVISV2-23 | O 双工与自主文字 PoC | `in_review` | O-C01、O10、P-01～04、Windows 便携包、O-RISK-23-01 | 2026-08-09 Windows/NVIDIA Smoke 暴露的 runner 硬门、空值、异常、编码、Formal 与 cleanup 问题已集中修复，待下一次真机验证。 | [tasks/AIJARVISV2-23.md](tasks/AIJARVISV2-23.md) |
+| AIJARVISV2-23 | O 双工与自主文字 PoC | `in_review` | O-C01、Reuse-First、官方基线、SPEAK/LISTEN、O-RISK-23-01 | 已固化三层 Reuse-First 和当前 Local O 官方基线；runner 修复仍待下一次 Windows/NVIDIA 真机验证。 | [tasks/AIJARVISV2-23.md](tasks/AIJARVISV2-23.md) |

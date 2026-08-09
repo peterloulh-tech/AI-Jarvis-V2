@@ -1,6 +1,6 @@
 # AI Jarvis V2 当前状态
 
-> 快照日期：2026-08-08。任务状态以 Dashi 项目 `ai-jarvis-v2` 的当前回读为准。
+> 快照日期：2026-08-09。任务状态以 Dashi 项目 `ai-jarvis-v2` 的当前回读为准。
 
 ## 当前阶段与进度
 
@@ -21,6 +21,8 @@ AIJARVISV2-21 已合并源码、UI/资源、许可与依赖审计，冻结 3 个
 AIJARVISV2-22 已筛选 4 个 O 模型/运行时组合，唯一准入任务 23 的 PoC 组合为固定 MiniCPM-o 4.5 GGUF 与固定 `llama.cpp-omni` TTS 关闭双工路径；Qwen2.5-Omni 保持候补、不进 PoC，当前为 `done`，见[任务卡](tasks/AIJARVISV2-22.md)。
 
 AIJARVISV2-23 已完成 O-C01 PoC 前检并触发 `O-RISK-23-01`；现有 GitHub Actions 预编译便携 Artifact 工作流、单入口 Windows 现场包、固定资产/输入校验及 P-02～04 JSONL/CSV 采集。2026-08-09 Windows/NVIDIA Smoke 已触达模型运行，并暴露 runner 的联网/GPU 独占硬门、大模型启动哈希、空值、异常覆盖、编码、Formal 误报和 cleanup 混判；这些问题已在 `07f32c1500514f25fc5106c106ffc952bfd52299` 集中修复，仍待下一次真机验证，当前为 `in_review`，见[任务卡](tasks/AIJARVISV2-23.md)。
+
+三层 Reuse-First 固定规则已启用：第一层使用 V2 当前实现和 AIJARVISV2-17/18 原作者复用结论，第二层使用 [`OFFICIAL_BASELINE_INDEX.md`](OFFICIAL_BASELINE_INDEX.md)，第三层只实现 V2 当前需求缺失的 Delta。当前已建立 MiniCPM-o 4.5、MiniCPM-o-Demo 与 `llama.cpp-omni` 基线；相同锁定版本默认不重复全量官方审计。
 
 ## 冻结基线
 

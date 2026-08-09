@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "id": "official-runtime-reference",
+  "prompt_source": "locked llama.cpp-omni no-ref/no-TTS plain-system branch and default duplex wording",
+  "system_prompt": "<|im_start|>system\nStreaming Duplex Conversation! You are a helpful assistant.",
+  "assistant_prompt": "<|im_end|>\n",
+  "validate_v2_contract": false,
+  "style_ids": []
+}

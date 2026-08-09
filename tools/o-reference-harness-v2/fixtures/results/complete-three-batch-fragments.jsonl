@@ -1,0 +1,2 @@
+{"user_seq":8,"frame_id":8,"generation_id":4,"ok":true,"is_speak":true,"fragment":"{\"batches\":[{\"style_id\":\"style-1\",\"items\":[\"a\"]},{\"style_id\":\"style-2\",\"items\":[","latency_ms":1300.0,"input_offset_ms":21000,"input_duration_ms":3000}
+{"user_seq":9,"frame_id":9,"generation_id":4,"ok":true,"is_speak":true,"fragment":"\"b\"]},{\"style_id\":\"style-3\",\"items\":[\"c\"]}]}","latency_ms":1290.0,"input_offset_ms":24000,"input_duration_ms":3000}

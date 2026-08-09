@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "model_repo": "openbmb/MiniCPM-o-4_5-gguf",
+  "model_revision": "502eec5b03eaee9d0d2ce17a176e3490103c9a63",
+  "model_files": [
+    {"path":"MiniCPM-o-4_5-Q4_K_M.gguf","size":5026714400,"sha256":"1237a97ee081b8abebc47aa7dad565701e8f5f904cdc92f6723ac4281bbc0932"},
+    {"path":"vision/MiniCPM-o-4_5-vision-F16.gguf","size":1095113184,"sha256":"1453678cc4e4fe18de241952962e234f265cb8dda780773526103ab8ba82f421"},
+    {"path":"audio/MiniCPM-o-4_5-audio-F16.gguf","size":660167904,"sha256":"d5b188ac7feaf98e17175c3f9bd14bf269301bfd187439fdaa3e3a494fc32ef7"}
+  ],
+  "runtime_revision": "b9d15b83ee353b2eaeee4d9318c98a35a1347486",
+  "runtime_patch_sha256": "cc8b1c4abb62a736cf190da3fdb1c29a260130f4b6cb3651696479703150783e",
+  "profiles": {
+    "official-runtime-reference": {
+      "source_path": "tools/o-reference-harness-v2/profiles/official-runtime-reference.json",
+      "package_path": "profiles/official-runtime-reference.json",
+      "sha256": "67fbd9bd906febda8a2d17d32f6445348dd2b2bf5a05acc02742be501362c9ed",
+      "validate_v2_contract": false
+    },
+    "v2-contract": {
+      "source_path": "tools/o-reference-harness-v2/profiles/v2-contract.json",
+      "package_path": "profiles/v2-contract.json",
+      "sha256": "48e11a234ab6af01bb2d9a7111aa11b6ca59b3d64b668d2231c79749cdffcf08",
+      "validate_v2_contract": true
+    }
+  },
+  "cadences": {
+    "official-1hz": {
+      "source_path": "tools/aijarvisv2-23/AIJARVISV2-23-NEXT-WIN-DELTA/O-IN-07-1HZ/manifest.json",
+      "package_path": "fixtures/official-1hz/manifest.json",
+      "sha256": "37fded1f3a3f6006780fb9a0adfe5d99de51ac0d9c3df06544277768e29168b0"
+    },
+    "legacy-3s-replay": {
+      "source_path": "tools/o-reference-harness-v2/fixtures/manifests/legacy-3s-replay.json",
+      "package_path": "fixtures/legacy-3s-replay/manifest.json",
+      "sha256": "f3d7ab31f9a40da7987b2c2405028048d6dd97e4a4fc282a2db1089b2c6dc645"
+    }
+  },
+  "result_root_pattern": "results/{profile}/{cadence}/{run_id}",
+  "windows_nvidia_execution": "DYNAMIC-ONLY"
+}

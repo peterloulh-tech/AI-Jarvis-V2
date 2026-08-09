@@ -1,0 +1,147 @@
+name: AIJARVISV2-92 O Reference Harness v2 portable
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  ARTIFACT_NAME: AIJARVISV2-92-o-reference-harness-v2-windows-x64-cuda
+  CUDA_VERSION: 12.8.1
+
+jobs:
+  build-portable:
+    runs-on: windows-2022
+    timeout-minutes: 180
+    steps:
+      - name: Check out pinned source
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
+      - name: Check out pinned runtime source
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          repository: tc-mb/llama.cpp-omni
+          ref: b9d15b83ee353b2eaeee4d9318c98a35a1347486
+          path: build/o-reference-runtime-source
+
+      - name: Fetch pinned CUDA redistributable licenses
+        shell: pwsh
+        run: |
+          $redistribBase = "https://developer.download.nvidia.com/compute/cuda/redist"
+          $licenseRoot = Join-Path $env:RUNNER_TEMP "o-reference-cuda-licenses"
+          New-Item -ItemType Directory -Path $licenseRoot -Force | Out-Null
+          $manifestPath = Join-Path $licenseRoot "redistrib_$env:CUDA_VERSION.json"
+          Invoke-WebRequest -Uri "$redistribBase/redistrib_$env:CUDA_VERSION.json" -OutFile $manifestPath
+          $manifestSha256 = (Get-FileHash -LiteralPath $manifestPath -Algorithm SHA256).Hash.ToLowerInvariant()
+          if ($manifestSha256 -ne "249e28a83008d711d5f72880541c8be6253f6d61608461de4fcb715554a6cf17") {
+            throw "CUDA redistributable manifest hash mismatch: $manifestSha256"
+          }
+          $manifest = Get-Content -LiteralPath $manifestPath -Raw -Encoding UTF8 | ConvertFrom-Json
+          $components = @(
+            [pscustomobject]@{ name="cuda_cudart"; version="12.8.90"; license_path="cuda_cudart/LICENSE.txt"; output="cuda_cudart-LICENSE.txt" },
+            [pscustomobject]@{ name="libcublas"; version="12.8.4.1"; license_path="libcublas/LICENSE.txt"; output="libcublas-LICENSE.txt" }
+          )
+          foreach ($component in $components) {
+            $metadata = $manifest.PSObject.Properties[$component.name].Value
+            if ($null -eq $metadata -or $metadata.version -ne $component.version -or
+                $metadata.license -ne "CUDA Toolkit" -or $metadata.license_path -ne $component.license_path -or
+                $null -eq $metadata.PSObject.Properties["windows-x86_64"].Value) {
+              throw "CUDA redistributable metadata mismatch for $($component.name)"
+            }
+            $licensePath = Join-Path $licenseRoot $component.output
+            Invoke-WebRequest -Uri "$redistribBase/$($component.license_path)" -OutFile $licensePath
+            if ((Get-FileHash -LiteralPath $licensePath -Algorithm SHA256).Hash.ToLowerInvariant() -ne
+                "e2c71babfd18a8e69542dd7e9ca018f9caa438094001a58e6bc4d8c999bf0d07") {
+              throw "CUDA redistributable license hash mismatch for $($component.name)"
+            }
+          }
+          "O_REFERENCE_CUDA_LICENSE_ROOT=$licenseRoot" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: Install pinned CUDA build toolkit
+        shell: pwsh
+        run: |
+          $installer = Join-Path $env:RUNNER_TEMP "cuda_$env:CUDA_VERSION`_windows_network.exe"
+          Invoke-WebRequest `
+            -Uri "https://developer.download.nvidia.com/compute/cuda/$env:CUDA_VERSION/network_installers/cuda_$env:CUDA_VERSION`_windows_network.exe" `
+            -OutFile $installer
+          $cudaMinor = ($env:CUDA_VERSION -split '\.')[0..1] -join '.'
+          $process = Start-Process -FilePath $installer -ArgumentList @(
+            '-s', "nvcc_$cudaMinor", "cudart_$cudaMinor", "cublas_$cudaMinor",
+            "cublas_dev_$cudaMinor", "visual_studio_integration_$cudaMinor"
+          ) -Wait -PassThru
+          if ($process.ExitCode -ne 0) { throw "CUDA network installer failed: $($process.ExitCode)" }
+          $cudaPath = "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v$cudaMinor"
+          if (-not (Test-Path -LiteralPath (Join-Path $cudaPath 'bin\nvcc.exe'))) {
+            throw "CUDA nvcc was not installed under $cudaPath"
+          }
+          "CUDA_PATH=$cudaPath" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          (Join-Path $cudaPath 'bin') | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+
+      - name: Prepare pinned runtime source
+        shell: pwsh
+        run: |
+          $runtimeSource = Join-Path $env:GITHUB_WORKSPACE "build/o-reference-runtime-source"
+          Push-Location $runtimeSource
+          try {
+            git apply "$env:GITHUB_WORKSPACE/third_party/runtime/patches/0001-text-input-runtime.patch"
+            if ($LASTEXITCODE -ne 0) { throw "Pinned runtime patch failed" }
+          } finally {
+            Pop-Location
+          }
+          "O_REFERENCE_RUNTIME_SOURCE=$runtimeSource" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: Run MSVC compile preflight
+        shell: pwsh
+        run: |
+          cmake -S tools/o-reference-harness-v2 -B build/o-reference-msvc-preflight -G "Visual Studio 17 2022" -A x64 `
+            -DGGML_CUDA=OFF -DGGML_NATIVE=OFF -DBUILD_SHARED_LIBS=OFF `
+            -DO_REFERENCE_HARNESS_WITH_LOCKED_RUNTIME=ON -DO_REFERENCE_HARNESS_MSVC_PREFLIGHT=ON `
+            "-DJARVIS_RUNTIME_UPSTREAM_SOURCE_DIR=$env:O_REFERENCE_RUNTIME_SOURCE"
+          if ($LASTEXITCODE -ne 0) { throw "MSVC preflight configure failed" }
+          cmake --build build/o-reference-msvc-preflight --config Release --target o-reference-harness-v2 --parallel
+          if ($LASTEXITCODE -ne 0) { throw "MSVC preflight build failed" }
+
+      - name: Configure and build CUDA target
+        shell: pwsh
+        run: |
+          cmake -S tools/o-reference-harness-v2 -B build/o-reference-portable -G "Visual Studio 17 2022" -A x64 `
+            -T "cuda=$env:CUDA_PATH" `
+            -DGGML_CUDA=ON -DGGML_CUDA_NCCL=OFF -DBUILD_SHARED_LIBS=OFF -DGGML_NATIVE=OFF `
+            '-DCMAKE_CUDA_ARCHITECTURES=86;89;120' -DO_REFERENCE_HARNESS_WITH_LOCKED_RUNTIME=ON `
+            "-DJARVIS_RUNTIME_UPSTREAM_SOURCE_DIR=$env:O_REFERENCE_RUNTIME_SOURCE"
+          if ($LASTEXITCODE -ne 0) { throw "CMake configure failed" }
+          cmake --build build/o-reference-portable --config Release --target o-reference-harness-v2 --parallel
+          if ($LASTEXITCODE -ne 0) { throw "Reference Harness build failed" }
+
+      - name: Install runtime dependencies and package
+        shell: pwsh
+        run: |
+          $packageRoot = Join-Path $env:GITHUB_WORKSPACE "build/artifact/$env:ARTIFACT_NAME"
+          cmake --install build/o-reference-portable --config Release --prefix $packageRoot
+          if ($LASTEXITCODE -ne 0) { throw "Portable dependency install failed" }
+          ./tools/o-reference-harness-v2/package-portable.ps1 `
+            -RepositoryRoot $env:GITHUB_WORKSPACE -PackageRoot $packageRoot `
+            -SourceCommit $env:GITHUB_SHA -CudaVersion $env:CUDA_VERSION `
+            -CudaLicenseRoot $env:O_REFERENCE_CUDA_LICENSE_ROOT -ArtifactName $env:ARTIFACT_NAME
+          "O_REFERENCE_PACKAGE_ROOT=$packageRoot" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: Verify packaged dry-run profiles
+        shell: pwsh
+        run: |
+          foreach ($profile in @("official-runtime-reference", "v2-contract")) {
+            foreach ($cadence in @("official-1hz", "legacy-3s-replay")) {
+              & (Join-Path $env:O_REFERENCE_PACKAGE_ROOT "run-o-reference-harness-v2.ps1") `
+                -Profile $profile -Cadence $cadence -DryRun `
+                -ResultRoot (Join-Path $env:RUNNER_TEMP "o-reference-dry-run")
+              if ($LASTEXITCODE -ne 0) { throw "Packaged dry-run failed: $profile / $cadence" }
+            }
+          }
+
+      - name: Upload portable Artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: ${{ env.ARTIFACT_NAME }}
+          path: build/artifact/${{ env.ARTIFACT_NAME }}
+          if-no-files-found: error
+          retention-days: 14

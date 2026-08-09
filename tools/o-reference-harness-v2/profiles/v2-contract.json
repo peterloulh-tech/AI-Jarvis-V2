@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "id": "v2-contract",
+  "prompt_source": "AI Jarvis V2 three-persona/three-batch contract",
+  "system_prompt": "<|im_start|>system\nContinuously inspect the audio and image timeline. Decide LISTEN or SPEAK from model evidence only. When speaking, output one compact JSON object with exactly three batches in style order style-1, style-2, style-3; each batch contains a matching style_id and a non-empty items array. Output JSON only.",
+  "assistant_prompt": "<|im_end|>\n",
+  "validate_v2_contract": true,
+  "style_ids": ["style-1", "style-2", "style-3"]
+}

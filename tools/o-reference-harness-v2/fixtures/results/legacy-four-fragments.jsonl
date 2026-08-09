@@ -1,0 +1,4 @@
+{"user_seq":4,"frame_id":4,"generation_id":4,"ok":true,"is_speak":true,"fragment":"{\"batches\": [{\"style_id\":\"style-","latency_ms":1521.4,"input_offset_ms":9000,"input_duration_ms":3000}
+{"user_seq":5,"frame_id":5,"generation_id":4,"ok":true,"is_speak":true,"fragment":"1\", \"items\": [\"01 开","latency_ms":1488.2,"input_offset_ms":12000,"input_duration_ms":3000}
+{"user_seq":6,"frame_id":6,"generation_id":4,"ok":true,"is_speak":true,"fragment":"始。\"]}, {\"style_id\":\"style-","latency_ms":1502.8,"input_offset_ms":15000,"input_duration_ms":3000}
+{"user_seq":7,"frame_id":7,"generation_id":4,"ok":true,"is_speak":true,"fragment":"2\", \"items\": [\"0","latency_ms":1477.9,"input_offset_ms":18000,"input_duration_ms":3000}

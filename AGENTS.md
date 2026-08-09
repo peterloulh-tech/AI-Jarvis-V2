@@ -33,6 +33,12 @@
 
 禁止为了“更漂亮、更规范、更先进”重写已经够用的代码，也禁止为执行 Reuse-First 重复审计整个项目。
 
+### Reference Harness & Proven Infrastructure
+
+外部 model/runtime 正式产品接入前，优先依据 Locked Official Baseline、原作者可复用实现和已有真实运行证据建立最小 Reference Harness，先确认 model/runtime 正确行为，再实现 V2 Product Adapter。Reference Harness 只保留必要参数转换、资源安全、原始结果和测试 instrumentation，不提前承载产品状态机、session 语义、IPC 或 Worker 业务策略。
+
+探索型 PoC 保留有效真机证据与已证明稳定的工程基础设施；其模型语义、adapter、session 和测试专用逻辑必须经 Official/Reuse 对齐后再决定是否进入 Reference Harness 或正式产品。已经真实跑通的 build、CI、portable、Windows Runner、CUDA/runtime 准备、artifact 和测试基础设施默认优先复用；模型/runtime 语义重建与工程基础设施重建分开判断，只修改真实存在的 Delta。
+
 ## 禁止上下文膨胀
 
 1. 禁止批量打开整个 `tasks`、`requirements`、`memory` 或 `docs` 目录。

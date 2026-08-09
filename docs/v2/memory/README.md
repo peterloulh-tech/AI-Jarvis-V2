@@ -55,4 +55,4 @@
 | AIJARVISV2-20 | 依赖治理与 SBOM | `done` | CycloneDX、来源锁定、vendor、patch、许可门、漏洞门 | 定义五类生态的准入、可追溯 SBOM、补丁记录、阻断规则与高风险替换路径。 | [tasks/AIJARVISV2-20.md](tasks/AIJARVISV2-20.md) |
 | AIJARVISV2-21 | V1 资产复用阶段门 | `done` | 主要参考、局部复用、白名单、黑名单、V2 缺口 | 合并源码、资源、许可和依赖审计，冻结最终复用边界、发布门及缺失能力责任。 | [tasks/AIJARVISV2-21.md](tasks/AIJARVISV2-21.md) |
 | AIJARVISV2-22 | O 模型与运行时候选 | `done` | MiniCPM-o、llama.cpp-omni、SPEAK/LISTEN、O-C01、Qwen HOLD | 以八项硬门筛选 O 组合，准入唯一 PoC 路径并冻结自主触发、TTS 关闭及 P1 取证计划。 | [tasks/AIJARVISV2-22.md](tasks/AIJARVISV2-22.md) |
-| AIJARVISV2-23 | O 双工与自主文字 PoC | `in_review` | O-C01、streaming fragment、1Hz diagnostic、O-RISK-23-01 | 真机已见 4 个跨 round SPEAK fragment；下一步只跑复用现有 EXE 的 O-A 聚合闭合与 O-B 1Hz 对齐诊断。 | [tasks/AIJARVISV2-23.md](tasks/AIJARVISV2-23.md) |
+| AIJARVISV2-23 | O 双工与自主文字 PoC | `done` | Legacy Diagnostic PoC、2026-08-09 真机、streaming fragment、Official Baseline | 冻结 RTX 5070 Ti 16GB 现场证据、四方 Delta、官方基线与诊断资产；后继 Reference Harness 链为 92→93→24。 | [tasks/AIJARVISV2-23.md](tasks/AIJARVISV2-23.md) |

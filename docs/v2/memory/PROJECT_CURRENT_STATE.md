@@ -20,7 +20,7 @@ AIJARVISV2-21 已合并源码、UI/资源、许可与依赖审计，冻结 3 个
 
 AIJARVISV2-22 已筛选 4 个 O 模型/运行时组合，唯一准入任务 23 的 PoC 组合为固定 MiniCPM-o 4.5 GGUF 与固定 `llama.cpp-omni` TTS 关闭双工路径；Qwen2.5-Omni 保持候补、不进 PoC，当前为 `done`，见[任务卡](tasks/AIJARVISV2-22.md)。
 
-AIJARVISV2-23 已完成 O-C01 PoC 前检并触发 `O-RISK-23-01`；2026-08-09 Windows/NVIDIA 完整运行已确认 73/73 result `ok:true`、69 LISTEN/4 SPEAK，4 个连续 SPEAK fragment 拼接为同一未闭合 JSON 前缀。下一次真机增量包复用现有 EXE/model/runtime，以 O-A 验证 fragment 聚合/33 秒闭合，以 O-B 执行 33×1 秒 `1Hz official-alignment diagnostic`；零 GPU 输入、映射、hash 和 fixture 自检已通过，动态结论待真机。任务当前为 `in_review`，见[任务卡](tasks/AIJARVISV2-23.md)。
+AIJARVISV2-23 已冻结为 `Legacy Diagnostic PoC / 2026-08-09 Real-machine Baseline` 并完成：RTX 5070 Ti 16GB Windows/NVIDIA 完整运行确认 73/73 result `ok:true`、69 LISTEN/4 SPEAK，连续 4 个 SPEAK fragment 拼接为未闭合 multi-batch JSON 前缀；同时保留 Locked 官方基线、四方 Delta、33×1 秒输入与零 GPU fixture/hash 验证。新任务链为 AIJARVISV2-23 → AIJARVISV2-92 Reference Harness 离线重建 → AIJARVISV2-93 Windows/NVIDIA 动态验收 → AIJARVISV2-24；任务 24 保持 `backlog`，见[任务卡](tasks/AIJARVISV2-23.md)。
 
 三层 Reuse-First 固定规则已启用：第一层使用 V2 当前实现和 AIJARVISV2-17/18 原作者复用结论，第二层使用 [`OFFICIAL_BASELINE_INDEX.md`](OFFICIAL_BASELINE_INDEX.md)，第三层只实现 V2 当前需求缺失的 Delta。当前已建立 MiniCPM-o 4.5、MiniCPM-o-Demo 与 `llama.cpp-omni` 基线；相同锁定版本默认不重复全量官方审计。
 
@@ -34,7 +34,7 @@ AIJARVISV2-23 已完成 O-C01 PoC 前检并触发 `O-RISK-23-01`；2026-08-09 Wi
 
 完整登记见 [`baseline-manifest.md`](../requirements/baseline-manifest.md)。AIJARVISV2-3～7 的 25 个 NFR 工程附录已由 AIJARVISV2-8 登记为 `NFR-ENG-APPENDIX-V1.0`；它不是第二份正式 NFR。阶段门已获用户批准，收口提交为 `b433f9dbfac5c074086a8d84ce73693670a3bd89`。
 
-当前业务交付基线为 AIJARVISV2-23 Windows 便携 PoC 包；Windows/MSVC/CUDA 编译链接已通过，2026-08-09 真机暴露的 runner 问题已集中修复。项目记忆只记录事实，不改变业务交付。
+当前真实运行基线为 AIJARVISV2-23 Windows 便携 Legacy Diagnostic PoC 包；其 Windows/MSVC/CUDA 构建链与 2026-08-09 真机证据保留供 Reference Harness 复用和解释，不作为正式 Product Adapter。
 
 ## 关键决定
 
@@ -63,4 +63,4 @@ AIJARVISV2-23 已完成 O-C01 PoC 前检并触发 `O-RISK-23-01`；2026-08-09 Wi
 
 ## 下一步注意事项
 
-AIJARVISV2-23 下一步只允许在同一任务执行已准备的 O-A/O-B Windows/NVIDIA 真机诊断；O-B 不得描述为严格单变量 A/B。默认普通运行不得记为 Formal，显式 Formal 仍须满足 16GB 正式最低环境。`O-RISK-23-01` 关闭前不得宣称 O-C01 可行，不得启动 AIJARVISV2-24。
+AIJARVISV2-92 只完成 Reference Harness v2 的设计、实现、fixture/unit/static/dry-run 与 Windows 构建准备；Windows/NVIDIA/CUDA 动态 build/run 仅由 AIJARVISV2-93 执行。两项完成前不得宣称 O-C01 正式可行，不得启动 AIJARVISV2-24。

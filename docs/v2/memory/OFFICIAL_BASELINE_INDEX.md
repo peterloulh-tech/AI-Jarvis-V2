@@ -2,7 +2,7 @@
 
 > 审计日期：2026-08-09。对应 Dashi 任务：`AIJARVISV2-23`。本文件只覆盖当前 Local O 路线，不代表未来模型选型。
 
-> Task93 于 2026-08-11 按已批准的 Official-First 架构重新锁定运行基线：`tc-mb/llama.cpp-omni feat/web-demo@5202b7b2f4d11f50b9f996161e7a2f8b8571b890` 与 `OpenBMB/MiniCPM-o-Demo Comni@9af4308a93ca889ddf5c7c7bde1bcfbb6ff9b147`。精确来源、许可与使用组件见 [`tools/o-official-reference/upstream-lock.json`](../../../tools/o-official-reference/upstream-lock.json)；下文 `b9d15b8` 只保留为 Task23 Legacy 历史基线。
+> Task93 于 2026-08-11 按已批准的 Official-First 架构锁定当前维护基线：`tc-mb/llama.cpp-omni master@09f5c3f1b484759f17b06fc63574f749c89c8761` 与 `OpenBMB/MiniCPM-o-Demo main@d0a002093615b7f1d4d0f87a03fc01cb39bef3f6`；Demo 当前 C++ backend 默认取 `master/origin/master` 并构建 `llama-omni-server`。精确来源、许可与使用组件见 [`tools/o-official-reference/upstream-lock.json`](../../../tools/o-official-reference/upstream-lock.json)；下文 `b9d15b8` 与 `feat/web-demo@5202b7b2...` 只保留为 Legacy/冲突路线历史。
 
 ## 0. 使用规则
 
@@ -154,29 +154,29 @@ PyTorch 主路径：
 
 `CURRENT-OFFICIAL-ONLY` 的 Comni 路径：
 
-`WebSocket gateway → Demo Worker/CppBackendWorker → 启动 llama-server → HTTP omni_init/update config/prefill + SSE decode → is_listen/text/audio → gateway result`
+`WebSocket gateway → Demo Worker → llama-omni-server /backend → session.init / input.append / session.close → session/output events`
 
-关键接口：
+当前 `llama-omni-server` 也保留供薄集成直接使用的 HTTP/SSE 接口：
 
 - `POST /v1/stream/omni_init`
 - `POST /v1/stream/update_session_config`
 - `POST /v1/stream/prefill`
-- `GET /v1/stream/decode`（SSE）
-- `POST /v1/stream/break`
+- `POST /v1/stream/decode`（SSE）
+- `WebSocket /backend`
+- `POST /sessions/:session_id/close`
 
 参考入口：
 
-- [Comni C++ backend 文档](https://github.com/OpenBMB/MiniCPM-o-Demo/blob/9af4308a93ca889ddf5c7c7bde1bcfbb6ff9b147/docs/en/cpp-backend.md)
-- [CppBackendProcessor](https://github.com/OpenBMB/MiniCPM-o-Demo/blob/9af4308a93ca889ddf5c7c7bde1bcfbb6ff9b147/core/processors/cpp_backend.py)
-- [Comni Worker](https://github.com/OpenBMB/MiniCPM-o-Demo/blob/9af4308a93ca889ddf5c7c7bde1bcfbb6ff9b147/core/worker.py)
+- [当前 C++ backend compose](https://github.com/OpenBMB/MiniCPM-o-Demo/blob/d0a002093615b7f1d4d0f87a03fc01cb39bef3f6/docker-compose.cpp.yml)
+- [当前 C++ backend Dockerfile](https://github.com/OpenBMB/MiniCPM-o-Demo/blob/d0a002093615b7f1d4d0f87a03fc01cb39bef3f6/docker/Dockerfile.cpp-worker-backend)
+- [当前 Worker](https://github.com/OpenBMB/MiniCPM-o-Demo/blob/d0a002093615b7f1d4d0f87a03fc01cb39bef3f6/worker.py)
 
-Comni Worker 的输入队列上限为 2，积压时丢弃旧片以保持实时性；session 后可重启 server 以获得干净 KV。这些是 `REFERENCE`，不是 V2 当前 runner 行为。
+当前 server 的 `/backend` session close 会停止推理并清理/复用官方 context；HTTP `omni_init` 会释放已有 context 后重新初始化。Task93 只直接复用这些官方生命周期，不另建 Session Manager。
 
 ### 官方实现中的已知差异/限制
 
-- Comni 分支代码为避免清空 KV/system prompt 后首片崩溃，当前跳过部分 `update_session_config` 调用并复用 init 状态；这是分支实现备注，不能泛化成所有 runtime revision 的规则。
-- Comni 默认连接完整含 TTS/参考音频的模型目录，而 V2 Locked Baseline 是三文件 no-TTS；不能直接照搬其 model directory 或 prompt。
-- 当前 main 新 backend 协议、Comni 分支和 runtime 当前 master 没有共同锁定的单一 revision。需要采用其中任一接口时，必须另行锁版并验证。
+- Demo 容器入口检查完整 TTS/projector/token2wav 布局；Task93 活动 profile 固定 `use_tts=false`，当前 server 源码实际只要求 LLM/audio/vision 三文件，因此不把可选 TTS 文件误报为活动缺口。
+- Demo main 通过 `LLAMA_OMNI_REFSPEC=master`、`LLAMA_OMNI_REF=origin/master` 跟随 runtime；Task93 以两仓当前 HEAD 精确锁定来获得可复现性。
 
 ## 3. llama.cpp-omni
 
@@ -199,7 +199,7 @@ Comni Worker 的输入队列上限为 2，积压时丢弃旧片以保持实时�
 - [当前 README](https://github.com/tc-mb/llama.cpp-omni/blob/09f5c3f1b484759f17b06fc63574f749c89c8761/README.md)
 - [README 所指 web-demo 分支 `5202b7b2...`](https://github.com/tc-mb/llama.cpp-omni/tree/5202b7b2f4d11f50b9f996161e7a2f8b8571b890)
 
-当前 master、README 指向的 `feat/web-demo` 和 MiniCPM-o-Demo Comni 分支不是一个 commit；新增服务接口均为 `CURRENT-OFFICIAL-ONLY`，除非后续任务另行锁定。
+`feat/web-demo@5202b7b2...` 只保留为冲突路线历史；Task93 当前活动接口以 `master@09f5c3f1...` 的 `llama-omni-server` 为准。
 
 ### 模型目录
 
@@ -263,11 +263,11 @@ Locked C API 顺序：
 
 Locked V2 当前直接相关参数：模型三路径、`n_ctx/n_batch/n_ubatch/n_predict`、GPU layers、seed、async、duplex、use_tts、system/voice prompt、assistant prompt、`force_listen_count`、`listen_prob_scale`、每片最大 speak token、媒体路径、slice 数和 sequence。
 
-`CURRENT-OFFICIAL-ONLY` 的 CLI/server 主要入口：`llama-omni-cli`、`llama-server`，模型/投影器、`--no-tts`、参考音频、ctx、GPU layers，以及 `/v1/stream/omni_init`、prefill、decode SSE、break/close。采用前必须固定准确 commit 与请求 schema。
+`CURRENT-OFFICIAL-ONLY` 的 CLI/server 主要入口：`llama-omni-cli`、`llama-omni-server`，模型目录、ctx、GPU layers，以及 HTTP omni_init/prefill/decode SSE 和 `/backend` session 协议。Task93 已固定准确 commit 与活动请求 schema。
 
 ### 与官方 MiniCPM-o-Demo 的连接方式
 
-官方 Comni 参考不是链接 V2 runner，而是由 Demo `CppBackendWorker` 管理一个 `llama-server` 进程，通过 HTTP init/prefill 和 SSE decode 交换结果，再转换成 Demo WebSocket 的 `is_listen/text/audio`。V2 当前 C API 路线与之共享底层 LS 概念，但进程、协议、TTS 和 session 清理路径不同。
+官方 Demo main 由 Worker 转发 runtime WebSocket 到 `llama-omni-server /backend`；Task93 的极薄 reference route 直接使用同一官方 binary 保留的 HTTP prefill/decode SSE，并用官方 `omni_init` context 替换完成 clean reinit，不复制 Demo gateway/worker/session 层。
 
 ### 官方限制与当前未确认项
 

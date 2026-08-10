@@ -37,7 +37,7 @@ function Write-JsonUtf8 {
 }
 
 $adapterPath = Join-Path $PackageRoot "bin\aijarvisv2-o-official-adapter.exe"
-$serverPath = Join-Path $PackageRoot "bin\llama-server.exe"
+$serverPath = Join-Path $PackageRoot "bin\llama-omni-server.exe"
 $configPath = Join-Path $PackageRoot "official-config.json"
 $lockPath = Join-Path $PackageRoot "upstream-lock.json"
 $manifestPath = Join-Path $InputRoot "manifest.json"
@@ -67,7 +67,7 @@ if ($DryRun) {
     return
 }
 
-Assert-File -Path $serverPath -Label "official llama-server"
+Assert-File -Path $serverPath -Label "official llama-omni-server"
 $modelFiles = @($lock.model.files)
 $modelEvidence = @()
 foreach ($model in $modelFiles) {
@@ -104,8 +104,8 @@ $effectivePrompt = ([string]$config.contract_prompt_template).Replace(
     "{{MAX_CHINESE_CHARS}}", [string]$profileConfig.max_chinese_chars)
 if ($effectivePrompt.Contains("{{MAX_CHINESE_CHARS}}")) { throw "contract prompt budget is unresolved" }
 $effectivePrompt | Set-Content -LiteralPath $promptPath -Encoding utf8NoBOM
-$serverOutput = Join-Path $EvidenceRoot "llama-server.stdout.log"
-$serverError = Join-Path $EvidenceRoot "llama-server.stderr.log"
+$serverOutput = Join-Path $EvidenceRoot "llama-omni-server.stdout.log"
+$serverError = Join-Path $EvidenceRoot "llama-omni-server.stderr.log"
 $runtimeOutput = Join-Path $EvidenceRoot "runtime-output"
 New-Item -ItemType Directory -Path $runtimeOutput -Force | Out-Null
 $baseUrl = "http://$($config.server.host):$($config.server.port)"
@@ -113,7 +113,7 @@ $serverProcess = $null
 $processExits = @()
 $hardKillUsed = $false
 $fullReinit = "NOT_RUN"
-$sessionBreak = "NOT_RUN"
+$cleanContext = "NOT_RUN"
 $runError = $null
 $rounds = @()
 $finalText = ""
@@ -135,7 +135,7 @@ function Get-VramSample {
 }
 
 function Start-OfficialServer {
-    Assert-File -Path $serverPath -Label "official llama-server"
+    Assert-File -Path $serverPath -Label "official llama-omni-server"
     $llmPath = Join-Path $ModelRoot "MiniCPM-o-4_5-Q4_K_M.gguf"
     $arguments = @(
         "--host", [string]$config.server.host,
@@ -152,12 +152,12 @@ function Start-OfficialServer {
 
     $deadline = (Get-Date).AddSeconds([int]$config.server.health_timeout_seconds)
     do {
-        if ($script:serverProcess.HasExited) { throw "llama-server exited before health ready" }
+        if ($script:serverProcess.HasExited) { throw "llama-omni-server exited before health ready" }
         & $adapterPath health --base-url $baseUrl --timeout-seconds 3 *> $null
         if ($LASTEXITCODE -eq 0) { break }
         Start-Sleep -Seconds 1
     } while ((Get-Date) -lt $deadline)
-    if ((Get-Date) -ge $deadline) { throw "llama-server health timeout" }
+    if ((Get-Date) -ge $deadline) { throw "llama-omni-server health timeout" }
 
     & $adapterPath init --base-url $baseUrl --timeout-seconds ([string]$config.server.health_timeout_seconds) `
         --model-dir $ModelRoot --output-dir $runtimeOutput --prompt-file $promptPath *> $null
@@ -168,10 +168,10 @@ function Stop-OfficialServer {
     param([switch]$AllowHardKill)
     if ($null -eq $script:serverProcess) { return }
     if (-not $script:serverProcess.HasExited) {
-        # Matches Comni's terminate -> bounded wait -> kill fallback lifecycle.
+        # Keep process cleanup bounded after the official context lifecycle completes.
         Stop-Process -Id $script:serverProcess.Id -ErrorAction SilentlyContinue
         if (-not $script:serverProcess.WaitForExit([int]$config.server.shutdown_timeout_seconds * 1000)) {
-            if (-not $AllowHardKill) { throw "llama-server graceful shutdown timeout" }
+            if (-not $AllowHardKill) { throw "llama-omni-server shutdown timeout" }
             Stop-Process -Id $script:serverProcess.Id -Force -ErrorAction SilentlyContinue
             $script:hardKillUsed = $true
             $script:serverProcess.WaitForExit()
@@ -226,22 +226,20 @@ try {
     $parsedJson = ($parsed | Out-String) | ConvertFrom-Json
     Write-JsonUtf8 -Value $parsedJson -Path (Join-Path $EvidenceRoot "final-parsed.json")
 
-    & $adapterPath break --base-url $baseUrl --timeout-seconds 10 *> $null
-    if ($LASTEXITCODE -ne 0) { throw "official break failed" }
-    $sessionBreak = "PASS"
-    Stop-OfficialServer -AllowHardKill
-
-    # Comni full_reinit: restart the official server and omni_init a clean context.
-    Start-OfficialServer
+    # Current llama-omni-server replaces the existing omni_context inside
+    # omni_init. Reuse that official clean-context/full-reinit mechanism in
+    # the same process instead of rebuilding session lifecycle in the runner.
+    & $adapterPath init --base-url $baseUrl --timeout-seconds ([string]$config.server.health_timeout_seconds) `
+        --model-dir $ModelRoot --output-dir $runtimeOutput --prompt-file $promptPath *> $null
+    if ($LASTEXITCODE -ne 0) { throw "official clean-context reinit failed" }
+    $cleanContext = "PASS"
     $fullReinit = "PASS"
-    & $adapterPath break --base-url $baseUrl --timeout-seconds 10 *> $null
     Stop-OfficialServer -AllowHardKill
     $vramSamples += Get-VramSample -Phase "after"
 } catch {
     $runError = $_.Exception.Message
 } finally {
     if ($null -ne $serverProcess) {
-        try { & $adapterPath break --base-url $baseUrl --timeout-seconds 3 *> $null } catch {}
         try { Stop-OfficialServer -AllowHardKill } catch {}
     }
     if (@($vramSamples | Where-Object phase -eq "after").Count -eq 0) {
@@ -262,7 +260,7 @@ $summary = [ordered]@{
     rounds = $rounds
     first_fragment_latency_ms = if ($selectedRound.Count -eq 1) { $selectedRound[0].first_fragment_latency_ms } else { $null }
     completion_latency_ms = if ($selectedRound.Count -eq 1) { $selectedRound[0].completion_latency_ms } else { $null }
-    session_break = $sessionBreak
+    clean_context = $cleanContext
     full_reinit = $fullReinit
     process_exit = $processExits
     hard_kill_fallback_used = $hardKillUsed

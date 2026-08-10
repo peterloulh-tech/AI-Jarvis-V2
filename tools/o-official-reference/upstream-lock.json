@@ -5,27 +5,32 @@
     {
       "name": "llama.cpp-omni",
       "repo": "https://github.com/tc-mb/llama.cpp-omni.git",
-      "ref": "feat/web-demo",
-      "commit": "5202b7b2f4d11f50b9f996161e7a2f8b8571b890",
+      "ref": "master",
+      "commit": "09f5c3f1b484759f17b06fc63574f749c89c8761",
       "license": "MIT",
-      "cmake_target": "llama-server",
-      "binary": "llama-server",
-      "usage": ["llama-server omni HTTP endpoints", "SSE completion", "runtime/session/streaming"]
+      "cmake_target": "llama-omni-server",
+      "binary": "llama-omni-server",
+      "usage": ["llama-omni-server omni HTTP endpoints", "SSE completion", "official context reinitialization", "runtime/session/streaming"]
     },
     {
       "name": "MiniCPM-o-Demo-Comni",
       "repo": "https://github.com/OpenBMB/MiniCPM-o-Demo.git",
-      "ref": "Comni",
-      "commit": "9af4308a93ca889ddf5c7c7bde1bcfbb6ff9b147",
+      "ref": "main",
+      "commit": "d0a002093615b7f1d4d0f87a03fc01cb39bef3f6",
       "license": "NO_LICENSE_FILE_AT_PIN",
       "redistributed": false,
-      "usage": ["server lifecycle reference", "health", "break", "full_reinit", "process cleanup"]
+      "runtime_refspec_default": "master",
+      "runtime_checkout_default": "origin/master",
+      "usage": ["current C++ backend compatibility", "llama-omni-server target", "CUDA/CMake baseline", "model layout", "backend session lifecycle"]
     }
   ],
   "model": {
     "repo": "openbmb/MiniCPM-o-4_5-gguf",
     "revision": "502eec5b03eaee9d0d2ce17a176e3490103c9a63",
     "external": true,
+    "active_profile": "duplex-no-tts",
+    "layout_compatibility": "DIRECT",
+    "missing_required_files": [],
     "files": [
       {"path": "MiniCPM-o-4_5-Q4_K_M.gguf", "sha256": "1237a97ee081b8abebc47aa7dad565701e8f5f904cdc92f6723ac4281bbc0932"},
       {"path": "audio/MiniCPM-o-4_5-audio-F16.gguf", "sha256": "d5b188ac7feaf98e17175c3f9bd14bf269301bfd187439fdaa3e3a494fc32ef7"},

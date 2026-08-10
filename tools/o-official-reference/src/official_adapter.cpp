@@ -85,7 +85,7 @@ std::vector<std::string> split_styles(const std::string &value) {
 
 int main(int argc, char **argv) {
   try {
-    if (argc < 2) throw std::runtime_error("command required: health|init|step|break|validate|dry-run");
+    if (argc < 2) throw std::runtime_error("command required: health|init|step|validate|dry-run");
     const std::string command = argv[1];
     const auto options = parse_options(argc, argv, 2);
 
@@ -118,12 +118,13 @@ int main(int argc, char **argv) {
           aijarvis::official_o::build_init_request(
               required(options, "model-dir"), required(options, "output-dir"),
               read_file(required(options, "prompt-file"))));
-      std::cout << response.dump() << '\n';
-      return 0;
-    }
-    if (command == "break") {
-      std::cout << post_json(client, "/v1/stream/break", {{"reason", "session_end"}}).dump()
-                << '\n';
+      const auto prefill = post_json(
+          client, "/v1/stream/prefill",
+          aijarvis::official_o::build_init_prefill_request());
+      std::cout << nlohmann::json({
+          {"omni_init", response},
+          {"system_prefill", prefill},
+      }).dump() << '\n';
       return 0;
     }
     if (command != "step") throw std::runtime_error("unknown command: " + command);

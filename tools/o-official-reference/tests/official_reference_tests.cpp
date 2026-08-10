@@ -98,6 +98,13 @@ int main(int argc, char **argv) {
             "V2 contract prompt was not injected into official init");
     require(init_request.at("assistant_prompt") == "<|audio_end|><|im_end|>\n",
             "Comni duplex assistant prompt changed");
+    const auto init_prefill = aijarvis::official_o::build_init_prefill_request();
+    require(init_prefill == nlohmann::json({
+                {"audio_path_prefix", ""},
+                {"img_path_prefix", ""},
+                {"cnt", 0},
+            }),
+            "current llama-omni-server requires one explicit index=0 system prefill");
 
     aijarvis::official_o::validate_upstream_lock(read_file(argv[3]));
     const auto plan = aijarvis::official_o::build_dry_run_plan(read_file(argv[4]));

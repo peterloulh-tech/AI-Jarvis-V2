@@ -38,9 +38,9 @@ function Get-LowerSha256 {
 }
 
 New-Item -ItemType Directory -Path (Join-Path $PackageRoot "bin") -Force | Out-Null
-$serverSource = Find-OneFile -Root $RuntimeBuildRoot -Name "llama-server.exe"
+$serverSource = Find-OneFile -Root $RuntimeBuildRoot -Name "llama-omni-server.exe"
 $adapterSource = Find-OneFile -Root $AdapterBuildRoot -Name "aijarvisv2-o-official-adapter.exe"
-Copy-RequiredFile -Source $serverSource -Destination (Join-Path $PackageRoot "bin\llama-server.exe")
+Copy-RequiredFile -Source $serverSource -Destination (Join-Path $PackageRoot "bin\llama-omni-server.exe")
 Copy-RequiredFile -Source $adapterSource -Destination (Join-Path $PackageRoot "bin\aijarvisv2-o-official-adapter.exe")
 
 $toolRoot = Join-Path $RepositoryRoot "tools\o-official-reference"
@@ -109,8 +109,8 @@ $portableManifest = [ordered]@{
     schema_version = 1
     artifact_name = $ArtifactName
     source_commit = $SourceCommit
-    runtime_commit = "5202b7b2f4d11f50b9f996161e7a2f8b8571b890"
-    demo_commit = "9af4308a93ca889ddf5c7c7bde1bcfbb6ff9b147"
+    runtime_commit = "09f5c3f1b484759f17b06fc63574f749c89c8761"
+    demo_commit = "d0a002093615b7f1d4d0f87a03fc01cb39bef3f6"
     cuda_toolkit_version = "12.8.1"
     models_included = 0
     o_in_07_media_included = 0

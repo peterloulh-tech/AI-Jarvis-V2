@@ -194,6 +194,14 @@ nlohmann::json build_init_request(const std::string &model_dir,
   };
 }
 
+nlohmann::json build_init_prefill_request() {
+  return {
+      {"audio_path_prefix", ""},
+      {"img_path_prefix", ""},
+      {"cnt", 0},
+  };
+}
+
 void validate_upstream_lock(const std::string &text) {
   const auto lock = nlohmann::json::parse(text);
   require(lock.value("schema_version", 0) == 1, "unsupported upstream lock schema");
@@ -201,19 +209,25 @@ void validate_upstream_lock(const std::string &text) {
           "upstream lock must contain exactly two source components");
   const auto &runtime = lock.at("components").at(0);
   require(runtime.at("repo") == "https://github.com/tc-mb/llama.cpp-omni.git" &&
-              runtime.at("ref") == "feat/web-demo" &&
-              runtime.at("commit") == "5202b7b2f4d11f50b9f996161e7a2f8b8571b890" &&
+              runtime.at("ref") == "master" &&
+              runtime.at("commit") == "09f5c3f1b484759f17b06fc63574f749c89c8761" &&
               runtime.at("license") == "MIT" &&
-              runtime.at("cmake_target") == "llama-server" &&
-              runtime.at("binary") == "llama-server",
+              runtime.at("cmake_target") == "llama-omni-server" &&
+              runtime.at("binary") == "llama-omni-server",
           "llama.cpp-omni lock changed");
   const auto &demo = lock.at("components").at(1);
   require(demo.at("repo") == "https://github.com/OpenBMB/MiniCPM-o-Demo.git" &&
-              demo.at("ref") == "Comni" &&
-              demo.at("commit") == "9af4308a93ca889ddf5c7c7bde1bcfbb6ff9b147" &&
+              demo.at("ref") == "main" &&
+              demo.at("commit") == "d0a002093615b7f1d4d0f87a03fc01cb39bef3f6" &&
+              demo.at("runtime_refspec_default") == "master" &&
+              demo.at("runtime_checkout_default") == "origin/master" &&
               demo.at("redistributed") == false,
           "MiniCPM-o-Demo Comni lock changed");
   require(lock.at("model").value("external", false), "models must stay external");
+  require(lock.at("model").value("active_profile", "") == "duplex-no-tts" &&
+              lock.at("model").value("layout_compatibility", "") == "DIRECT" &&
+              lock.at("model").at("missing_required_files").empty(),
+          "active no-TTS model layout is not directly compatible");
   require(lock.at("model").at("files").size() == 3,
           "model lock must contain exactly the frozen three-file set");
   for (const auto &file : lock.at("model").at("files")) {

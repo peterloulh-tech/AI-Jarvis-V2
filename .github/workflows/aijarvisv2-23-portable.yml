@@ -216,7 +216,7 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           repository: tc-mb/llama.cpp-omni
-          ref: 5202b7b2f4d11f50b9f996161e7a2f8b8571b890
+          ref: 09f5c3f1b484759f17b06fc63574f749c89c8761
           path: build/task93-official-runtime-source
 
       - name: Verify upstream locks
@@ -227,8 +227,8 @@ jobs:
           $demo = @($lock.components | Where-Object name -eq "MiniCPM-o-Demo-Comni")
           $runtimeHead = git -C build/task93-official-runtime-source rev-parse HEAD
           if ($runtime.Count -ne 1 -or $runtime[0].commit -ne $runtimeHead -or
-              $runtimeHead -ne "5202b7b2f4d11f50b9f996161e7a2f8b8571b890" -or
-              $demo.Count -ne 1 -or $demo[0].commit -ne "9af4308a93ca889ddf5c7c7bde1bcfbb6ff9b147") {
+              $runtimeHead -ne "09f5c3f1b484759f17b06fc63574f749c89c8761" -or
+              $demo.Count -ne 1 -or $demo[0].commit -ne "d0a002093615b7f1d4d0f87a03fc01cb39bef3f6") {
             throw "Official upstream lock verification failed"
           }
 
@@ -285,7 +285,7 @@ jobs:
           "CUDA_PATH=$cudaPath" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
           (Join-Path $cudaPath 'bin') | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
-      - name: Build official llama-server
+      - name: Build official llama-omni-server
         shell: pwsh
         run: |
           cmake -S build/task93-official-runtime-source -B build/task93-official-runtime `
@@ -294,8 +294,8 @@ jobs:
             -DGGML_NATIVE=OFF '-DCMAKE_CUDA_ARCHITECTURES=86;89;120' `
             -DLLAMA_BUILD_TESTS=OFF -DLLAMA_BUILD_EXAMPLES=OFF -DLLAMA_BUILD_SERVER=ON -DLLAMA_CURL=OFF
           if ($LASTEXITCODE -ne 0) { throw "official runtime configure failed" }
-          cmake --build build/task93-official-runtime --config Release --target llama-server --parallel
-          if ($LASTEXITCODE -ne 0) { throw "llama-server build failed" }
+          cmake --build build/task93-official-runtime --config Release --target llama-omni-server --parallel
+          if ($LASTEXITCODE -ne 0) { throw "llama-omni-server build failed" }
 
       - name: Build and test thin Task93 adapter
         shell: pwsh
@@ -327,7 +327,7 @@ jobs:
             -ArtifactName $env:ARTIFACT_NAME
           if ($LASTEXITCODE -ne 0) { throw "Official-First packaging failed" }
           $portable = Get-Content (Join-Path $packageRoot "portable-manifest.json") -Raw -Encoding UTF8 | ConvertFrom-Json
-          if ($portable.runtime_commit -ne "5202b7b2f4d11f50b9f996161e7a2f8b8571b890" -or
+          if ($portable.runtime_commit -ne "09f5c3f1b484759f17b06fc63574f749c89c8761" -or
               $portable.models_included -ne 0 -or $portable.o_in_07_media_included -ne 0) {
             throw "Official-First portable manifest failed"
           }

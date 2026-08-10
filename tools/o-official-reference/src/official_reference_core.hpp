@@ -39,6 +39,7 @@ nlohmann::json parse_and_validate_config(const std::string &text);
 nlohmann::json build_init_request(const std::string &model_dir,
                                   const std::string &output_dir,
                                   const std::string &contract_prompt);
+nlohmann::json build_init_prefill_request();
 void validate_upstream_lock(const std::string &text);
 nlohmann::json build_dry_run_plan(const std::string &manifest_text);
 

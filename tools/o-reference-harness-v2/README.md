@@ -42,7 +42,7 @@ The Locked C result has no reliable official EOS/finished field. `runtime_bounda
 - `legacy-3s-replay`: 11 × 3000 ms assets are mechanically reconstructed from the same 1 Hz content and match the 2026-08-09 source snapshot hashes.
 - `fixtures/results/legacy-four-fragments.jsonl` preserves the four real SPEAK fragments. They remain ordered raw fragments and aggregate to `payload_incomplete`, never `invalid_final_payload`.
 - `fixtures/results/complete-three-batch-fragments.jsonl` proves aggregate → JSON parse → schema → three-batch PASS.
-- C++ tests cover generation change, LISTEN, timeout/incomplete, failed result separation, order rejection, summary counters and profile separation.
+- C++ tests cover generation change, LISTEN, timeout/incomplete, failed result separation, duplicate/order rejection without evidence contamination, payload-complete continuation, invalid/incomplete separation, idempotent drain, summary counters and profile separation.
 
 Run the complete zero-GPU suite:
 
@@ -52,15 +52,19 @@ node tools/o-reference-harness-v2/tests/run-offline-tests.js
 
 `dry-run` writes `run-metadata.json`, ordered `inputs.jsonl`, and `summary.json` without loading a model. Output directories must be new/empty.
 
+`replay-results` is the single Mock result source for the real aggregation/validator/evidence/summary chain. The packaged runner exposes it as `-MockResultSource` with a declared `-MockBoundary`; no GPU or model is used. Valid, empty and lifecycle inputs write canonical evidence, while malformed/missing/null/duplicate/out-of-order inputs exit non-zero with a stable failed `summary.json` and `evidence.json`. Invalid JSON payloads are counted separately from incomplete payloads.
+
 ## Results
 
 Dynamic runs write run metadata (model/revisions/commit/profile/prompt/platform), ordered input records, `raw-results.jsonl`, `aggregations.json`, `runtime-boundaries.jsonl`, `summary.json`, runner logs/environment telemetry and `sha256sums.txt`. Summary counters include model/input, LISTEN/SPEAK, fragments, aggregates, complete/incomplete payloads, valid three-batch payloads and runtime failures.
 
 ## Build
 
-`BUILD_REQUIRED`: Task23's binary cannot represent the corrected aggregation/completion semantics, so the new target is `o-reference-harness-v2`. The CMake/runtime/CUDA/package route is the proven Task23 route with no model embedded. This task prepares but does not execute the Windows/CUDA build.
+`BUILD_REQUIRED`: Task23's binary cannot represent the corrected aggregation/completion semantics, so the target remains `o-reference-harness-v2`. The CMake/runtime/CUDA/package route is the proven Task23 route with no model embedded. On branch `codex/aijarvisv2-93`, successful Actions run `31355297807` executed the Task23 workflow and produced `AIJARVISV2-23-windows-x64-cuda-portable`; it proves the reusable build infrastructure but did not build this target.
 
 The GitHub workflow is `workflow_dispatch` only. It builds Windows x64 with CUDA architectures `86;89;120`, packages the external-model runner and deterministic fixtures, then runs all four profile/cadence dry-run combinations without loading a model.
+
+The lightweight workflow `.github/workflows/aijarvisv2-93-no-gpu-smoke.yml` is also manual-only. It uses `windows-2022`, builds only the no-runtime CLI, then runs the packaged runner under Windows PowerShell 5.1 with Mock JSONL in Chinese/space-containing paths. It covers JSON/JSONL, LISTEN/SPEAK fragments, generation changes, runtime continuation, empty/failed/malformed inputs, aggregation/summary/evidence, error propagation and repeated cleanup. It needs neither CUDA nor GGUF files.
 
 ## Windows dynamic test
 
@@ -73,3 +77,5 @@ After Task 92 review, Task 93 may dispatch the workflow, download the Artifact, 
 ```
 
 Windows/NVIDIA model load, CUDA execution, native LISTEN/SPEAK distribution, latency, VRAM and cleanup remain `DYNAMIC-ONLY` until Task 93 produces real evidence.
+
+The runner is compatible with Windows PowerShell 5.1. Each dynamic command creates a unique `results/{profile}/{cadence}/{run_id}` directory and automatically records raw results, aggregation, summary, runner logs, per-second GPU/process samples, before/after NVIDIA state, executable/build-manifest/model hashes, cleanup/orphan state and final result hashes. Primary harness failures remain primary when cleanup also fails.

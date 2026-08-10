@@ -24,7 +24,7 @@ AIJARVISV2-23 已冻结为 `Legacy Diagnostic PoC / 2026-08-09 Real-machine Base
 
 AIJARVISV2-92 已完成独立 Reference Harness v2、两个分离 profile、manifest 驱动的 33×1 秒/11×3 秒固定输入、streaming aggregation 与 completion 分层、三批 validator、离线 fixture/unit/static/dry-run、薄 Locked C API shim，以及既有 Windows/CUDA 构建链的最小接入准备，当前为 `done`，见[任务卡](tasks/AIJARVISV2-92.md)。
 
-AIJARVISV2-93 当前为 `in_progress`：首次 Windows/CUDA 构建前检查确认沿用 Task23 的 Windows 2022、CUDA 12.8.1、Locked runtime/model、MSVC preflight、portable DLL/license/manifest 与 Artifact 路线；Task93 仅补回新 package 缺失的结构化 runtime/CUDA license provenance 及上传前核验。当前状态为 `READY_FOR_FIRST_WINDOWS_BUILD`；尚未启动 Actions、Windows/MSVC/CUDA 构建或动态模型验收，任务 24 保持 `backlog`。
+AIJARVISV2-93 当前为 `in_progress`：继续沿用 Task23 的 Windows 2022、CUDA 12.8.1、Locked runtime/model、MSVC preflight、portable DLL/license/manifest 与 Artifact 路线。分支 `codex/aijarvisv2-93` 的成功 Actions run `31355297807` 实际执行 Task23 workflow，并产出 `AIJARVISV2-23-windows-x64-cuda-portable`；它仍是可复用的成功构建基础设施/Legacy portable 基线，但没有构建 `o-reference-harness-v2.exe`。本轮新增同一 Harness 的 Mock result source 全链路、稳定异常证据、PowerShell 5.1 runner 兼容和手动 no-GPU smoke；真实 O Reference Harness binary 仍需后续最小构建，任务 24 保持 `backlog`。
 
 三层 Reuse-First 固定规则已启用：第一层使用 V2 当前实现和 AIJARVISV2-17/18 原作者复用结论，第二层使用 [`OFFICIAL_BASELINE_INDEX.md`](OFFICIAL_BASELINE_INDEX.md)，第三层只实现 V2 当前需求缺失的 Delta。当前已建立 MiniCPM-o 4.5、MiniCPM-o-Demo 与 `llama.cpp-omni` 基线；相同锁定版本默认不重复全量官方审计。
 
@@ -55,7 +55,8 @@ AIJARVISV2-93 当前为 `in_progress`：首次 Windows/CUDA 构建前检查确�
 
 ## 开放风险与待实测项
 
-- O-C01 仍是唯一 PoC 准入组合；Reference Harness v2 已进入 `READY_FOR_FIRST_WINDOWS_BUILD`，但 Windows/NVIDIA 动态 build/run 尚未由 AIJARVISV2-93 执行，Locked runtime 的 startup LISTEN、自主 LISTEN/SPEAK、streaming、三批契约、延迟、显存与清理仍没有 Reference Harness 正式动态通过证据。Qwen2.5-Omni 候补还缺权重 revision/许可材料、自主触发、20 秒 16GB 与 Windows 自包含包证据。
+- O-C01 仍是唯一 PoC 准入组合；Task93 分支目前只有 Task23 Legacy portable 的成功构建，Reference Harness v2 binary 和 Windows/NVIDIA 动态 run 均未完成。Locked runtime 的 startup LISTEN、自主 LISTEN/SPEAK、streaming、三批契约、延迟、显存与清理仍没有 Reference Harness 正式动态通过证据。Qwen2.5-Omni 候补还缺权重 revision/许可材料、自主触发、20 秒 16GB 与 Windows 自包含包证据。
+- Downloads 中两份同名冻结 Markdown 当前 SHA-256 为 `270e0b1f...c90` / `f65950be...7b5`，与 `baseline-manifest.md` 正式登记的 `2b9f2bd6...d46` / `3f04ecaa...8dd` 不一致；在恢复已登记原件或正式重走基线前，不得从这两份文件新增能力矩阵或功能范围。Dashi AIJARVISV2-90/91 也引用前一组未登记哈希并阻塞 Task80，需后续定点核对，当前未改任务。
 - V 候选模型和原生多图能力、许可回放/变化标注/事件高光金标、8GB/12GB+ 真机，以及 1～3 路延迟、吞吐、显存和 GPU 数据尚无实测证据。
 - O/V 共用语料、许可、脱敏、时间轴和金标格式已定义，但实际授权资产与双人标注尚待制作；事件、高光、相关性和质量阈值仍待选型后校准。
 - 真机代表组合和记录入口已编排，但 Windows 11/NVIDIA 8/12/16GB 机器、1080P/2K/4K × 五档缩放、音频设备、Overlay 点击穿透、系统电源事件、断网及英雄联盟同机负载均待执行；英雄联盟与主机完全断网的兼容执行方式尚未确认。
@@ -67,4 +68,4 @@ AIJARVISV2-93 当前为 `in_progress`：首次 Windows/CUDA 构建前检查确�
 
 ## 下一步注意事项
 
-当前只推进 AIJARVISV2-93：人工在 `codex/aijarvisv2-93` 分支启动手动 workflow，先取得 Windows/CUDA portable Artifact，再进入 RTX 5070 Ti 16GB 动态验收。验收完成前不得宣称 O-C01 正式可行，不得启动 AIJARVISV2-24。
+当前只推进 AIJARVISV2-93：先恢复与 `baseline-manifest.md` 一致的两份正式冻结 Markdown；随后人工触发 `AIJARVISV2-93 Windows PS5.1 no-GPU smoke`，通过后再决定 Reference Harness v2 的最小 Windows/CUDA rebuild 与 RTX 5070 Ti 16GB 动态验收。动态验收完成前不得宣称 O-C01 正式可行，不得启动 AIJARVISV2-24。

@@ -75,6 +75,7 @@ struct Summary {
   std::size_t aggregated_payload_count{};
   std::size_t complete_payload_count{};
   std::size_t incomplete_payload_count{};
+  std::size_t invalid_payload_count{};
   std::size_t valid_three_batch_count{};
   std::size_t runtime_failure_count{};
 };

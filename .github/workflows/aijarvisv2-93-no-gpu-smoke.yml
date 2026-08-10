@@ -1,0 +1,41 @@
+name: AIJARVISV2-93 Windows PS5.1 no-GPU smoke
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  powershell-5-no-gpu:
+    runs-on: windows-2022
+    timeout-minutes: 15
+    steps:
+      - name: Check out source
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
+      - name: Build lightweight mock-capable harness
+        shell: powershell
+        run: |
+          cmake -S tools/o-reference-harness-v2 -B build/o-reference-no-gpu `
+            -G "Visual Studio 17 2022" -A x64 `
+            -DO_REFERENCE_HARNESS_WITH_LOCKED_RUNTIME=OFF -DBUILD_TESTING=OFF
+          if ($LASTEXITCODE -ne 0) { throw "no-GPU configure failed" }
+          cmake --build build/o-reference-no-gpu --config Release --target o-reference-harness-v2 --parallel
+          if ($LASTEXITCODE -ne 0) { throw "no-GPU build failed" }
+          $packageRoot = Join-Path $env:RUNNER_TEMP "Task93 Mock Package 中文 path"
+          cmake --install build/o-reference-no-gpu --config Release --prefix $packageRoot
+          if ($LASTEXITCODE -ne 0) { throw "no-GPU install failed" }
+          "TASK93_MOCK_PACKAGE=$packageRoot" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: Run real runner with mock result sources in Windows PowerShell 5.1
+        shell: powershell
+        run: |
+          $version = $PSVersionTable.PSVersion
+          if ($version.Major -ne 5 -or $version.Minor -ne 1) {
+            throw "Expected Windows PowerShell 5.1, got $version"
+          }
+          powershell.exe -NoProfile -ExecutionPolicy Bypass -File `
+            tools/o-reference-harness-v2/tests/windows-no-gpu-smoke.ps1 `
+            -PackageRoot $env:TASK93_MOCK_PACKAGE
+          if ($LASTEXITCODE -ne 0) { throw "PowerShell 5.1 no-GPU smoke failed" }

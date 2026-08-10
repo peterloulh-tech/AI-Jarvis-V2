@@ -137,6 +137,50 @@ void test_generation_change_timeout_failure_and_order_detection() {
     detected = true;
   }
   require(detected, "out-of-order fragment sequence must be rejected");
+  require(order.report().raw_results.size() == 1 &&
+              order.report().summary.input_processed == 1,
+          "rejected results must not contaminate raw evidence or summary counters");
+
+  Aggregator duplicate(v2_options());
+  duplicate.consume(speak(10, "a"));
+  detected = false;
+  try {
+    duplicate.consume(speak(10, "b"));
+  } catch (const std::invalid_argument&) {
+    detected = true;
+  }
+  require(detected && duplicate.report().raw_results.size() == 1,
+          "duplicate results must be rejected without contaminating evidence");
+}
+
+void test_payload_completion_runtime_continuation_and_invalid_summary() {
+  const std::string payload =
+      R"({"batches":[{"style_id":"style-1","items":["中文一"]},{"style_id":"style-2","items":["中文二"]},{"style_id":"style-3","items":["中文三"]}]})";
+  Aggregator continuation(v2_options());
+  continuation.consume(speak(1, payload.substr(0, 40)));
+  continuation.consume(speak(2, payload.substr(40)));
+  continuation.consume(speak(3, ""));
+  continuation.consume(listen(4));
+  require(continuation.report().aggregations.size() == 2,
+          "runtime results after payload completion must remain observable");
+  require(continuation.report().aggregations[0].payload_parse_state ==
+              PayloadParseState::payload_complete &&
+              continuation.report().aggregations[1].payload_parse_state ==
+                  PayloadParseState::payload_incomplete,
+          "a later empty SPEAK must not be merged into the completed payload");
+  require(continuation.report().summary.speak_count == 3 &&
+              continuation.report().summary.listen_count == 1,
+          "continuation decisions must be counted without hiding the empty fragment");
+
+  Aggregator invalid(v2_options());
+  invalid.consume(speak(1, R"({"batches":]})"));
+  invalid.boundary(RuntimeBoundaryReason::session_end_drain);
+  require(invalid.report().summary.invalid_payload_count == 1 &&
+              invalid.report().summary.incomplete_payload_count == 0,
+          "invalid JSON must not be misreported as incomplete JSON");
+  invalid.boundary(RuntimeBoundaryReason::session_end_drain);
+  require(invalid.report().aggregations.size() == 1,
+          "repeated drain/cleanup boundaries must be idempotent");
 }
 
 void test_profiles_are_explicitly_separated(const fs::path& repository_root) {
@@ -183,7 +227,9 @@ int main(int argc, char** argv) {
         {"legacy fragments", test_legacy_fragments_remain_ordered_incomplete_prefix},
         {"complete payload", test_complete_three_batch_payload_passes_contract_without_runtime_eos},
         {"official profile", test_official_profile_does_not_require_v2_json},
-        {"boundaries", test_generation_change_timeout_failure_and_order_detection}};
+        {"boundaries", test_generation_change_timeout_failure_and_order_detection},
+        {"continuation and invalid summary",
+         test_payload_completion_runtime_continuation_and_invalid_summary}};
     for (const auto& [name, test] : tests) {
       test();
       std::cout << "PASS " << name << '\n';

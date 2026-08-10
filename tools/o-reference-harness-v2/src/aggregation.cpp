@@ -116,12 +116,12 @@ Aggregator::Aggregator(AggregationOptions options) : options_(std::move(options)
 }
 
 void Aggregator::consume(const RawRuntimeResult& result) {
-  report_.raw_results.push_back(result);
-  ++report_.summary.input_processed;
   if (last_generation_ && *last_generation_ == result.generation_id &&
       last_user_seq_ && result.user_seq <= *last_user_seq_) {
-    throw std::invalid_argument("raw runtime results are out of user_seq order");
+    throw std::invalid_argument("duplicate or out-of-order raw runtime result");
   }
+  report_.raw_results.push_back(result);
+  ++report_.summary.input_processed;
   if (last_generation_ && *last_generation_ != result.generation_id) {
     finalize(RuntimeBoundaryReason::generation_change);
     last_user_seq_.reset();
@@ -214,8 +214,11 @@ void Aggregator::finalize(std::optional<RuntimeBoundaryReason> reason) {
     if (current_->payload_schema_state == PayloadSchemaState::schema_valid) {
       ++report_.summary.valid_three_batch_count;
     }
-  } else if (options_.validate_v2_contract) {
+  } else if (current_->payload_parse_state == PayloadParseState::payload_incomplete &&
+             options_.validate_v2_contract) {
     ++report_.summary.incomplete_payload_count;
+  } else if (current_->payload_parse_state == PayloadParseState::payload_invalid) {
+    ++report_.summary.invalid_payload_count;
   }
   report_.aggregations.push_back(std::move(*current_));
   current_.reset();

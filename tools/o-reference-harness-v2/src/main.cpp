@@ -118,6 +118,7 @@ json summary_json(const Summary& value) {
               {"aggregated_payload_count", value.aggregated_payload_count},
               {"complete_payload_count", value.complete_payload_count},
               {"incomplete_payload_count", value.incomplete_payload_count},
+              {"invalid_payload_count", value.invalid_payload_count},
               {"valid_three_batch_count", value.valid_three_batch_count},
               {"runtime_failure_count", value.runtime_failure_count}};
 }
@@ -228,23 +229,45 @@ int dry_run(const std::map<std::string, std::string>& options) {
 
 int replay_results(const std::map<std::string, std::string>& options) {
   const auto profile = load_profile(required(options, "profile"));
+  const auto final_boundary = parse_boundary(required(options, "boundary"));
+  const fs::path input = fs::absolute(required(options, "input"));
   const fs::path output = required(options, "output-dir");
   prepare_output_directory(output);
+  write_json(output / "run-metadata.json",
+             metadata(profile, required(options, "harness-commit"), "replay-results"));
   Aggregator aggregator(AggregationOptions{.validate_v2_contract = profile.validate_v2_contract,
                                            .style_ids = profile.style_ids});
-  std::ifstream stream(required(options, "input"), std::ios::binary);
+  std::ifstream stream(input, std::ios::binary);
   if (!stream) throw std::runtime_error("cannot open replay input");
   std::string line;
   std::size_t line_number = 0;
+  std::optional<std::string> primary_error;
   while (std::getline(stream, line)) {
     ++line_number;
-    if (!line.empty()) aggregator.consume(parse_raw_result(json::parse(line), line_number));
+    if (line.empty()) continue;
+    const auto value = json::parse(line, nullptr, false);
+    if (value.is_discarded()) {
+      primary_error = "line " + std::to_string(line_number) + ": malformed JSON";
+      break;
+    }
+    try {
+      aggregator.consume(parse_raw_result(value, line_number));
+    } catch (const std::invalid_argument& error) {
+      const std::string detail = error.what();
+      primary_error = "line " + std::to_string(line_number) + ": " +
+                      (detail.find("duplicate or out-of-order") != std::string::npos
+                           ? std::string("duplicate or out-of-order result")
+                           : std::string("invalid raw result: ") + detail);
+      break;
+    } catch (const std::exception& error) {
+      primary_error = "line " + std::to_string(line_number) +
+                      ": invalid raw result: " + error.what();
+      break;
+    }
   }
-  const auto final_boundary = parse_boundary(required(options, "boundary"));
-  aggregator.boundary(final_boundary);
+  const auto evidence_boundary = primary_error ? RuntimeBoundaryReason::failure : final_boundary;
+  aggregator.boundary(evidence_boundary);
   const auto& report = aggregator.report();
-  write_json(output / "run-metadata.json",
-             metadata(profile, required(options, "harness-commit"), "replay-results"));
   std::vector<json> raw;
   for (const auto& result : report.raw_results) raw.push_back(raw_result_json(result));
   write_jsonl(output / "raw-results.jsonl", raw);
@@ -253,11 +276,30 @@ int replay_results(const std::map<std::string, std::string>& options) {
     aggregations.push_back(aggregation_json(aggregate));
   }
   write_json(output / "aggregations.json", aggregations);
-  write_jsonl(output / "runtime-boundaries.jsonl",
-              boundary_ledger(report.raw_results, final_boundary, false));
+  auto boundaries = boundary_ledger(report.raw_results, evidence_boundary, false);
+  if (primary_error && !boundaries.empty()) {
+    boundaries.back()["source"] = "mock_result_source";
+  }
+  write_jsonl(output / "runtime-boundaries.jsonl", boundaries);
   auto summary = summary_json(report.summary);
-  summary["dynamic_runtime_status"] = "DYNAMIC-ONLY";
+  summary["dynamic_runtime_status"] = "MOCK-RESULT-SOURCE";
+  summary["outcome"] = primary_error ? "failed" : "passed";
+  summary["error_count"] = primary_error ? 1 : 0;
+  summary["primary_error"] = primary_error ? json(*primary_error) : json(nullptr);
   write_json(output / "summary.json", summary);
+  write_json(output / "evidence.json",
+             json{{"schema_version", 1},
+                  {"outcome", primary_error ? "failed" : "passed"},
+                  {"execution_mode", "mock_result_source"},
+                  {"result_source", input.string()},
+                  {"requested_boundary", to_string(final_boundary)},
+                  {"final_boundary", to_string(evidence_boundary)},
+                  {"primary_error", primary_error ? json(*primary_error) : json(nullptr)},
+                  {"cleanup_error", nullptr}});
+  if (primary_error) {
+    std::cerr << "Mock result source failed: " << *primary_error << '\n';
+    return 4;
+  }
   return 0;
 }
 

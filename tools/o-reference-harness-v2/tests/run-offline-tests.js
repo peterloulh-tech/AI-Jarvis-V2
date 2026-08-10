@@ -109,8 +109,8 @@ for (const profile of profiles) {
 process.stdout.write(`${JSON.stringify({
   status: "passed",
   scope: "fixture/unit/manifest/hash/dry-run/static locked C API syntax",
-  core_tests: 6,
-  cli_tests: 4,
+  core_tests: 7,
+  cli_tests: 7,
   fixture_tests: 3,
   runner_config_tests: 1,
   concurrent_correlation_tests: 1,

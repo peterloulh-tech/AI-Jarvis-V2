@@ -111,6 +111,7 @@ $portableManifest = [ordered]@{
     source_commit = $SourceCommit
     runtime_commit = "09f5c3f1b484759f17b06fc63574f749c89c8761"
     demo_commit = "d0a002093615b7f1d4d0f87a03fc01cb39bef3f6"
+    transport = "/backend"
     cuda_toolkit_version = "12.8.1"
     models_included = 0
     o_in_07_media_included = 0

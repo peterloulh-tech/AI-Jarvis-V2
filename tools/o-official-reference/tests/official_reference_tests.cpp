@@ -1,6 +1,7 @@
 #include "official_reference_core.hpp"
 
 #include <fstream>
+#include <filesystem>
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
@@ -34,22 +35,27 @@ void require_rejected(F operation, const std::string &message) {
 
 int main(int argc, char **argv) {
   try {
-    require(argc == 5, "expected fixture, config, lock, and O-IN-07 manifest paths");
+    require(argc == 4, "expected config, lock, and O-IN-07 manifest paths");
 
-    aijarvis::official_o::SseCollector collector;
-    const std::string sse = read_file(argv[1]);
-    const auto split = sse.size() / 2;
-    collector.feed(sse.substr(0, split), 17);
-    collector.feed(sse.substr(split), 29);
-    collector.finish(31);
+    aijarvis::official_o::BackendEventCollector collector;
+    collector.feed(R"({"type":"session.created","session_id":"official-session","mode":"full_duplex"})", 3);
+    collector.feed(R"({"type":"response.output.delta","kind":"text","session_id":"official-session","response_id":"r1","text":"第一批"})", 17);
+    collector.feed(R"({"type":"response.output.delta","kind":"text","session_id":"official-session","response_id":"r1","text":"第二批"})", 29);
+    collector.feed(R"({"type":"response.done","session_id":"official-session","response_id":"r1","text":"第一批第二批","reason":"turn_end"})", 31);
     const auto result = collector.result();
-    require(result.content == "第一批第二批", "SSE content order changed");
-    require(result.saw_listen && result.saw_stop && result.saw_done,
-            "SSE lifecycle markers are incomplete");
+    require(result.session_id == "official-session", "backend session id changed");
+    require(result.content == "第一批第二批", "backend text delta order changed");
+    require(result.saw_done, "backend response.done boundary is missing");
     require(result.first_fragment_latency_ms == 17,
             "first-fragment latency must use the first content event");
-    require(result.completion_latency_ms == 29,
-            "completion latency must end at official DONE");
+    require(result.completion_latency_ms == 31,
+            "completion latency must end at official response.done");
+
+    aijarvis::official_o::BackendEventCollector listen_collector;
+    listen_collector.feed(R"({"type":"session.created","session_id":"listen-session","mode":"full_duplex"})", 1);
+    listen_collector.feed(R"({"type":"response.output.delta","kind":"listen","session_id":"listen-session","response_id":"r1"})", 9);
+    require(listen_collector.result().saw_listen,
+            "backend LISTEN boundary is missing");
 
     const auto valid_contract = R"({"batches":[{"style_id":"style-1","items":["稳住，这波能翻。"]},{"style_id":"style-2","items":["漂亮！继续压节奏。"]},{"style_id":"style-3","items":["这波操作真的细。"]}]})";
     const auto parsed = aijarvis::official_o::validate_contract(
@@ -67,7 +73,7 @@ int main(int argc, char **argv) {
           {"style-1", "style-2", "style-3"}, 225);
     }, "non-Chinese item was accepted");
 
-    const auto config = aijarvis::official_o::parse_and_validate_config(read_file(argv[2]));
+    const auto config = aijarvis::official_o::parse_and_validate_config(read_file(argv[1]));
     require(config.at("budgets") == nlohmann::json::array({225, 350, 500}),
             "budget entry changed");
     require(config.at("timeouts_seconds") == nlohmann::json::array({12, 16, 20}),
@@ -77,43 +83,44 @@ int main(int argc, char **argv) {
     auto prompt_template = config.at("contract_prompt_template").get<std::string>();
     require(prompt_template.find("{{MAX_CHINESE_CHARS}}") != std::string::npos,
             "contract prompt must carry the selected character budget");
-    const auto init_request = aijarvis::official_o::build_init_request(
-        "C:/external/model", "C:/evidence/runtime-output",
-        prompt_template.replace(prompt_template.find("{{MAX_CHINESE_CHARS}}"),
-                                std::string("{{MAX_CHINESE_CHARS}}").size(), "350"));
-    require(init_request.at("use_tts") == false && init_request.at("duplex_mode") == true,
-            "official init must keep duplex enabled and TTS disabled");
-    const auto wrapped_prompt = init_request.at("voice_clone_prompt").get<std::string>();
-    const std::string prompt_prefix = "<|im_start|>system\n";
-    const std::string prompt_suffix = "\n<|audio_start|>";
-    require(wrapped_prompt.rfind(prompt_prefix, 0) == 0 &&
-                wrapped_prompt.size() >= prompt_suffix.size() &&
-                wrapped_prompt.compare(wrapped_prompt.size() - prompt_suffix.size(),
-                                       prompt_suffix.size(), prompt_suffix) == 0,
-            "Comni voice prompt wrapper changed");
-    require(init_request.at("voice_clone_prompt").get<std::string>().find("350") !=
-                std::string::npos &&
-                init_request.at("voice_clone_prompt").get<std::string>().find(
-                    "style-1") != std::string::npos,
-            "V2 contract prompt was not injected into official init");
-    require(init_request.at("assistant_prompt") == "<|audio_end|><|im_end|>\n",
-            "Comni duplex assistant prompt changed");
-    const auto init_prefill = aijarvis::official_o::build_init_prefill_request();
-    require(init_prefill == nlohmann::json({
-                {"audio_path_prefix", ""},
-                {"img_path_prefix", ""},
-                {"cnt", 0},
-            }),
-            "current llama-omni-server requires one explicit index=0 system prefill");
+    prompt_template.replace(prompt_template.find("{{MAX_CHINESE_CHARS}}"),
+                            std::string("{{MAX_CHINESE_CHARS}}").size(), "350");
+    const auto init_request = aijarvis::official_o::build_session_init_request(prompt_template);
+    require(init_request.at("type") == "session.init" &&
+                init_request.at("payload").at("mode") == "full_duplex" &&
+                init_request.at("payload").at("use_tts") == false,
+            "official backend init must keep full duplex enabled and TTS disabled");
+    const auto backend_prompt = init_request.at("payload").at("system_prompt").get<std::string>();
+    require(backend_prompt.rfind("<|audio_end|>", 0) == 0 &&
+                backend_prompt.find(prompt_template) != std::string::npos &&
+                backend_prompt.size() >= std::string("<|im_end|>\n").size() &&
+                backend_prompt.compare(backend_prompt.size() - std::string("<|im_end|>\n").size(),
+                                       std::string("<|im_end|>\n").size(), "<|im_end|>\n") == 0,
+            "V2 contract prompt was not aligned to the official duplex suffix slot");
 
-    aijarvis::official_o::validate_upstream_lock(read_file(argv[3]));
-    const auto plan = aijarvis::official_o::build_dry_run_plan(read_file(argv[4]));
+    aijarvis::official_o::validate_upstream_lock(read_file(argv[2]));
+    const auto plan = aijarvis::official_o::build_dry_run_plan(read_file(argv[3]));
     require(plan.at("input_id") == "O-IN-07", "dry-run input changed");
     require(plan.at("cadence") == "official-1hz", "official cadence changed");
     require(plan.at("steps").size() == 33, "O-IN-07 must have 33 one-second steps");
     require(plan.at("steps").front().at("cnt") == 1 &&
                 plan.at("steps").back().at("cnt") == 33,
             "official prefill counters must run from 1 through 33");
+
+    const auto manifest_path = std::filesystem::path(argv[3]);
+    const auto fixture_root = manifest_path.parent_path();
+    const auto manifest = nlohmann::json::parse(read_file(argv[3]));
+    const auto &first_chunk = manifest.at("chunks").front();
+    const auto input_request = aijarvis::official_o::build_input_append_request(
+        (fixture_root / first_chunk.at("audio").get<std::string>()).string(),
+        (fixture_root / first_chunk.at("image").get<std::string>()).string());
+    require(input_request.at("type") == "input.append",
+            "official backend input type changed");
+    require(input_request.at("input").at("audio_base64").get<std::string>().size() > 80000,
+            "PCM16 WAV was not converted to base64 float32 PCM");
+    require(input_request.at("input").at("video_frames").size() == 1 &&
+                input_request.at("input").at("video_frames").front().get<std::string>().size() > 1000,
+            "JPEG frame was not encoded for official input.append");
 
     std::cout << "official reference tests: PASS\n";
     return 0;

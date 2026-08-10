@@ -1,6 +1,7 @@
 {
   "schema_version": 1,
   "artifact_name": "AIJARVISV2-93-o-official-reference-windows-x64-cuda",
+  "transport": "/backend",
   "models_included": false,
   "o_in_07_media_included": false,
   "required_files": [

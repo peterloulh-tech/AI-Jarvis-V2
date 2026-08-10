@@ -1,5 +1,6 @@
 {
   "schema_version": 1,
+  "transport": "/backend",
   "cadence": "official-1hz",
   "budget_profiles": {
     "short": { "max_chinese_chars": 225, "hard_timeout_seconds": 12 },
@@ -17,9 +18,7 @@
     "shutdown_timeout_seconds": 10
   },
   "runtime": {
-    "media_type": 2,
     "use_tts": false,
-    "duplex_mode": true,
     "n_gpu_layers": 99,
     "ctx_size": 8192
   }

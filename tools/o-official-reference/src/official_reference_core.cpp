@@ -2,8 +2,14 @@
 
 #include <algorithm>
 #include <array>
+#include <cstring>
+#include <fstream>
+#include <iterator>
 #include <set>
+#include <sstream>
 #include <stdexcept>
+
+#include "common/base64.hpp"
 
 namespace aijarvis::official_o {
 namespace {
@@ -62,60 +68,113 @@ bool is_sha256(const std::string &value) {
   });
 }
 
+std::string read_binary_file(const std::string &path) {
+  std::ifstream input(path, std::ios::binary);
+  if (!input) throw std::runtime_error("cannot read " + path);
+  return {std::istreambuf_iterator<char>(input), std::istreambuf_iterator<char>()};
+}
+
+std::uint16_t read_le16(const std::string &bytes, std::size_t offset) {
+  require(offset + 2 <= bytes.size(), "truncated WAV uint16");
+  return static_cast<std::uint16_t>(static_cast<unsigned char>(bytes[offset])) |
+         static_cast<std::uint16_t>(static_cast<unsigned char>(bytes[offset + 1])) << 8;
+}
+
+std::uint32_t read_le32(const std::string &bytes, std::size_t offset) {
+  require(offset + 4 <= bytes.size(), "truncated WAV uint32");
+  return static_cast<std::uint32_t>(static_cast<unsigned char>(bytes[offset])) |
+         static_cast<std::uint32_t>(static_cast<unsigned char>(bytes[offset + 1])) << 8 |
+         static_cast<std::uint32_t>(static_cast<unsigned char>(bytes[offset + 2])) << 16 |
+         static_cast<std::uint32_t>(static_cast<unsigned char>(bytes[offset + 3])) << 24;
+}
+
+std::string wav_pcm16_to_float32_bytes(const std::string &wav) {
+  require(wav.size() >= 12 && wav.compare(0, 4, "RIFF") == 0 &&
+              wav.compare(8, 4, "WAVE") == 0,
+          "audio input must be a RIFF/WAVE file");
+
+  bool saw_format = false;
+  std::size_t data_offset = 0;
+  std::size_t data_size = 0;
+  for (std::size_t offset = 12; offset + 8 <= wav.size();) {
+    const auto chunk_id = wav.substr(offset, 4);
+    const auto chunk_size = static_cast<std::size_t>(read_le32(wav, offset + 4));
+    const auto chunk_data = offset + 8;
+    require(chunk_data + chunk_size <= wav.size(), "truncated WAV chunk");
+    if (chunk_id == "fmt ") {
+      require(chunk_size >= 16 && read_le16(wav, chunk_data) == 1,
+              "audio input must use integer PCM");
+      require(read_le16(wav, chunk_data + 2) == 1,
+              "audio input must be mono");
+      require(read_le32(wav, chunk_data + 4) == 16000,
+              "audio input must be 16 kHz");
+      require(read_le16(wav, chunk_data + 14) == 16,
+              "audio input must be 16-bit PCM");
+      saw_format = true;
+    } else if (chunk_id == "data") {
+      data_offset = chunk_data;
+      data_size = chunk_size;
+    }
+    offset = chunk_data + chunk_size + (chunk_size & 1U);
+  }
+  require(saw_format && data_offset != 0 && data_size != 0 && data_size % 2 == 0,
+          "WAV format or data chunk is missing");
+
+  std::string pcm;
+  pcm.resize((data_size / 2) * sizeof(float));
+  for (std::size_t index = 0; index < data_size / 2; ++index) {
+    const auto raw = read_le16(wav, data_offset + index * 2);
+    const auto sample = static_cast<std::int16_t>(raw);
+    const float normalized = static_cast<float>(sample) / 32768.0F;
+    std::memcpy(pcm.data() + index * sizeof(float), &normalized, sizeof(float));
+  }
+  return pcm;
+}
+
 }  // namespace
 
-void SseCollector::feed(std::string_view bytes, std::int64_t elapsed_ms) {
-  result_.raw_sse.append(bytes.data(), bytes.size());
-  pending_.append(bytes.data(), bytes.size());
-  for (;;) {
-    const auto newline = pending_.find('\n');
-    if (newline == std::string::npos) break;
-    auto line = pending_.substr(0, newline);
-    pending_.erase(0, newline + 1);
-    if (!line.empty() && line.back() == '\r') line.pop_back();
-    consume_line(std::move(line), elapsed_ms);
-  }
-}
-
-void SseCollector::finish(std::int64_t elapsed_ms) {
-  if (!pending_.empty()) {
-    auto line = std::move(pending_);
-    pending_.clear();
-    if (!line.empty() && line.back() == '\r') line.pop_back();
-    consume_line(std::move(line), elapsed_ms);
-  }
-  require(result_.saw_done, "official SSE ended without [DONE]");
-  if (result_.completion_latency_ms < 0) result_.completion_latency_ms = elapsed_ms;
-}
-
-const SseResult &SseCollector::result() const { return result_; }
-
-void SseCollector::consume_line(std::string line, std::int64_t elapsed_ms) {
-  if (line.empty() || line.front() == ':') return;
-  if (line.rfind("data:", 0) != 0) return;
-  auto data = line.substr(5);
-  if (!data.empty() && data.front() == ' ') data.erase(0, 1);
-  if (data == "[DONE]") {
-    result_.saw_done = true;
-    result_.completion_latency_ms = elapsed_ms;
+void BackendEventCollector::feed(std::string_view event_json, std::int64_t elapsed_ms) {
+  const auto event = nlohmann::json::parse(event_json);
+  require(event.is_object() && event.contains("type") && event.at("type").is_string(),
+          "official backend event must contain a string type");
+  const auto type = event.at("type").get<std::string>();
+  if (type == "session.created") {
+    require(event.contains("session_id") && event.at("session_id").is_string(),
+            "session.created must contain session_id");
+    result_.session_id = event.at("session_id").get<std::string>();
     return;
   }
-
-  const auto event = nlohmann::json::parse(data);
-  require(event.is_object(), "official SSE data must be a JSON object");
-  if (event.contains("content")) {
-    require(event.at("content").is_string(), "SSE content must be a string");
-    const auto fragment = event.at("content").get<std::string>();
-    if (!fragment.empty()) {
-      if (result_.first_fragment_latency_ms < 0) {
-        result_.first_fragment_latency_ms = elapsed_ms;
-      }
-      result_.content += fragment;
+  if (type == "response.output.delta") {
+    const auto kind = event.value("kind", "");
+    if (kind == "listen") {
+      result_.saw_listen = true;
+      result_.completion_latency_ms = elapsed_ms;
+      return;
     }
+    if (kind == "text") {
+      require(event.contains("text") && event.at("text").is_string(),
+              "text delta must contain text");
+      const auto fragment = event.at("text").get<std::string>();
+      if (!fragment.empty()) {
+        if (result_.first_fragment_latency_ms < 0) {
+          result_.first_fragment_latency_ms = elapsed_ms;
+        }
+        result_.content += fragment;
+      }
+    }
+    return;
   }
-  if (event.value("is_listen", false)) result_.saw_listen = true;
-  if (event.value("stop", false)) result_.saw_stop = true;
+  if (type == "response.done") {
+    if (event.contains("text") && event.at("text").is_string()) {
+      const auto complete = event.at("text").get<std::string>();
+      if (!complete.empty()) result_.content = complete;
+    }
+    result_.saw_done = true;
+    result_.completion_latency_ms = elapsed_ms;
+  }
 }
+
+const BackendResult &BackendEventCollector::result() const { return result_; }
 
 nlohmann::json validate_contract(const std::string &text,
                                  const std::vector<std::string> &style_ids,
@@ -156,6 +215,8 @@ nlohmann::json validate_contract(const std::string &text,
 nlohmann::json parse_and_validate_config(const std::string &text) {
   const auto config = nlohmann::json::parse(text);
   require(config.value("schema_version", 0) == 1, "unsupported official config schema");
+  require(config.value("transport", "") == "/backend",
+          "official transport must use /backend");
   require(config.value("cadence", "") == "official-1hz", "official cadence must be 1Hz");
   require(config.at("budgets") == nlohmann::json::array({225, 350, 500}),
           "budgets must remain 225/350/500");
@@ -166,39 +227,42 @@ nlohmann::json parse_and_validate_config(const std::string &text) {
           "style_ids must contain exactly the three frozen styles");
   require(config.at("runtime").value("use_tts", true) == false,
           "TTS must remain disabled");
-  require(config.at("runtime").value("duplex_mode", false),
-          "duplex mode must remain enabled");
   const auto prompt = config.value("contract_prompt_template", "");
   require(!prompt.empty() && prompt.find("{{MAX_CHINESE_CHARS}}") != std::string::npos,
           "contract prompt template must include the character-budget placeholder");
   return config;
 }
 
-nlohmann::json build_init_request(const std::string &model_dir,
-                                  const std::string &output_dir,
-                                  const std::string &contract_prompt) {
-  require(!model_dir.empty(), "official init requires model_dir");
-  require(!output_dir.empty(), "official init requires output_dir");
-  require(!contract_prompt.empty(), "official init requires the V2 contract prompt");
+nlohmann::json build_session_init_request(const std::string &contract_prompt) {
+  require(!contract_prompt.empty(), "official session.init requires the V2 contract prompt");
   require(contract_prompt.find("{{MAX_CHINESE_CHARS}}") == std::string::npos,
-          "official init contract prompt has an unresolved budget placeholder");
+          "official session.init contract prompt has an unresolved budget placeholder");
   return {
-      {"media_type", 2},
-      {"use_tts", false},
-      {"duplex_mode", true},
-      {"model_dir", model_dir},
-      {"output_dir", output_dir},
-      {"voice_clone_prompt", "<|im_start|>system\n" + contract_prompt +
-                                 "\n<|audio_start|>"},
-      {"assistant_prompt", "<|audio_end|><|im_end|>\n"},
+      {"type", "session.init"},
+      {"payload", {
+          {"mode", "full_duplex"},
+          {"use_tts", false},
+          {"system_prompt", "<|audio_end|>" + contract_prompt + "<|im_end|>\n"},
+      }},
   };
 }
 
-nlohmann::json build_init_prefill_request() {
+nlohmann::json build_input_append_request(const std::string &audio_path,
+                                          const std::string &image_path) {
+  require(!audio_path.empty() && !image_path.empty(),
+          "official input.append requires audio and image paths");
+  const auto float_pcm = wav_pcm16_to_float32_bytes(read_binary_file(audio_path));
+  const auto jpeg = read_binary_file(image_path);
+  require(jpeg.size() >= 2 && static_cast<unsigned char>(jpeg[0]) == 0xFF &&
+              static_cast<unsigned char>(jpeg[1]) == 0xD8,
+          "image input must be JPEG");
   return {
-      {"audio_path_prefix", ""},
-      {"img_path_prefix", ""},
-      {"cnt", 0},
+      {"type", "input.append"},
+      {"input", {
+          {"audio_base64", base64::encode(float_pcm)},
+          {"video_frames", nlohmann::json::array({base64::encode(jpeg)})},
+          {"max_slice_nums", -1},
+      }},
   };
 }
 

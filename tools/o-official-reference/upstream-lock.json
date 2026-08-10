@@ -10,7 +10,7 @@
       "license": "MIT",
       "cmake_target": "llama-omni-server",
       "binary": "llama-omni-server",
-      "usage": ["llama-omni-server omni HTTP endpoints", "SSE completion", "official context reinitialization", "runtime/session/streaming"]
+      "usage": ["llama-omni-server /backend", "SessionManager", "backend protocol events", "session close", "omni_prepare_for_reuse", "runtime/session/streaming"]
     },
     {
       "name": "MiniCPM-o-Demo-Comni",
@@ -21,7 +21,7 @@
       "redistributed": false,
       "runtime_refspec_default": "master",
       "runtime_checkout_default": "origin/master",
-      "usage": ["current C++ backend compatibility", "llama-omni-server target", "CUDA/CMake baseline", "model layout", "backend session lifecycle"]
+      "usage": ["current C++ backend compatibility", "llama-omni-server target", "CUDA/CMake baseline", "model layout", "backend client/session lifecycle", "entrypoint child-process lifecycle", "tests"]
     }
   ],
   "model": {

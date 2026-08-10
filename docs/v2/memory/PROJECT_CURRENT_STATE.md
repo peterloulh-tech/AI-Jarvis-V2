@@ -24,7 +24,7 @@ AIJARVISV2-23 已冻结为 `Legacy Diagnostic PoC / 2026-08-09 Real-machine Base
 
 AIJARVISV2-92 已完成独立 Reference Harness v2、两个分离 profile、manifest 驱动的 33×1 秒/11×3 秒固定输入、streaming aggregation 与 completion 分层、三批 validator、离线 fixture/unit/static/dry-run、薄 Locked C API shim，以及既有 Windows/CUDA 构建链的最小接入准备，当前为 `done`，见[任务卡](tasks/AIJARVISV2-92.md)。
 
-AIJARVISV2-93 当前为 `in_progress`，活动架构已一次性切换到当前 Official-First：锁定 `llama.cpp-omni master@09f5c3f1...` 的官方 `llama-omni-server`，与 `MiniCPM-o-Demo main@d0a00209...` 当前 C++ backend 默认的 `master/origin/master` 关系一致；V2 仅保留 HTTP/SSE、O-IN-07、三批契约、prompt 注入与证据薄层，见 [`tools/o-official-reference`](../../../tools/o-official-reference/)。活动 no-TTS profile 的 LLM/audio/vision 三文件布局与现有模型兼容，模型与哈希不变且继续外置；复用 Task23 的 Windows 2022、VS2022、CUDA 12.8.1、DLL/license/portable/artifact 基础。旧 `tools/o-reference-harness-v2` 保持 `LEGACY / RETIRED-PENDING-NEW-ROUTE-VALIDATION`，不再被活动 workflow 或新实现调用；Task24 保持 `backlog`。
+AIJARVISV2-93 当前为 `in_progress`，活动架构锁定 `llama.cpp-omni master@09f5c3f1...` 的官方 `llama-omni-server /backend`，与 `MiniCPM-o-Demo main@d0a00209...` 当前 C++ backend 默认的 `master/origin/master` 关系一致；直接复用官方 SessionManager、协议事件、HTTP session close 与 `omni_prepare_for_reuse`。V2 仅保留 O-IN-07 WAV/JPEG payload 转换、1Hz 输入、三批契约、prompt 注入与证据薄层，见 [`tools/o-official-reference`](../../../tools/o-official-reference/)。正式需求首版禁用 TTS；LLM/audio/vision 三文件与当前官方 no-TTS 路径兼容，模型与哈希不变且继续外置；构建复用当前官方 Windows/CUDA workflow、Comni CMake 参数与 Task23 portable 补充。旧 `tools/o-reference-harness-v2` 保持 `LEGACY / RETIRED-PENDING-NEW-ROUTE-VALIDATION`，不被活动 workflow 或新实现调用；Task24 保持 `backlog`。
 
 三层 Reuse-First 与 Official-First Runtime Rule 已启用：模型/runtime/session/streaming 优先直接使用锁定官方实现，AI Jarvis 只实现正式需求 Delta，不再为参考或测试建立独立 Runtime/Harness。
 
@@ -55,7 +55,7 @@ AIJARVISV2-93 当前为 `in_progress`，活动架构已一次性切换到当前 
 
 ## 开放风险与待实测项
 
-- O-C01 仍是唯一 PoC 准入组合；Official-First runtime baseline 已改变，`llama-omni-server` Windows/CUDA binary 必须重建。当前仅有 Mac/no-GPU 的 lock、SSE fixture、三批 validator、O-IN-07 dry-run、workflow/package/static 证据；官方 Runtime/Session/Streaming、startup LISTEN、自主 LISTEN/SPEAK、延迟、显存、full reinit 与 cleanup 均为 `DYNAMIC_ONLY`，尚无 Windows/NVIDIA PASS。Qwen2.5-Omni 候补边界不变。
+- O-C01 仍是唯一 PoC 准入组合；Official-First runtime baseline 已改变，`llama-omni-server` Windows/CUDA binary 必须重建。当前仅有 Mac/no-GPU 的 lock、`/backend` 协议/payload unit、三批 validator、O-IN-07 dry-run、workflow/package/static 证据；官方 Runtime/Session、startup LISTEN、自主 LISTEN/SPEAK、延迟、显存、session reuse 与 process cleanup 均为 `DYNAMIC_ONLY`，尚无 Windows/NVIDIA PASS。Qwen2.5-Omni 候补边界不变。
 - 2026-08-09 已批准的 Online V1 需求已同步为当前正式基线（功能 `270e0b1f...c90`、非功能 `f65950be...7b5`）；Task93 已据此建立 Local O 能力矩阵。Task90/91 原有新 SHA 引用保持不变，未批量改写历史 Dashi 任务。
 - V 候选模型和原生多图能力、许可回放/变化标注/事件高光金标、8GB/12GB+ 真机，以及 1～3 路延迟、吞吐、显存和 GPU 数据尚无实测证据。
 - O/V 共用语料、许可、脱敏、时间轴和金标格式已定义，但实际授权资产与双人标注尚待制作；事件、高光、相关性和质量阈值仍待选型后校准。

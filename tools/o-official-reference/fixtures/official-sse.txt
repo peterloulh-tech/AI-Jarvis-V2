@@ -1,7 +1,0 @@
-data: {"content":"第一批","is_listen":false,"stop":false}
-
-data: {"content":"第二批","is_listen":false,"stop":true}
-
-data: {"is_listen":true,"stop":false}
-
-data: [DONE]

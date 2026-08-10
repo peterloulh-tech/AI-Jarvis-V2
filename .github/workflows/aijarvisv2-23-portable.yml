@@ -289,9 +289,9 @@ jobs:
         shell: pwsh
         run: |
           cmake -S build/task93-official-runtime-source -B build/task93-official-runtime `
-            -G "Visual Studio 17 2022" -A x64 -T "cuda=$env:CUDA_PATH" `
+            -G "Ninja Multi-Config" `
             -DGGML_CUDA=ON -DGGML_CUDA_NCCL=OFF -DBUILD_SHARED_LIBS=OFF `
-            -DGGML_NATIVE=OFF '-DCMAKE_CUDA_ARCHITECTURES=86;89;120' `
+            -DGGML_CUDA_CUB_3DOT2=ON -DGGML_NATIVE=OFF '-DCMAKE_CUDA_ARCHITECTURES=86;89;120' `
             -DLLAMA_BUILD_TESTS=OFF -DLLAMA_BUILD_EXAMPLES=OFF -DLLAMA_BUILD_SERVER=ON -DLLAMA_CURL=OFF
           if ($LASTEXITCODE -ne 0) { throw "official runtime configure failed" }
           cmake --build build/task93-official-runtime --config Release --target llama-omni-server --parallel
@@ -302,7 +302,7 @@ jobs:
         run: |
           $runtimeSource = Join-Path $env:GITHUB_WORKSPACE "build/task93-official-runtime-source"
           cmake -S tools/o-official-reference -B build/task93-official-adapter `
-            -G "Visual Studio 17 2022" -A x64 -DBUILD_TESTING=ON `
+            -G "Ninja Multi-Config" -DBUILD_TESTING=ON `
             "-DAIJARVIS_OFFICIAL_RUNTIME_SOURCE_DIR=$runtimeSource"
           if ($LASTEXITCODE -ne 0) { throw "thin adapter configure failed" }
           cmake --build build/task93-official-adapter --config Release --parallel
@@ -328,6 +328,7 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw "Official-First packaging failed" }
           $portable = Get-Content (Join-Path $packageRoot "portable-manifest.json") -Raw -Encoding UTF8 | ConvertFrom-Json
           if ($portable.runtime_commit -ne "09f5c3f1b484759f17b06fc63574f749c89c8761" -or
+              $portable.transport -ne "/backend" -or
               $portable.models_included -ne 0 -or $portable.o_in_07_media_included -ne 0) {
             throw "Official-First portable manifest failed"
           }

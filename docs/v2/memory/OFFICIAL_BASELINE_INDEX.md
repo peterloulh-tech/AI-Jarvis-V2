@@ -171,7 +171,7 @@ PyTorch 主路径：
 - [当前 C++ backend Dockerfile](https://github.com/OpenBMB/MiniCPM-o-Demo/blob/d0a002093615b7f1d4d0f87a03fc01cb39bef3f6/docker/Dockerfile.cpp-worker-backend)
 - [当前 Worker](https://github.com/OpenBMB/MiniCPM-o-Demo/blob/d0a002093615b7f1d4d0f87a03fc01cb39bef3f6/worker.py)
 
-当前 server 的 `/backend` session close 会停止推理并清理/复用官方 context；HTTP `omni_init` 会释放已有 context 后重新初始化。Task93 只直接复用这些官方生命周期，不另建 Session Manager。
+当前 server 的 `/backend` session close 会停止推理并通过 `omni_prepare_for_reuse` 清理/复用官方 context。Task93 活动路线只直接复用 `/backend` 的 SessionManager、协议事件和 close/reuse 生命周期，不另建 Session Manager；HTTP/SSE 仅作为上游现存接口记录，不进入活动链。
 
 ### 官方实现中的已知差异/限制
 
@@ -267,7 +267,7 @@ Locked V2 当前直接相关参数：模型三路径、`n_ctx/n_batch/n_ubatch/n
 
 ### 与官方 MiniCPM-o-Demo 的连接方式
 
-官方 Demo main 由 Worker 转发 runtime WebSocket 到 `llama-omni-server /backend`；Task93 的极薄 reference route 直接使用同一官方 binary 保留的 HTTP prefill/decode SSE，并用官方 `omni_init` context 替换完成 clean reinit，不复制 Demo gateway/worker/session 层。
+官方 Demo main 由 Worker 转发 runtime WebSocket 到 `llama-omni-server /backend`；Task93 的极薄 reference route 直接使用同一 `/backend` 协议与 HTTP session close，复用官方 SessionManager 和 `omni_prepare_for_reuse`，不复制 Demo gateway/worker/session 层。V2 只转换固定 WAV/JPEG 为 `input.append` 所需 float32 PCM/JPEG base64，并收集官方事件用于三批契约和证据。
 
 ### 官方限制与当前未确认项
 

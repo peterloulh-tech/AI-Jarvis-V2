@@ -18,11 +18,11 @@ const runner = read("tools/o-official-reference/run-o-official-reference.ps1");
 for (const required of [
   "llama-omni-server.exe",
   "health",
-  "init",
-  "step",
-  "full_reinit",
+  " run `",
+  'transport = "/backend"',
+  "backend-events.json",
+  "official_session_reuse",
   "nvidia-smi",
-  "raw-sse",
   "final-text.txt",
   "final-parsed.json",
   "first_fragment_latency_ms",
@@ -34,26 +34,42 @@ for (const required of [
 ]) {
   requireCondition(runner.includes(required), `runner missing ${required}`);
 }
-requireCondition(!runner.includes("o-reference-harness-v2"), "runner calls retired Task93 harness");
-requireCondition(!runner.includes("llama-server.exe"),
-  "runner still names the conflicting legacy server binary");
-requireCondition(!runner.includes("adapterPath break"),
-  "runner still calls the removed legacy HTTP break endpoint");
-requireCondition(!runner.includes('"--vision"') && !runner.includes('"--audio"') &&
-  !runner.includes('"--no-tts"'), "runner bypasses Comni model initialization");
+for (const forbidden of [
+  "o-reference-harness-v2",
+  "llama-server.exe",
+  "raw-sse",
+  "full_reinit",
+  "/v1/stream/omni_init",
+  "/v1/stream/prefill",
+  "/v1/stream/decode",
+]) {
+  requireCondition(!runner.includes(forbidden), `runner retains conflicting boundary: ${forbidden}`);
+}
 
 const adapter = read("tools/o-official-reference/src/official_adapter.cpp");
 const core = read("tools/o-official-reference/src/official_reference_core.cpp");
-requireCondition(adapter.includes('required(options, "prompt-file")'),
-  "adapter does not inject the V2 prompt into official init");
-requireCondition(adapter.includes("build_init_prefill_request"),
-  "adapter does not perform the current server's explicit index=0 system prefill");
-requireCondition(core.includes("voice_clone_prompt") && core.includes("assistant_prompt"),
-  "Comni prompt wrappers are missing");
+for (const required of [
+  "WebSocketClient",
+  'url + "/backend"',
+  "build_session_init_request",
+  "build_input_append_request",
+  'type == "response.done"',
+  'kind\", \"\") == \"listen\"',
+  '"/sessions/" + session_id + "/close"',
+]) {
+  requireCondition(adapter.includes(required), `adapter missing official backend primitive: ${required}`);
+}
+requireCondition(core.includes('"type", "session.init"') &&
+  core.includes('"type", "input.append"') && core.includes('"audio_base64"') &&
+  core.includes('"video_frames"'), "official backend payload builders are incomplete");
+requireCondition(!adapter.includes("SseCollector") && !core.includes("SseCollector") &&
+  !adapter.includes("/v1/stream/") && !core.includes("build_init_prefill_request"),
+  "HTTP/SSE boundary remains active");
 
 const packageManifest = JSON.parse(read("tools/o-official-reference/package-manifest.json"));
 requireCondition(packageManifest.artifact_name ===
   "AIJARVISV2-93-o-official-reference-windows-x64-cuda", "artifact name changed");
+requireCondition(packageManifest.transport === "/backend", "package transport changed");
 for (const required of [
   "bin/llama-omni-server.exe",
   "bin/aijarvisv2-o-official-adapter.exe",
@@ -68,38 +84,42 @@ for (const required of [
 }
 requireCondition(packageManifest.models_included === false, "models must remain external");
 
+const config = JSON.parse(read("tools/o-official-reference/official-config.json"));
+requireCondition(config.transport === "/backend" && config.runtime.use_tts === false,
+  "active config is not official /backend no-TTS");
+
 const upstreamLock = JSON.parse(read("tools/o-official-reference/upstream-lock.json"));
 const runtimeLock = upstreamLock.components.find((component) => component.name === "llama.cpp-omni");
-requireCondition(runtimeLock?.ref === "master",
-  "upstream lock does not record the current maintained runtime ref");
-requireCondition(runtimeLock?.commit === "09f5c3f1b484759f17b06fc63574f749c89c8761",
-  "upstream lock does not record the current maintained runtime commit");
-requireCondition(runtimeLock?.cmake_target === "llama-omni-server",
-  "upstream lock does not record the real CMake target");
-requireCondition(runtimeLock?.binary === "llama-omni-server",
-  "upstream lock does not record the real upstream binary");
+requireCondition(runtimeLock?.ref === "master" &&
+  runtimeLock?.commit === "09f5c3f1b484759f17b06fc63574f749c89c8761" &&
+  runtimeLock?.cmake_target === "llama-omni-server" &&
+  runtimeLock?.binary === "llama-omni-server", "runtime lock changed");
+requireCondition(runtimeLock.usage.includes("llama-omni-server /backend") &&
+  runtimeLock.usage.includes("SessionManager") &&
+  runtimeLock.usage.includes("omni_prepare_for_reuse"), "runtime provenance omits official lifecycle");
 const demoLock = upstreamLock.components.find((component) => component.name === "MiniCPM-o-Demo-Comni");
 requireCondition(demoLock?.ref === "main" &&
   demoLock?.commit === "d0a002093615b7f1d4d0f87a03fc01cb39bef3f6",
-  "upstream lock does not record the current maintained Comni demo baseline");
+  "Comni lock changed");
 
 const workflow = read(".github/workflows/aijarvisv2-23-portable.yml");
 for (const required of [
-  "codex/aijarvisv2-93-official-first",
   "09f5c3f1b484759f17b06fc63574f749c89c8761",
+  '-G "Ninja Multi-Config"',
+  "-DGGML_CUDA=ON",
+  "-DGGML_CUDA_CUB_3DOT2=ON",
+  "-DGGML_NATIVE=OFF",
+  "-DLLAMA_CURL=OFF",
   "--target llama-omni-server",
   "AIJARVISV2-93-o-official-reference-windows-x64-cuda",
   "tools/o-official-reference/package-official.ps1",
 ]) {
   requireCondition(workflow.includes(required), `workflow missing ${required}`);
 }
-requireCondition(!workflow.includes("task93-powershell-5-no-gpu"),
-  "registered workflow still calls retired Task93 job");
-requireCondition(!workflow.includes("tools/o-reference-harness-v2"),
-  "registered workflow still calls retired Task93 harness");
-requireCondition(!workflow.includes("5202b7b2f4d11f50b9f996161e7a2f8b8571b890") &&
-  !workflow.includes("--target llama-server"),
-  "registered workflow still contains the conflicting legacy runtime route");
+requireCondition(!workflow.includes("task93-powershell-5-no-gpu") &&
+  !workflow.includes("tools/o-reference-harness-v2") &&
+  !workflow.includes("5202b7b2f4d11f50b9f996161e7a2f8b8571b890") &&
+  !workflow.includes("--target llama-server"), "workflow retains a conflicting Task93 route");
 
 const workflowRoot = path.join(repositoryRoot, ".github", "workflows");
 for (const file of fs.readdirSync(workflowRoot).filter((name) => /\.ya?ml$/.test(name))) {

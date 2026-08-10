@@ -1,0 +1,3 @@
+tools/o-reference-harness-v2/profiles/*.json text eol=lf
+tools/o-reference-harness-v2/fixtures/manifests/*.json text eol=lf
+tools/aijarvisv2-23/AIJARVISV2-23-NEXT-WIN-DELTA/O-IN-07-1HZ/manifest.json text eol=lf

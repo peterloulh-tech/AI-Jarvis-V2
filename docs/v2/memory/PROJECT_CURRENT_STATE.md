@@ -32,8 +32,8 @@ AIJARVISV2-93 当前为 `in_progress`：继续沿用 Task23 的 Windows 2022、C
 
 | 基线 | 状态 | SHA-256 |
 |---|---|---|
-| 功能需求 V1.0 | 正式冻结；唯一功能范围 | `2b9f2bd67bcd4d0e1c510b35b961411c0445e0e4bc9f4da768f237c9073f6d46` |
-| 非功能需求 V1.0 | 正式冻结；正式质量约束 | `3f04ecaa48298517692a814d1e0004a042e853b35a825fb360ad987f835084dd` |
+| 功能需求 V1.0 | 正式冻结；唯一功能范围；Local O / Local V / Online | `270e0b1f225ecd0f20d34a480a14845bcebab19708b873178c196837c8fd3c90` |
+| 非功能需求 V1.0 | 正式冻结；正式质量约束；Local 离线 / Online 条件联网 | `f65950be98e56217d5e0472316ca7531d46227b00cfe5560186de7147ab8b7b5` |
 | 验收清单 V0.1 | 候选规划基线；不得扩展功能 | `2fa89eb557e0f638bd4a5430cf9d86e63b17773000bf657409bc6ef287ee5f66` |
 
 完整登记见 [`baseline-manifest.md`](../requirements/baseline-manifest.md)。AIJARVISV2-3～7 的 25 个 NFR 工程附录已由 AIJARVISV2-8 登记为 `NFR-ENG-APPENDIX-V1.0`；它不是第二份正式 NFR。阶段门已获用户批准，收口提交为 `b433f9dbfac5c074086a8d84ce73693670a3bd89`。

@@ -48,7 +48,10 @@ $normalRun = Get-LatestRun -ResultRoot $normalRoot
 $normalSummary = Get-Content -LiteralPath (Join-Path $normalRun "summary.json") -Raw -Encoding UTF8 | ConvertFrom-Json
 $normalRaw = @(Get-Content -LiteralPath (Join-Path $normalRun "raw-results.jsonl") -Encoding UTF8 |
     Where-Object { $_ } | ForEach-Object { $_ | ConvertFrom-Json })
-$normalAggregates = @(Get-Content -LiteralPath (Join-Path $normalRun "aggregations.json") -Raw -Encoding UTF8 | ConvertFrom-Json)
+$normalAggregates = @(
+    (Get-Content -LiteralPath (Join-Path $normalRun "aggregations.json") -Raw -Encoding UTF8 |
+        ConvertFrom-Json) | Write-Output
+)
 $normalEnvironment = Get-Content -LiteralPath (Join-Path $normalRun "environment.json") -Raw -Encoding UTF8 | ConvertFrom-Json
 Assert-True ($normalSummary.outcome -eq "passed") "normal mock summary must pass"
 Assert-True ($normalSummary.input_processed -eq 6 -and $normalSummary.listen_count -eq 2 -and
@@ -69,7 +72,10 @@ $emptyRoot = Join-Path $testRoot "empty results"
     -MockResultSource $emptySource -MockBoundary timeout
 $emptyRun = Get-LatestRun -ResultRoot $emptyRoot
 $emptySummary = Get-Content -LiteralPath (Join-Path $emptyRun "summary.json") -Raw -Encoding UTF8 | ConvertFrom-Json
-$emptyAggregates = @(Get-Content -LiteralPath (Join-Path $emptyRun "aggregations.json") -Raw -Encoding UTF8 | ConvertFrom-Json)
+$emptyAggregates = @(
+    (Get-Content -LiteralPath (Join-Path $emptyRun "aggregations.json") -Raw -Encoding UTF8 |
+        ConvertFrom-Json) | Write-Output
+)
 Assert-True ($emptySummary.input_processed -eq 0 -and $emptyAggregates.Count -eq 0) "empty result source misreported evidence"
 
 $malformedSource = Join-Path $testRoot "malformed.jsonl"

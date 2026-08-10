@@ -4,7 +4,7 @@
   "models_included": false,
   "o_in_07_media_included": false,
   "required_files": [
-    "bin/llama-omni-server.exe",
+    "bin/llama-server.exe",
     "bin/aijarvisv2-o-official-adapter.exe",
     "run-o-official-reference.ps1",
     "official-config.json",

@@ -203,7 +203,9 @@ void validate_upstream_lock(const std::string &text) {
   require(runtime.at("repo") == "https://github.com/tc-mb/llama.cpp-omni.git" &&
               runtime.at("ref") == "feat/web-demo" &&
               runtime.at("commit") == "5202b7b2f4d11f50b9f996161e7a2f8b8571b890" &&
-              runtime.at("license") == "MIT",
+              runtime.at("license") == "MIT" &&
+              runtime.at("cmake_target") == "llama-server" &&
+              runtime.at("binary") == "llama-server",
           "llama.cpp-omni lock changed");
   const auto &demo = lock.at("components").at(1);
   require(demo.at("repo") == "https://github.com/OpenBMB/MiniCPM-o-Demo.git" &&

@@ -154,7 +154,7 @@ PyTorch 主路径：
 
 `CURRENT-OFFICIAL-ONLY` 的 Comni 路径：
 
-`WebSocket gateway → Demo Worker/CppBackendWorker → 启动 llama-omni-server → HTTP omni_init/update config/prefill + SSE decode → is_listen/text/audio → gateway result`
+`WebSocket gateway → Demo Worker/CppBackendWorker → 启动 llama-server → HTTP omni_init/update config/prefill + SSE decode → is_listen/text/audio → gateway result`
 
 关键接口：
 
@@ -263,11 +263,11 @@ Locked C API 顺序：
 
 Locked V2 当前直接相关参数：模型三路径、`n_ctx/n_batch/n_ubatch/n_predict`、GPU layers、seed、async、duplex、use_tts、system/voice prompt、assistant prompt、`force_listen_count`、`listen_prob_scale`、每片最大 speak token、媒体路径、slice 数和 sequence。
 
-`CURRENT-OFFICIAL-ONLY` 的 CLI/server 主要入口：`llama-omni-cli`、`llama-omni-server`，模型/投影器、`--no-tts`、参考音频、ctx、GPU layers，以及 `/v1/stream/omni_init`、prefill、decode SSE、break/close。采用前必须固定准确 commit 与请求 schema。
+`CURRENT-OFFICIAL-ONLY` 的 CLI/server 主要入口：`llama-omni-cli`、`llama-server`，模型/投影器、`--no-tts`、参考音频、ctx、GPU layers，以及 `/v1/stream/omni_init`、prefill、decode SSE、break/close。采用前必须固定准确 commit 与请求 schema。
 
 ### 与官方 MiniCPM-o-Demo 的连接方式
 
-官方 Comni 参考不是链接 V2 runner，而是由 Demo `CppBackendWorker` 管理一个 `llama-omni-server` 进程，通过 HTTP init/prefill 和 SSE decode 交换结果，再转换成 Demo WebSocket 的 `is_listen/text/audio`。V2 当前 C API 路线与之共享底层 LS 概念，但进程、协议、TTS 和 session 清理路径不同。
+官方 Comni 参考不是链接 V2 runner，而是由 Demo `CppBackendWorker` 管理一个 `llama-server` 进程，通过 HTTP init/prefill 和 SSE decode 交换结果，再转换成 Demo WebSocket 的 `is_listen/text/audio`。V2 当前 C API 路线与之共享底层 LS 概念，但进程、协议、TTS 和 session 清理路径不同。
 
 ### 官方限制与当前未确认项
 

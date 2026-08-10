@@ -285,7 +285,7 @@ jobs:
           "CUDA_PATH=$cudaPath" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
           (Join-Path $cudaPath 'bin') | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
-      - name: Build official llama-omni-server
+      - name: Build official llama-server
         shell: pwsh
         run: |
           cmake -S build/task93-official-runtime-source -B build/task93-official-runtime `
@@ -294,8 +294,8 @@ jobs:
             -DGGML_NATIVE=OFF '-DCMAKE_CUDA_ARCHITECTURES=86;89;120' `
             -DLLAMA_BUILD_TESTS=OFF -DLLAMA_BUILD_EXAMPLES=OFF -DLLAMA_BUILD_SERVER=ON
           if ($LASTEXITCODE -ne 0) { throw "official runtime configure failed" }
-          cmake --build build/task93-official-runtime --config Release --target llama-omni-server --parallel
-          if ($LASTEXITCODE -ne 0) { throw "llama-omni-server build failed" }
+          cmake --build build/task93-official-runtime --config Release --target llama-server --parallel
+          if ($LASTEXITCODE -ne 0) { throw "llama-server build failed" }
 
       - name: Build and test thin Task93 adapter
         shell: pwsh

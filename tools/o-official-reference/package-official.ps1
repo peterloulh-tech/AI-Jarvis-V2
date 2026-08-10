@@ -38,9 +38,9 @@ function Get-LowerSha256 {
 }
 
 New-Item -ItemType Directory -Path (Join-Path $PackageRoot "bin") -Force | Out-Null
-$serverSource = Find-OneFile -Root $RuntimeBuildRoot -Name "llama-omni-server.exe"
+$serverSource = Find-OneFile -Root $RuntimeBuildRoot -Name "llama-server.exe"
 $adapterSource = Find-OneFile -Root $AdapterBuildRoot -Name "aijarvisv2-o-official-adapter.exe"
-Copy-RequiredFile -Source $serverSource -Destination (Join-Path $PackageRoot "bin\llama-omni-server.exe")
+Copy-RequiredFile -Source $serverSource -Destination (Join-Path $PackageRoot "bin\llama-server.exe")
 Copy-RequiredFile -Source $adapterSource -Destination (Join-Path $PackageRoot "bin\aijarvisv2-o-official-adapter.exe")
 
 $toolRoot = Join-Path $RepositoryRoot "tools\o-official-reference"

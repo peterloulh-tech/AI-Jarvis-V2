@@ -8,7 +8,9 @@
       "ref": "feat/web-demo",
       "commit": "5202b7b2f4d11f50b9f996161e7a2f8b8571b890",
       "license": "MIT",
-      "usage": ["llama-omni-server", "HTTP stream API", "SSE completion", "runtime/session/streaming"]
+      "cmake_target": "llama-server",
+      "binary": "llama-server",
+      "usage": ["llama-server omni HTTP endpoints", "SSE completion", "runtime/session/streaming"]
     },
     {
       "name": "MiniCPM-o-Demo-Comni",

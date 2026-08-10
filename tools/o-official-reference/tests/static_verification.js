@@ -16,7 +16,7 @@ function requireCondition(condition, message) {
 
 const runner = read("tools/o-official-reference/run-o-official-reference.ps1");
 for (const required of [
-  "llama-omni-server.exe",
+  "llama-server.exe",
   "health",
   "init",
   "step",
@@ -36,6 +36,8 @@ for (const required of [
   requireCondition(runner.includes(required), `runner missing ${required}`);
 }
 requireCondition(!runner.includes("o-reference-harness-v2"), "runner calls retired Task93 harness");
+requireCondition(!runner.includes("llama-omni-server"),
+  "runner names a binary not produced by the locked upstream commit");
 requireCondition(!runner.includes('"--vision"') && !runner.includes('"--audio"') &&
   !runner.includes('"--no-tts"'), "runner bypasses Comni model initialization");
 
@@ -50,7 +52,7 @@ const packageManifest = JSON.parse(read("tools/o-official-reference/package-mani
 requireCondition(packageManifest.artifact_name ===
   "AIJARVISV2-93-o-official-reference-windows-x64-cuda", "artifact name changed");
 for (const required of [
-  "bin/llama-omni-server.exe",
+  "bin/llama-server.exe",
   "bin/aijarvisv2-o-official-adapter.exe",
   "run-o-official-reference.ps1",
   "official-config.json",
@@ -63,11 +65,18 @@ for (const required of [
 }
 requireCondition(packageManifest.models_included === false, "models must remain external");
 
+const upstreamLock = JSON.parse(read("tools/o-official-reference/upstream-lock.json"));
+const runtimeLock = upstreamLock.components.find((component) => component.name === "llama.cpp-omni");
+requireCondition(runtimeLock?.cmake_target === "llama-server",
+  "upstream lock does not record the real CMake target");
+requireCondition(runtimeLock?.binary === "llama-server",
+  "upstream lock does not record the real upstream binary");
+
 const workflow = read(".github/workflows/aijarvisv2-23-portable.yml");
 for (const required of [
   "codex/aijarvisv2-93-official-first",
   "5202b7b2f4d11f50b9f996161e7a2f8b8571b890",
-  "llama-omni-server",
+  "--target llama-server",
   "AIJARVISV2-93-o-official-reference-windows-x64-cuda",
   "tools/o-official-reference/package-official.ps1",
 ]) {
@@ -77,6 +86,8 @@ requireCondition(!workflow.includes("task93-powershell-5-no-gpu"),
   "registered workflow still calls retired Task93 job");
 requireCondition(!workflow.includes("tools/o-reference-harness-v2"),
   "registered workflow still calls retired Task93 harness");
+requireCondition(!workflow.includes("llama-omni-server"),
+  "registered workflow names a target absent from the locked upstream commit");
 
 const workflowRoot = path.join(repositoryRoot, ".github", "workflows");
 for (const file of fs.readdirSync(workflowRoot).filter((name) => /\.ya?ml$/.test(name))) {

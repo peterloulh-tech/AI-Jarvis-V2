@@ -1,6 +1,6 @@
 # Task93 Official-First O Reference
 
-当前入口只调用锁定的官方 `llama-omni-server`，不实现 Runtime、Session manager、streaming boundary 或 Mock runtime。`aijarvisv2-o-official-adapter` 负责官方 HTTP/SSE、Comni 同形的 system prompt 注入与三批契约，PowerShell runner 负责固定 O-IN-07、证据和 `break → stop → restart → omni_init` full reinit。
+当前入口只调用锁定的官方 `llama-server` omni HTTP endpoints，不实现 Runtime、Session manager、streaming boundary 或 Mock runtime。`aijarvisv2-o-official-adapter` 负责官方 HTTP/SSE、Comni 同形的 system prompt 注入与三批契约，PowerShell runner 负责固定 O-IN-07、证据和 `break → stop → restart → omni_init` full reinit。
 
 Windows/NVIDIA 动态运行：
 

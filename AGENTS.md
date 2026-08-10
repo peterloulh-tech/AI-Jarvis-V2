@@ -4,6 +4,12 @@
 
 事实优先级按内容区分：Dashi 负责真实任务状态、描述、依赖和评论；Git 提交、实际文件和测试记录负责真实交付与验证结果；`docs/v2/memory/` 只作摘要索引。记忆与事实冲突时必须修正记忆，不得用记忆覆盖事实。
 
+## 技术职责与第二审核
+
+Codex 是 AI Jarvis V2 第一技术负责人、四方审计执行者和实际开发者。涉及架构、Bug、runtime、session、streaming、server、adapter、模型接入、构建、Windows/CUDA、测试、GitHub Actions、性能、开发顺序、技术选型或任务下一步时，Codex 必须先读取正式冻结需求、当前任务状态、真实代码与 Git 事实，并按本文件的四方审计顺序独立完成技术判断、必要修改、针对性验证和证据报告；不得等待 ChatGPT 在无法读取真实代码时根据猜测预先给出文件级、接口级或实现级方案。
+
+ChatGPT 是第二审计人，负责复核正式需求、四方审计、成熟能力复用、V2 Delta 是否最小、3+2 和下一步路线，不替代 Codex 的源码判断。第二审核如发现问题，只指出违反的审计规则与应达到的目标；具体修改方式仍由 Codex 重新读取真实项目后决定。
+
 ## Context & Planning Efficiency（上下文与规划效率）
 
 新 Codex 会话恢复上下文时只确认当前事实：
@@ -19,29 +25,43 @@
 
 如果 Superpowers 或其他流程要求 planning，默认只保留最小会话内 plan；除非用户或当前任务明确要求，不额外创建 plan、design 或 spec 文档。
 
-普通任务遵循“三加二原则”：尽量少改动、最大化复用、避免不必要返工和复杂度，同时保证能用和节省 Token；使用最小交付、针对性验证和精简报告。高价值、高风险任务可为了准确性适度增加必要分析，阶段门、架构或协议冻结、集成及发布验收使用严格模式，但不得以“更完整”为由无边界扩大范围。普通 Codex 指令不得重复 Dashi 中已有的完整任务要求。只有跨任务重要决定才更新 [`DECISIONS.md`](docs/v2/memory/DECISIONS.md)。
+普通任务固定执行 3+2：少代码、少改动、最大化复用、避免返工和复杂度，同时保证能用、省 Token 并选择最快满足正式需求的路线；使用最小交付、针对性验证和精简报告，不为架构、治理、覆盖率或文档好看及技术炫技增加工作。高价值、高风险任务可为了准确性适度增加必要分析，阶段门、架构或协议冻结、集成及发布验收使用严格模式，但不得以“更完整”为由无边界扩大范围。普通 Codex 指令不得重复 Dashi 中已有的完整任务要求。只有跨任务重要决定才更新 [`DECISIONS.md`](docs/v2/memory/DECISIONS.md)。
 
-## Reuse-First（三层固定规则）
+## 四方审计与 Official-First 前置门
 
-开发或修改功能前，只读取当前任务相关模块，并按以下三层顺序决策：
+每个技术任务开始前，只读取当前任务命中的冻结需求、源码和证据，并严格按以下顺序决策，不得反转：
 
-1. **已有资产**：V2 当前实现，以及 AIJARVISV2-17/18 已确认的原作者复用结论；已完成的专项审计优先直接使用其结论和源码索引，例如现有 O Runtime 四方 Delta 审计。能直接满足就直接复用，能最小修改满足就修改复用，不新增平行实现。
-2. **官方基线**：第三方官方行为优先使用 [`OFFICIAL_BASELINE_INDEX.md`](docs/v2/memory/OFFICIAL_BASELINE_INDEX.md) 的项目锁定 revision。
-3. **V2 当前需求**：比较原作者已有实现、官方标准实现、V2 当前实现和本任务需求，只实现真正缺失的 Delta；只有前两层都不能满足时才允许新增实现。
+1. **正式冻结需求**：先确认产品行为和验收边界，不用实现反推需求。
+2. **当前官方成熟实现**：涉及外部 upstream 时检查当前实际源码、文档、构建文件和测试，不只依赖旧 lock 或记忆；锁定 revision 和源码索引登记在 [`OFFICIAL_BASELINE_INDEX.md`](docs/v2/memory/OFFICIAL_BASELINE_INDEX.md) 及对应 lock 中。
+3. **当前原作者成熟实现**：官方不能满足而原作者能满足时，使用原作者成熟能力；两者都能满足时优先官方。
+4. **已验证项目资产**：复用仍与当前需求和上游兼容的代码、测试、构建、CI、portable、Windows Runner、CUDA/runtime 准备、artifact 与真机证据。
+5. **V2 最小自研增量**：只有前四项都不能满足且正式需求确实需要时才允许新增。
 
-只有当前任务所需信息在已有资产中缺失，model、runtime 或 API 版本/revision 改变，实际行为与已有结论冲突，或当前判断需要 source-level 证据才能可靠完成时，才继续深入源码或重新查询官方。
+统一判断标签为：`DIRECT`（成熟能力直接复用）、`MODIFY`（最小必要适配）、`DUPLICATE`（重复自研，应退出活动路线）、`CONFLICT`（与更高优先级实现冲突，以后者为准）、`V2-ONLY`（正式需求独有的最小增量）、`UNCONFIRMED`（证据不足，先验证不猜）和 `MISSING`（确认官方、原作者和项目资产均不存在后才补开发）。
 
-禁止为了“更漂亮、更规范、更先进”重写已经够用的代码，也禁止为执行 Reuse-First 重复审计整个项目。
+当前项目代码没有保留特权。已完成、已提交、测试通过或投入较多都不能压过正式需求及更高优先级成熟实现；项目资产与当前官方冲突时官方优先，重复或冲突资产必须退出活动路线。只有相关 upstream、model、runtime、API 或环境发生变化，现有证据缺失或冲突，或可靠判断确需源码证据时才深入重审；不得重复审计整个项目。
 
-### Reference Harness & Proven Infrastructure
+### 成熟能力、Reference Harness 与基础设施
 
-外部 model/runtime 正式产品接入前，优先依据 Locked Official Baseline、原作者可复用实现和已有真实运行证据建立最小 Reference Harness，先确认 model/runtime 正确行为，再实现 V2 Product Adapter。Reference Harness 只保留必要参数转换、资源安全、原始结果和测试 instrumentation，不提前承载产品状态机、session 语义、IPC 或 Worker 业务策略。
+准备新增或重写 Runtime、Harness、Session Manager、Streaming boundary、Server、Adapter 架构、Scheduler、Process Manager、测试框架、构建体系、模型接入层或数据基础设施前，必须先以证据证明当前官方、原作者和已验证项目资产均不能满足，并存在明确正式需求；否则不得开发。模型、runtime、session 或 streaming 已有成熟官方实现时直接以官方实现为基础，不得为参考或测试方便另建平行实现。
 
-探索型 PoC 保留有效真机证据与已证明稳定的工程基础设施；其模型语义、adapter、session 和测试专用逻辑必须经 Official/Reuse 对齐后再决定是否进入 Reference Harness 或正式产品。已经真实跑通的 build、CI、portable、Windows Runner、CUDA/runtime 准备、artifact 和测试基础设施默认优先复用；模型/runtime 语义重建与工程基础设施重建分开判断，只修改真实存在的 Delta。
+只有通过前置门后确需 Reference Harness 时，它才可保留必要参数转换、资源安全、原始结果和测试 instrumentation，不提前承载产品状态机、session 语义、IPC 或 Worker 业务策略。探索型 PoC 的真机证据与已证明基础设施可以复用，但其模型语义、adapter、session 和测试逻辑仍须重新按四方顺序判断；旧投入不能成为保留错误路线的理由。
 
-### Official-First Runtime Rule
+### 标准执行、验证与停止条件
 
-模型、runtime、session 或 streaming 已有锁定且成熟的官方实现时，默认直接以官方实现为基础，不得为“参考实现”或测试方便另建独立 Runtime/Harness；AI Jarvis 只实现正式需求 Delta。只有官方能力确实缺失且存在明确 Requirement ID 时才允许自研。
+Codex 默认在一轮内完成：读取冻结需求、Dashi/Git 状态和真实代码；检查当前官方、原作者与项目资产；完成四方审计并选择最短正确路线；直接实施必要修改；运行与改动直接相关的必要验证；检查 `git diff`/`status`；按授权 commit/push；输出供第二审核使用的证据报告。普通小差异在同一轮修完，不因实现细节等待 ChatGPT；已经验证且相关代码和环境未变的能力不重复证明。
+
+只有以下情况才停止并请求用户决定：冻结需求矛盾或缺失；两个成熟方案存在会改变正式产品行为的重大取舍；需要改变冻结需求；需要大规模改变整体架构；存在用户指定的人工确认或高风险操作；缺少无法自行取得的外部资源、凭据或硬件。
+
+测试也按四方顺序复用：官方 test/smoke/CLI → 原作者 tests → 已验证项目测试资产 → V2 特有 contract/evidence/acceptance assertions。不得重复建立 Runtime、Session、Streaming、Media 或 Build 测试框架。
+
+构建也按四方顺序复用：当前官方构建方案 → 原作者成熟构建方案 → 已验证项目构建资产 → V2 最小补充。已有 workflow 能工作不代表可以忽略更成熟、更直接的当前官方路径。
+
+GitHub Actions 或其他远程长任务成功触发并取得 run ID 后立即停止；禁止 `gh run watch`、高频或持续轮询及长时间等待。只有用户之后明确要求时才查询一次最终状态和必要日志。push 因 sandbox、网络或权限失败时只尝试一次，随后给出最短人工 `git push` 命令，不扩建权限流程。
+
+### 重要任务证据报告
+
+重要任务完成后尽量按“正式需求、四方审计、实际采用路线、官方/原作者复用、项目资产复用、V2 最小 Delta、实际修改、验证、Git、未验证、结论、下一步唯一建议”输出简洁事实，由用户交给 ChatGPT 第二审核。只把实际执行过的验证写为 PASS；未执行项必须列入“未验证”。结论使用 `READY`、`BLOCKED`、`PASS` 或 `FAIL` 中最准确的一项；下一步只给当前最快的一项，除非原任务已授权，否则不自动执行。
 
 ## 禁止上下文膨胀
 

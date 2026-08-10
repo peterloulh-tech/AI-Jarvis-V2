@@ -56,7 +56,7 @@ AIJARVISV2-93 当前为 `in_progress`：继续沿用 Task23 的 Windows 2022、C
 ## 开放风险与待实测项
 
 - O-C01 仍是唯一 PoC 准入组合；Task93 分支目前只有 Task23 Legacy portable 的成功构建，Reference Harness v2 binary 和 Windows/NVIDIA 动态 run 均未完成。Locked runtime 的 startup LISTEN、自主 LISTEN/SPEAK、streaming、三批契约、延迟、显存与清理仍没有 Reference Harness 正式动态通过证据。Qwen2.5-Omni 候补还缺权重 revision/许可材料、自主触发、20 秒 16GB 与 Windows 自包含包证据。
-- Downloads 中两份同名冻结 Markdown 当前 SHA-256 为 `270e0b1f...c90` / `f65950be...7b5`，与 `baseline-manifest.md` 正式登记的 `2b9f2bd6...d46` / `3f04ecaa...8dd` 不一致；在恢复已登记原件或正式重走基线前，不得从这两份文件新增能力矩阵或功能范围。Dashi AIJARVISV2-90/91 也引用前一组未登记哈希并阻塞 Task80，需后续定点核对，当前未改任务。
+- 2026-08-09 已批准的 Online V1 需求已同步为当前正式基线（功能 `270e0b1f...c90`、非功能 `f65950be...7b5`）；Task93 已据此建立 Local O 能力矩阵。Task90/91 原有新 SHA 引用保持不变，未批量改写历史 Dashi 任务。
 - V 候选模型和原生多图能力、许可回放/变化标注/事件高光金标、8GB/12GB+ 真机，以及 1～3 路延迟、吞吐、显存和 GPU 数据尚无实测证据。
 - O/V 共用语料、许可、脱敏、时间轴和金标格式已定义，但实际授权资产与双人标注尚待制作；事件、高光、相关性和质量阈值仍待选型后校准。
 - 真机代表组合和记录入口已编排，但 Windows 11/NVIDIA 8/12/16GB 机器、1080P/2K/4K × 五档缩放、音频设备、Overlay 点击穿透、系统电源事件、断网及英雄联盟同机负载均待执行；英雄联盟与主机完全断网的兼容执行方式尚未确认。

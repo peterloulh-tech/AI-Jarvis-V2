@@ -22,15 +22,27 @@ function Get-Sha256 {
 }
 
 $cudaLicenses = @(
-    [pscustomobject]@{ component="cuda_cudart"; version="12.8.90"; source="cuda_cudart-LICENSE.txt" },
-    [pscustomobject]@{ component="libcublas"; version="12.8.4.1"; source="libcublas-LICENSE.txt" }
+    [pscustomobject]@{
+        component="cuda_cudart"
+        version="12.8.90"
+        source="cuda_cudart-LICENSE.txt"
+        package_path="licenses\NVIDIA-CUDA\cuda_cudart-LICENSE.txt"
+        sha256="e2c71babfd18a8e69542dd7e9ca018f9caa438094001a58e6bc4d8c999bf0d07"
+    },
+    [pscustomobject]@{
+        component="libcublas"
+        version="12.8.4.1"
+        source="libcublas-LICENSE.txt"
+        package_path="licenses\NVIDIA-CUDA\libcublas-LICENSE.txt"
+        sha256="e2c71babfd18a8e69542dd7e9ca018f9caa438094001a58e6bc4d8c999bf0d07"
+    }
 )
 foreach ($license in $cudaLicenses) {
     $source = Join-Path $CudaLicenseRoot $license.source
-    if ((Get-Sha256 -Path $source) -ne "e2c71babfd18a8e69542dd7e9ca018f9caa438094001a58e6bc4d8c999bf0d07") {
+    if ((Get-Sha256 -Path $source) -ne $license.sha256) {
         throw "CUDA redistributable license mismatch: $($license.component)"
     }
-    $destination = Join-Path $PackageRoot "licenses\NVIDIA-CUDA\$($license.source)"
+    $destination = Join-Path $PackageRoot $license.package_path
     New-Item -ItemType Directory -Path (Split-Path -Parent $destination) -Force | Out-Null
     Copy-Item -LiteralPath $source -Destination $destination -Force
 }
@@ -68,6 +80,15 @@ $buildManifest = [ordered]@{
     cuda_toolkit_version = $CudaVersion
     runtime_revision = "b9d15b83ee353b2eaeee4d9318c98a35a1347486"
     runtime_patch_sha256 = "cc8b1c4abb62a736cf190da3fdb1c29a260130f4b6cb3651696479703150783e"
+    runtime_license_sha256 = "94f29bbed6a22c35b992c5c6ebf0e7c92f13b836b90f36f461c9cf2f0f1d010d"
+    cuda_redistributable_licenses = @($cudaLicenses | ForEach-Object {
+        [ordered]@{
+            component = $_.component
+            version = $_.version
+            path = $_.package_path.Replace("\", "/")
+            sha256 = $_.sha256
+        }
+    })
     executable_sha256 = Get-Sha256 -Path (Join-Path $PackageRoot "bin\o-reference-harness-v2.exe")
     cmake_source_sha256 = Get-Sha256 -Path (Join-Path $toolRoot "CMakeLists.txt")
     models_included = 0
@@ -91,6 +112,7 @@ $files = @(Get-ChildItem -LiteralPath $PackageRoot -Recurse -File | Where-Object
     source_commit = $SourceCommit
     runtime_revision = $buildManifest.runtime_revision
     runtime_patch_sha256 = $buildManifest.runtime_patch_sha256
+    runtime_license_sha256 = $buildManifest.runtime_license_sha256
     model_strategy = "external locked three-file no-TTS"
     files = $files
 } | ConvertTo-Json -Depth 12 | Set-Content -LiteralPath (Join-Path $PackageRoot "portable-manifest.json") -Encoding UTF8

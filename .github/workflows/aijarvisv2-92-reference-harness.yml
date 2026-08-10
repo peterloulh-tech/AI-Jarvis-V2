@@ -126,9 +126,28 @@ jobs:
             -CudaLicenseRoot $env:O_REFERENCE_CUDA_LICENSE_ROOT -ArtifactName $env:ARTIFACT_NAME
           "O_REFERENCE_PACKAGE_ROOT=$packageRoot" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
-      - name: Verify packaged dry-run profiles
+      - name: Verify package provenance and dry-run profiles
         shell: pwsh
         run: |
+          $buildManifestPath = Join-Path $env:O_REFERENCE_PACKAGE_ROOT "portable-build-manifest.json"
+          $buildManifest = Get-Content -LiteralPath $buildManifestPath -Raw -Encoding UTF8 | ConvertFrom-Json
+          if ($buildManifest.runtime_license_sha256 -ne
+              "94f29bbed6a22c35b992c5c6ebf0e7c92f13b836b90f36f461c9cf2f0f1d010d" -or
+              $buildManifest.models_included -ne 0) {
+            throw "Portable Artifact runtime license or external-model provenance mismatch"
+          }
+          $cudaLicenses = @($buildManifest.cuda_redistributable_licenses)
+          if ($cudaLicenses.Count -ne 2) {
+            throw "Portable Artifact must record both CUDA redistributable licenses"
+          }
+          foreach ($license in $cudaLicenses) {
+            $licensePath = Join-Path $env:O_REFERENCE_PACKAGE_ROOT ([string]$license.path).Replace("/", "\")
+            $licenseSha256 = (Get-FileHash -LiteralPath $licensePath -Algorithm SHA256).Hash.ToLowerInvariant()
+            if ($licenseSha256 -ne $license.sha256 -or
+                $licenseSha256 -ne "e2c71babfd18a8e69542dd7e9ca018f9caa438094001a58e6bc4d8c999bf0d07") {
+              throw "Portable Artifact CUDA license provenance mismatch: $($license.component)"
+            }
+          }
           foreach ($profile in @("official-runtime-reference", "v2-contract")) {
             foreach ($cadence in @("official-1hz", "legacy-3s-replay")) {
               & (Join-Path $env:O_REFERENCE_PACKAGE_ROOT "run-o-reference-harness-v2.ps1") `

@@ -292,7 +292,7 @@ jobs:
             -G "Visual Studio 17 2022" -A x64 -T "cuda=$env:CUDA_PATH" `
             -DGGML_CUDA=ON -DGGML_CUDA_NCCL=OFF -DBUILD_SHARED_LIBS=OFF `
             -DGGML_NATIVE=OFF '-DCMAKE_CUDA_ARCHITECTURES=86;89;120' `
-            -DLLAMA_BUILD_TESTS=OFF -DLLAMA_BUILD_EXAMPLES=OFF -DLLAMA_BUILD_SERVER=ON
+            -DLLAMA_BUILD_TESTS=OFF -DLLAMA_BUILD_EXAMPLES=OFF -DLLAMA_BUILD_SERVER=ON -DLLAMA_CURL=OFF
           if ($LASTEXITCODE -ne 0) { throw "official runtime configure failed" }
           cmake --build build/task93-official-runtime --config Release --target llama-server --parallel
           if ($LASTEXITCODE -ne 0) { throw "llama-server build failed" }

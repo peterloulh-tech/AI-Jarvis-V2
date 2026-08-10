@@ -68,4 +68,4 @@ AIJARVISV2-93 当前为 `in_progress`：继续沿用 Task23 的 Windows 2022、C
 
 ## 下一步注意事项
 
-当前只推进 AIJARVISV2-93：先恢复与 `baseline-manifest.md` 一致的两份正式冻结 Markdown；随后人工触发 `AIJARVISV2-93 Windows PS5.1 no-GPU smoke`，通过后再决定 Reference Harness v2 的最小 Windows/CUDA rebuild 与 RTX 5070 Ti 16GB 动态验收。动态验收完成前不得宣称 O-C01 正式可行，不得启动 AIJARVISV2-24。
+当前只推进 AIJARVISV2-93：先恢复与 `baseline-manifest.md` 一致的两份正式冻结 Markdown；随后人工从已注册的 `AIJARVISV2-23 Windows portable PoC` workflow 选择 ref `codex/aijarvisv2-93`，此时只执行 `task93-powershell-5-no-gpu`、跳过 CUDA job。通过后再决定 Reference Harness v2 的最小 Windows/CUDA rebuild 与 RTX 5070 Ti 16GB 动态验收。动态验收完成前不得宣称 O-C01 正式可行，不得启动 AIJARVISV2-24。

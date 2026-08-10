@@ -64,7 +64,7 @@ Dynamic runs write run metadata (model/revisions/commit/profile/prompt/platform)
 
 The GitHub workflow is `workflow_dispatch` only. It builds Windows x64 with CUDA architectures `86;89;120`, packages the external-model runner and deterministic fixtures, then runs all four profile/cadence dry-run combinations without loading a model.
 
-The lightweight workflow `.github/workflows/aijarvisv2-93-no-gpu-smoke.yml` is also manual-only. It uses `windows-2022`, builds only the no-runtime CLI, then runs the packaged runner under Windows PowerShell 5.1 with Mock JSONL in Chinese/space-containing paths. It covers JSON/JSONL, LISTEN/SPEAK fragments, generation changes, runtime continuation, empty/failed/malformed inputs, aggregation/summary/evidence, error propagation and repeated cleanup. It needs neither CUDA nor GGUF files.
+The lightweight no-GPU entry reuses the already registered `.github/workflows/aijarvisv2-23-portable.yml`: when manually dispatched with ref `codex/aijarvisv2-93`, the CUDA portable job is skipped and only `task93-powershell-5-no-gpu` runs. It uses `windows-2022`, builds only the no-runtime CLI, then runs the packaged runner under Windows PowerShell 5.1 with Mock JSONL in Chinese/space-containing paths. It covers JSON/JSONL, LISTEN/SPEAK fragments, generation changes, runtime continuation, empty/failed/malformed inputs, aggregation/summary/evidence, bounded timeout, error propagation and repeated idempotent cleanup. It needs neither CUDA nor GGUF files.
 
 ## Windows dynamic test
 

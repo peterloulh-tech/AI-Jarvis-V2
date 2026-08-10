@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "locked_at": "2026-08-11",
+  "components": [
+    {
+      "name": "llama.cpp-omni",
+      "repo": "https://github.com/tc-mb/llama.cpp-omni.git",
+      "ref": "feat/web-demo",
+      "commit": "5202b7b2f4d11f50b9f996161e7a2f8b8571b890",
+      "license": "MIT",
+      "usage": ["llama-omni-server", "HTTP stream API", "SSE completion", "runtime/session/streaming"]
+    },
+    {
+      "name": "MiniCPM-o-Demo-Comni",
+      "repo": "https://github.com/OpenBMB/MiniCPM-o-Demo.git",
+      "ref": "Comni",
+      "commit": "9af4308a93ca889ddf5c7c7bde1bcfbb6ff9b147",
+      "license": "NO_LICENSE_FILE_AT_PIN",
+      "redistributed": false,
+      "usage": ["server lifecycle reference", "health", "break", "full_reinit", "process cleanup"]
+    }
+  ],
+  "model": {
+    "repo": "openbmb/MiniCPM-o-4_5-gguf",
+    "revision": "502eec5b03eaee9d0d2ce17a176e3490103c9a63",
+    "external": true,
+    "files": [
+      {"path": "MiniCPM-o-4_5-Q4_K_M.gguf", "sha256": "1237a97ee081b8abebc47aa7dad565701e8f5f904cdc92f6723ac4281bbc0932"},
+      {"path": "audio/MiniCPM-o-4_5-audio-F16.gguf", "sha256": "d5b188ac7feaf98e17175c3f9bd14bf269301bfd187439fdaa3e3a494fc32ef7"},
+      {"path": "vision/MiniCPM-o-4_5-vision-F16.gguf", "sha256": "1453678cc4e4fe18de241952962e234f265cb8dda780773526103ab8ba82f421"}
+    ]
+  }
+}

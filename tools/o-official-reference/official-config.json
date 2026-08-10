@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "cadence": "official-1hz",
+  "budget_profiles": {
+    "short": { "max_chinese_chars": 225, "hard_timeout_seconds": 12 },
+    "standard": { "max_chinese_chars": 350, "hard_timeout_seconds": 16 },
+    "long": { "max_chinese_chars": 500, "hard_timeout_seconds": 20 }
+  },
+  "budgets": [225, 350, 500],
+  "timeouts_seconds": [12, 16, 20],
+  "style_ids": ["style-1", "style-2", "style-3"],
+  "contract_prompt_template": "Streaming Duplex Conversation. When you decide to SPEAK, output exactly one JSON object and no Markdown or extra text: {\"batches\":[{\"style_id\":\"style-1\",\"items\":[\"中文弹幕\"]},{\"style_id\":\"style-2\",\"items\":[\"中文弹幕\"]},{\"style_id\":\"style-3\",\"items\":[\"中文弹幕\"]}]}. Keep exactly three batches in this order, every items array non-empty, every item containing Chinese text, and the total item text at no more than {{MAX_CHINESE_CHARS}} Unicode characters.",
+  "server": {
+    "host": "127.0.0.1",
+    "port": 19080,
+    "health_timeout_seconds": 300,
+    "shutdown_timeout_seconds": 10
+  },
+  "runtime": {
+    "media_type": 2,
+    "use_tts": false,
+    "duplex_mode": true,
+    "n_gpu_layers": 99,
+    "ctx_size": 8192
+  }
+}

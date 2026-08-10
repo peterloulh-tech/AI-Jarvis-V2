@@ -20,7 +20,7 @@ env:
 
 jobs:
   build-portable:
-    if: github.ref_name != 'codex/aijarvisv2-93'
+    if: github.ref_name != 'codex/aijarvisv2-93' && github.ref_name != 'codex/aijarvisv2-93-official-first'
     runs-on: windows-2022
     timeout-minutes: 180
     steps:
@@ -202,36 +202,140 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
-  task93-powershell-5-no-gpu:
-    if: github.ref_name == 'codex/aijarvisv2-93'
+  task93-official-first:
+    if: github.ref_name == 'codex/aijarvisv2-93-official-first'
     runs-on: windows-2022
-    timeout-minutes: 15
+    timeout-minutes: 180
+    env:
+      ARTIFACT_NAME: AIJARVISV2-93-o-official-reference-windows-x64-cuda
     steps:
-      - name: Check out source
+      - name: Check out pinned source
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
 
-      - name: Build lightweight mock-capable harness
-        shell: powershell
-        run: |
-          cmake -S tools/o-reference-harness-v2 -B build/o-reference-no-gpu `
-            -G "Visual Studio 17 2022" -A x64 `
-            -DO_REFERENCE_HARNESS_WITH_LOCKED_RUNTIME=OFF -DBUILD_TESTING=OFF
-          if ($LASTEXITCODE -ne 0) { throw "no-GPU configure failed" }
-          cmake --build build/o-reference-no-gpu --config Release --target o-reference-harness-v2 --parallel
-          if ($LASTEXITCODE -ne 0) { throw "no-GPU build failed" }
-          $packageRoot = Join-Path $env:RUNNER_TEMP "Task93 Mock Package 中文 path"
-          cmake --install build/o-reference-no-gpu --config Release --prefix $packageRoot
-          if ($LASTEXITCODE -ne 0) { throw "no-GPU install failed" }
-          "TASK93_MOCK_PACKAGE=$packageRoot" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+      - name: Check out pinned official runtime source
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          repository: tc-mb/llama.cpp-omni
+          ref: 5202b7b2f4d11f50b9f996161e7a2f8b8571b890
+          path: build/task93-official-runtime-source
 
-      - name: Run real runner with mock result sources in Windows PowerShell 5.1
-        shell: powershell
+      - name: Verify upstream locks
+        shell: pwsh
         run: |
-          $version = $PSVersionTable.PSVersion
-          if ($version.Major -ne 5 -or $version.Minor -ne 1) {
-            throw "Expected Windows PowerShell 5.1, got $version"
+          $lock = Get-Content tools/o-official-reference/upstream-lock.json -Raw -Encoding UTF8 | ConvertFrom-Json
+          $runtime = @($lock.components | Where-Object name -eq "llama.cpp-omni")
+          $demo = @($lock.components | Where-Object name -eq "MiniCPM-o-Demo-Comni")
+          $runtimeHead = git -C build/task93-official-runtime-source rev-parse HEAD
+          if ($runtime.Count -ne 1 -or $runtime[0].commit -ne $runtimeHead -or
+              $runtimeHead -ne "5202b7b2f4d11f50b9f996161e7a2f8b8571b890" -or
+              $demo.Count -ne 1 -or $demo[0].commit -ne "9af4308a93ca889ddf5c7c7bde1bcfbb6ff9b147") {
+            throw "Official upstream lock verification failed"
           }
-          powershell.exe -NoProfile -ExecutionPolicy Bypass -File `
-            tools/o-reference-harness-v2/tests/windows-no-gpu-smoke.ps1 `
-            -PackageRoot $env:TASK93_MOCK_PACKAGE
-          if ($LASTEXITCODE -ne 0) { throw "PowerShell 5.1 no-GPU smoke failed" }
+
+      - name: Fetch pinned CUDA redistributable licenses
+        shell: pwsh
+        run: |
+          $redistribBase = "https://developer.download.nvidia.com/compute/cuda/redist"
+          $licenseRoot = Join-Path $env:RUNNER_TEMP "task93-cuda-redistributable-licenses"
+          New-Item -ItemType Directory -Path $licenseRoot -Force | Out-Null
+          $manifestPath = Join-Path $licenseRoot "redistrib_$env:CUDA_VERSION.json"
+          Invoke-WebRequest -Uri "$redistribBase/redistrib_$env:CUDA_VERSION.json" -OutFile $manifestPath
+          $manifestSha256 = (Get-FileHash -LiteralPath $manifestPath -Algorithm SHA256).Hash.ToLowerInvariant()
+          if ($manifestSha256 -ne "249e28a83008d711d5f72880541c8be6253f6d61608461de4fcb715554a6cf17") {
+            throw "CUDA redistributable manifest hash mismatch: $manifestSha256"
+          }
+          $manifest = Get-Content -LiteralPath $manifestPath -Raw -Encoding UTF8 | ConvertFrom-Json
+          $components = @(
+            [pscustomobject]@{ name = "cuda_cudart"; version = "12.8.90"; license_path = "cuda_cudart/LICENSE.txt"; output = "cuda_cudart-LICENSE.txt" },
+            [pscustomobject]@{ name = "libcublas"; version = "12.8.4.1"; license_path = "libcublas/LICENSE.txt"; output = "libcublas-LICENSE.txt" }
+          )
+          foreach ($component in $components) {
+            $metadata = $manifest.PSObject.Properties[$component.name].Value
+            if ($null -eq $metadata -or $metadata.version -ne $component.version -or
+                $metadata.license -ne "CUDA Toolkit" -or $metadata.license_path -ne $component.license_path -or
+                $null -eq $metadata.PSObject.Properties["windows-x86_64"].Value) {
+              throw "CUDA redistributable metadata mismatch for $($component.name)"
+            }
+            $licensePath = Join-Path $licenseRoot $component.output
+            Invoke-WebRequest -Uri "$redistribBase/$($component.license_path)" -OutFile $licensePath
+            $licenseSha256 = (Get-FileHash -LiteralPath $licensePath -Algorithm SHA256).Hash.ToLowerInvariant()
+            if ($licenseSha256 -ne "e2c71babfd18a8e69542dd7e9ca018f9caa438094001a58e6bc4d8c999bf0d07") {
+              throw "CUDA redistributable license hash mismatch: $licenseSha256"
+            }
+          }
+          "TASK93_CUDA_LICENSE_ROOT=$licenseRoot" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: Install pinned CUDA build toolkit
+        shell: pwsh
+        run: |
+          $installer = Join-Path $env:RUNNER_TEMP "cuda_$env:CUDA_VERSION`_windows_network.exe"
+          Invoke-WebRequest `
+            -Uri "https://developer.download.nvidia.com/compute/cuda/$env:CUDA_VERSION/network_installers/cuda_$env:CUDA_VERSION`_windows_network.exe" `
+            -OutFile $installer
+          $cudaMinor = ($env:CUDA_VERSION -split '\.')[0..1] -join '.'
+          $process = Start-Process -FilePath $installer -ArgumentList @(
+            '-s', "nvcc_$cudaMinor", "cudart_$cudaMinor", "cublas_$cudaMinor",
+            "cublas_dev_$cudaMinor", "visual_studio_integration_$cudaMinor"
+          ) -Wait -PassThru
+          if ($process.ExitCode -ne 0) { throw "CUDA network installer failed: $($process.ExitCode)" }
+          $cudaPath = "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v$cudaMinor"
+          if (-not (Test-Path -LiteralPath (Join-Path $cudaPath 'bin\nvcc.exe'))) {
+            throw "CUDA nvcc was not installed under $cudaPath"
+          }
+          "CUDA_PATH=$cudaPath" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          (Join-Path $cudaPath 'bin') | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+
+      - name: Build official llama-omni-server
+        shell: pwsh
+        run: |
+          cmake -S build/task93-official-runtime-source -B build/task93-official-runtime `
+            -G "Visual Studio 17 2022" -A x64 -T "cuda=$env:CUDA_PATH" `
+            -DGGML_CUDA=ON -DGGML_CUDA_NCCL=OFF -DBUILD_SHARED_LIBS=OFF `
+            -DGGML_NATIVE=OFF '-DCMAKE_CUDA_ARCHITECTURES=86;89;120' `
+            -DLLAMA_BUILD_TESTS=OFF -DLLAMA_BUILD_EXAMPLES=OFF -DLLAMA_BUILD_SERVER=ON
+          if ($LASTEXITCODE -ne 0) { throw "official runtime configure failed" }
+          cmake --build build/task93-official-runtime --config Release --target llama-omni-server --parallel
+          if ($LASTEXITCODE -ne 0) { throw "llama-omni-server build failed" }
+
+      - name: Build and test thin Task93 adapter
+        shell: pwsh
+        run: |
+          $runtimeSource = Join-Path $env:GITHUB_WORKSPACE "build/task93-official-runtime-source"
+          cmake -S tools/o-official-reference -B build/task93-official-adapter `
+            -G "Visual Studio 17 2022" -A x64 -DBUILD_TESTING=ON `
+            "-DAIJARVIS_OFFICIAL_RUNTIME_SOURCE_DIR=$runtimeSource"
+          if ($LASTEXITCODE -ne 0) { throw "thin adapter configure failed" }
+          cmake --build build/task93-official-adapter --config Release --parallel
+          if ($LASTEXITCODE -ne 0) { throw "thin adapter build failed" }
+          ctest --test-dir build/task93-official-adapter -C Release --output-on-failure
+          if ($LASTEXITCODE -ne 0) { throw "thin adapter tests failed" }
+          node tools/o-official-reference/tests/static_verification.js
+          if ($LASTEXITCODE -ne 0) { throw "Official-First static verification failed" }
+
+      - name: Package official reference Artifact
+        shell: pwsh
+        run: |
+          $packageRoot = Join-Path $env:GITHUB_WORKSPACE "build/artifact/$env:ARTIFACT_NAME"
+          ./tools/o-official-reference/package-official.ps1 `
+            -RepositoryRoot $env:GITHUB_WORKSPACE `
+            -PackageRoot $packageRoot `
+            -RuntimeSourceRoot (Join-Path $env:GITHUB_WORKSPACE "build/task93-official-runtime-source") `
+            -RuntimeBuildRoot (Join-Path $env:GITHUB_WORKSPACE "build/task93-official-runtime") `
+            -AdapterBuildRoot (Join-Path $env:GITHUB_WORKSPACE "build/task93-official-adapter") `
+            -CudaLicenseRoot $env:TASK93_CUDA_LICENSE_ROOT `
+            -SourceCommit $env:GITHUB_SHA `
+            -ArtifactName $env:ARTIFACT_NAME
+          if ($LASTEXITCODE -ne 0) { throw "Official-First packaging failed" }
+          $portable = Get-Content (Join-Path $packageRoot "portable-manifest.json") -Raw -Encoding UTF8 | ConvertFrom-Json
+          if ($portable.runtime_commit -ne "5202b7b2f4d11f50b9f996161e7a2f8b8571b890" -or
+              $portable.models_included -ne 0 -or $portable.o_in_07_media_included -ne 0) {
+            throw "Official-First portable manifest failed"
+          }
+
+      - name: Upload official reference Artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: ${{ env.ARTIFACT_NAME }}
+          path: build/artifact/${{ env.ARTIFACT_NAME }}
+          if-no-files-found: error
+          retention-days: 14

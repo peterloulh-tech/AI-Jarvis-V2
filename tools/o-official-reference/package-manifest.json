@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "artifact_name": "AIJARVISV2-93-o-official-reference-windows-x64-cuda",
+  "models_included": false,
+  "o_in_07_media_included": false,
+  "required_files": [
+    "bin/llama-omni-server.exe",
+    "bin/aijarvisv2-o-official-adapter.exe",
+    "run-o-official-reference.ps1",
+    "official-config.json",
+    "upstream-lock.json",
+    "fixture/O-IN-07/manifest.json",
+    "fixture/O-IN-07/gold.json",
+    "fixture/O-IN-07/authorization.md",
+    "licenses/llama.cpp-omni/LICENSE",
+    "licenses/llama.cpp-omni/upstream/LICENSE-httplib",
+    "licenses/llama.cpp-omni/upstream/LICENSE-jsonhpp",
+    "licenses/AI-Jarvis-V2/LICENSE",
+    "licenses/NVIDIA-CUDA/cuda_cudart-LICENSE.txt",
+    "licenses/NVIDIA-CUDA/libcublas-LICENSE.txt"
+  ]
+}

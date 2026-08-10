@@ -2,6 +2,8 @@
 
 > 审计日期：2026-08-09。对应 Dashi 任务：`AIJARVISV2-23`。本文件只覆盖当前 Local O 路线，不代表未来模型选型。
 
+> Task93 于 2026-08-11 按已批准的 Official-First 架构重新锁定运行基线：`tc-mb/llama.cpp-omni feat/web-demo@5202b7b2f4d11f50b9f996161e7a2f8b8571b890` 与 `OpenBMB/MiniCPM-o-Demo Comni@9af4308a93ca889ddf5c7c7bde1bcfbb6ff9b147`。精确来源、许可与使用组件见 [`tools/o-official-reference/upstream-lock.json`](../../../tools/o-official-reference/upstream-lock.json)；下文 `b9d15b8` 只保留为 Task23 Legacy 历史基线。
+
 ## 0. 使用规则
 
 - 这是 MiniCPM-o 与 `llama.cpp-omni` 的第三方官方行为基线，不是官方文档镜像，也不是新的需求或实现规范。

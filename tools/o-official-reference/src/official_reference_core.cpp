@@ -133,6 +133,65 @@ std::string wav_pcm16_to_float32_bytes(const std::string &wav) {
 
 }  // namespace
 
+TriggerOfferDecision PendingTriggerSlot::offer(PendingTrigger trigger) {
+  if (!pending_) {
+    pending_ = std::move(trigger);
+    return TriggerOfferDecision::Stored;
+  }
+  if (pending_->source == TriggerSource::Autonomous &&
+      trigger.source == TriggerSource::System) {
+    return TriggerOfferDecision::Ignored;
+  }
+  if (pending_->source == trigger.source && trigger.sequence <= pending_->sequence) {
+    return TriggerOfferDecision::Ignored;
+  }
+  pending_ = std::move(trigger);
+  return TriggerOfferDecision::Replaced;
+}
+
+std::optional<PendingTrigger> PendingTriggerSlot::take() {
+  auto trigger = std::move(pending_);
+  pending_.reset();
+  return trigger;
+}
+
+void PendingTriggerSlot::clear() { pending_.reset(); }
+
+std::size_t PendingTriggerSlot::depth() const { return pending_ ? 1U : 0U; }
+
+RunGenerationFence::RunGenerationFence(std::string initial_session_id)
+    : active_session_id_(std::move(initial_session_id)) {
+  require(!active_session_id_.empty(), "initial session id must not be empty");
+}
+
+std::uint64_t RunGenerationFence::generation() const { return generation_; }
+
+bool RunGenerationFence::paused() const { return paused_; }
+
+std::uint64_t RunGenerationFence::pause_and_invalidate(
+    PendingTriggerSlot &pending_slot) {
+  require(!paused_, "run generation is already paused");
+  pending_slot.clear();
+  paused_session_id_ = std::move(active_session_id_);
+  active_session_id_.clear();
+  paused_ = true;
+  ++generation_;
+  return generation_;
+}
+
+void RunGenerationFence::resume(std::string new_session_id) {
+  require(paused_, "run generation must be paused before resume");
+  require(!new_session_id.empty(), "resume session id must not be empty");
+  require(new_session_id != paused_session_id_, "resume requires a new session id");
+  active_session_id_ = std::move(new_session_id);
+  paused_ = false;
+}
+
+bool RunGenerationFence::accepts(std::uint64_t generation,
+                                 std::string_view session_id) const {
+  return !paused_ && generation == generation_ && session_id == active_session_id_;
+}
+
 void BackendEventCollector::feed(std::string_view event_json, std::int64_t elapsed_ms) {
   const auto event = nlohmann::json::parse(event_json);
   require(event.is_object() && event.contains("type") && event.at("type").is_string(),
@@ -173,6 +232,8 @@ void BackendEventCollector::feed(std::string_view event_json, std::int64_t elaps
     result_.completion_latency_ms = elapsed_ms;
   }
 }
+
+void BackendEventCollector::clear() { result_ = BackendResult{}; }
 
 const BackendResult &BackendEventCollector::result() const { return result_; }
 

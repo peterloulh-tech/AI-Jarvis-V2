@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <optional>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -8,6 +9,51 @@
 #include <nlohmann/json.hpp>
 
 namespace aijarvis::official_o {
+
+enum class TriggerSource {
+  System,
+  Autonomous,
+};
+
+struct PendingTrigger {
+  TriggerSource source;
+  std::uint64_t sequence;
+  std::string input_ref;
+};
+
+enum class TriggerOfferDecision {
+  Stored,
+  Replaced,
+  Ignored,
+};
+
+class PendingTriggerSlot {
+ public:
+  TriggerOfferDecision offer(PendingTrigger trigger);
+  std::optional<PendingTrigger> take();
+  void clear();
+  std::size_t depth() const;
+
+ private:
+  std::optional<PendingTrigger> pending_;
+};
+
+class RunGenerationFence {
+ public:
+  explicit RunGenerationFence(std::string initial_session_id);
+
+  std::uint64_t generation() const;
+  bool paused() const;
+  std::uint64_t pause_and_invalidate(PendingTriggerSlot &pending_slot);
+  void resume(std::string new_session_id);
+  bool accepts(std::uint64_t generation, std::string_view session_id) const;
+
+ private:
+  std::uint64_t generation_ = 1;
+  bool paused_ = false;
+  std::string active_session_id_;
+  std::string paused_session_id_;
+};
 
 struct BackendResult {
   std::string session_id;
@@ -21,6 +67,7 @@ struct BackendResult {
 class BackendEventCollector {
  public:
   void feed(std::string_view event_json, std::int64_t elapsed_ms);
+  void clear();
   const BackendResult &result() const;
 
  private:

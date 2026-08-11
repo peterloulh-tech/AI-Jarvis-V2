@@ -327,7 +327,6 @@ jobs:
             -CudaLicenseRoot $env:TASK93_CUDA_LICENSE_ROOT `
             -SourceCommit $env:GITHUB_SHA `
             -ArtifactName $env:ARTIFACT_NAME
-          if ($LASTEXITCODE -ne 0) { throw "Official-First packaging failed" }
           $portable = Get-Content (Join-Path $packageRoot "portable-manifest.json") -Raw -Encoding UTF8 | ConvertFrom-Json
           if ($portable.runtime_commit -ne "09f5c3f1b484759f17b06fc63574f749c89c8761" -or
               $portable.source_commit -ne $env:GITHUB_SHA -or

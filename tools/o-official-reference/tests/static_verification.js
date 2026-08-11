@@ -121,6 +121,9 @@ requireCondition(!workflow.includes("task93-powershell-5-no-gpu") &&
   !workflow.includes("tools/o-reference-harness-v2") &&
   !workflow.includes("5202b7b2f4d11f50b9f996161e7a2f8b8571b890") &&
   !workflow.includes("--target llama-server"), "workflow retains a conflicting Task93 route");
+requireCondition(!workflow.includes(
+  'if ($LASTEXITCODE -ne 0) { throw "Official-First packaging failed" }'),
+  "workflow must not treat stale native LASTEXITCODE as a PowerShell script result");
 
 const workflowRoot = path.join(repositoryRoot, ".github", "workflows");
 for (const file of fs.readdirSync(workflowRoot).filter((name) => /\.ya?ml$/.test(name))) {

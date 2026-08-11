@@ -1,6 +1,6 @@
 # AI Jarvis V2 当前状态
 
-> 快照日期：2026-08-11。任务状态以 Dashi 项目 `ai-jarvis-v2` 的当前回读为准。
+> 快照日期：2026-08-12。任务状态以 Dashi 项目 `ai-jarvis-v2` 的当前回读为准。
 
 ## 当前阶段与进度
 
@@ -24,9 +24,9 @@ AIJARVISV2-23 已冻结为 `Legacy Diagnostic PoC / 2026-08-09 Real-machine Base
 
 AIJARVISV2-92 已完成独立 Reference Harness v2、两个分离 profile、manifest 驱动的 33×1 秒/11×3 秒固定输入、streaming aggregation 与 completion 分层、三批 validator、离线 fixture/unit/static/dry-run、薄 Locked C API shim，以及既有 Windows/CUDA 构建链的最小接入准备，当前为 `done`，见[任务卡](tasks/AIJARVISV2-92.md)。
 
-AIJARVISV2-93 当前为 `in_progress`，活动架构锁定 `llama.cpp-omni master@09f5c3f1...` 的官方 `llama-omni-server /backend`，与 `MiniCPM-o-Demo main@d0a00209...` 当前 C++ backend 默认的 `master/origin/master` 关系一致；直接复用官方 SessionManager、协议事件、HTTP session close 与 `omni_prepare_for_reuse`。V2 仅保留 O-IN-07 WAV/JPEG payload 转换、1Hz 输入、三批契约、prompt 注入与证据薄层，见 [`tools/o-official-reference`](../../../tools/o-official-reference/)。正式需求首版禁用 TTS；LLM/audio/vision 三文件与当前官方 no-TTS 路径兼容，模型与哈希不变且继续外置；构建复用当前官方 Windows/CUDA workflow、Comni CMake 参数与 Task23 portable 补充。旧 `tools/o-reference-harness-v2` 保持 `LEGACY / RETIRED-PENDING-NEW-ROUTE-VALIDATION`，不被活动 workflow 或新实现调用；Task24 保持 `backlog`。
+AIJARVISV2-93 当前为 `in_progress`，活动架构锁定 `llama.cpp-omni master@09f5c3f1...` 的官方 `llama-omni-server /backend`，与 `MiniCPM-o-Demo main@d0a00209...` 当前 C++ backend 默认的 `master/origin/master` 关系一致；直接复用官方 SessionManager、协议事件、HTTP session close 与 `omni_prepare_for_reuse`。V2 仅保留 O-IN-07 WAV/JPEG payload 转换、1Hz 输入、三批契约、prompt 注入与证据薄层，见 [`tools/o-official-reference`](../../../tools/o-official-reference/)。正式需求首版禁用 TTS；LLM/audio/vision 三文件与当前官方 no-TTS 路径兼容，模型与哈希不变且继续外置。GitHub Actions run [`31500354700`](https://github.com/peterloulh-tech/AI-Jarvis-V2/actions/runs/31500354700) 已在提交 `d6a95b4` 成功完成官方 runtime、thin adapter、打包验证和 Artifact 上传，Task23 job 正确跳过；Artifact 为 `AIJARVISV2-93-o-official-reference-windows-x64-cuda`。旧 `tools/o-reference-harness-v2` 保持 `LEGACY / RETIRED-PENDING-NEW-ROUTE-VALIDATION`，不被活动 workflow 或新实现调用；Task24 保持 `backlog`。
 
-三层 Reuse-First 与 Official-First Runtime Rule 已启用：模型/runtime/session/streaming 优先直接使用锁定官方实现，AI Jarvis 只实现正式需求 Delta，不再为参考或测试建立独立 Runtime/Harness。
+四方审计与 Official-First Runtime Rule 已启用：按正式需求、当前官方、当前原作者、已验证项目资产的顺序判断，模型/runtime/session/streaming 优先直接使用成熟实现，AI Jarvis 只实现正式需求 Delta，不再为参考或测试建立独立 Runtime/Harness。
 
 ## 冻结基线
 
@@ -55,7 +55,7 @@ AIJARVISV2-93 当前为 `in_progress`，活动架构锁定 `llama.cpp-omni maste
 
 ## 开放风险与待实测项
 
-- O-C01 仍是唯一 PoC 准入组合；Official-First runtime baseline 已改变，`llama-omni-server` Windows/CUDA binary 必须重建。当前仅有 Mac/no-GPU 的 lock、`/backend` 协议/payload unit、三批 validator、O-IN-07 dry-run、workflow/package/static 证据；官方 Runtime/Session、startup LISTEN、自主 LISTEN/SPEAK、延迟、显存、session reuse 与 process cleanup 均为 `DYNAMIC_ONLY`，尚无 Windows/NVIDIA PASS。Qwen2.5-Omni 候补边界不变。
+- O-C01 仍是唯一 PoC 准入组合；Official-First `llama-omni-server` Windows/CUDA binary、thin adapter 和便携 Artifact 已构建并通过 workflow/package/static 门，但 GitHub hosted runner 无 NVIDIA 真机能力。官方 Runtime/Session、startup LISTEN、自主 LISTEN/SPEAK、延迟、显存、session reuse 与 process cleanup 仍为 `DYNAMIC_ONLY`，尚无 Windows/NVIDIA PASS；Qwen2.5-Omni 候补边界不变。
 - 2026-08-09 已批准的 Online V1 需求已同步为当前正式基线（功能 `270e0b1f...c90`、非功能 `f65950be...7b5`）；Task93 已据此建立 Local O 能力矩阵。Task90/91 原有新 SHA 引用保持不变，未批量改写历史 Dashi 任务。
 - V 候选模型和原生多图能力、许可回放/变化标注/事件高光金标、8GB/12GB+ 真机，以及 1～3 路延迟、吞吐、显存和 GPU 数据尚无实测证据。
 - O/V 共用语料、许可、脱敏、时间轴和金标格式已定义，但实际授权资产与双人标注尚待制作；事件、高光、相关性和质量阈值仍待选型后校准。
@@ -68,4 +68,4 @@ AIJARVISV2-93 当前为 `in_progress`，活动架构锁定 `llama.cpp-omni maste
 
 ## 下一步注意事项
 
-当前只推进 AIJARVISV2-93：人工从已注册的 `AIJARVISV2-23 Windows portable PoC` workflow 选择 ref `codex/aijarvisv2-93-official-first`，仅执行 `task93-official-first`，预期 Artifact 为 `AIJARVISV2-93-o-official-reference-windows-x64-cuda`。本地不触发或等待 Actions；取得 Artifact 后再执行 RTX 5070 Ti 16GB 动态验收。动态 PASS 前不得删除 Legacy Harness、宣称 O-C01 正式可行或启动 AIJARVISV2-24。
+当前只推进 AIJARVISV2-93：使用 run `31500354700` 成功产出的 `AIJARVISV2-93-o-official-reference-windows-x64-cuda`，配合外置三模型与 O-IN-07 媒体执行 RTX 5070 Ti 16GB 动态验收。动态 PASS 前不得删除 Legacy Harness、宣称 O-C01 正式可行或启动 AIJARVISV2-24。

@@ -27,6 +27,18 @@ enum class TriggerOfferDecision {
   Ignored,
 };
 
+enum class TimelineProgress {
+  Continue,
+  Complete,
+  MissingSpeak,
+};
+
+TimelineProgress evaluate_timeline_progress(std::size_t sent,
+                                            std::size_t terminal,
+                                            std::size_t expected,
+                                            bool saw_speak);
+bool is_terminal_backend_event(std::string_view type, std::string_view kind);
+
 class PendingTriggerSlot {
  public:
   TriggerOfferDecision offer(PendingTrigger trigger);

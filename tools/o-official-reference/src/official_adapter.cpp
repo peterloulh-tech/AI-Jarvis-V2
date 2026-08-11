@@ -220,17 +220,62 @@ nlohmann::json run_backend(const std::map<std::string, std::string> &options) {
       raw_events.push_back({{"elapsed_ms", elapsed}, {"event", event}});
 
       const auto type = event.value("type", "");
-      if (type == "response.done" ||
-          (type == "response.output.delta" && event.value("kind", "") == "listen")) {
+      if (aijarvis::official_o::is_terminal_backend_event(
+              type, event.value("kind", ""))) {
         ++terminal_count;
       }
-      if (collector.result().saw_done && !collector.result().content.empty()) {
-        break;
-      }
-      if (sent_count.load() == requests.size() && terminal_count >= requests.size()) {
+      const auto progress = aijarvis::official_o::evaluate_timeline_progress(
+          sent_count.load(), terminal_count, requests.size(),
+          collector.result().saw_done && !collector.result().content.empty());
+      if (progress == aijarvis::official_o::TimelineProgress::Complete) break;
+      if (progress == aijarvis::official_o::TimelineProgress::MissingSpeak) {
         throw std::runtime_error("official O-IN-07 completed without a SPEAK text response");
       }
     }
+
+    stop.store(true);
+    producer_cv.notify_all();
+    if (producer.joinable()) producer.join();
+    {
+      std::lock_guard<std::mutex> lock(producer_mutex);
+      if (!producer_error.empty()) throw std::runtime_error(producer_error);
+    }
+
+    const auto collected = collector.result();
+    const auto parsed =
+        aijarvis::official_o::validate_contract(collected.content, styles, budget);
+    const auto post_close_generation =
+        generation_fence.pause_and_invalidate(pending_trigger);
+    collector.clear();
+    const auto active_close = close_session(options, session.session_id, hard_timeout);
+    session.ws->close();
+
+    return {
+        {"transport", "/backend"},
+        {"warmup_session_id", warmup_session_id},
+        {"warmup_close", warmup_close},
+        {"pause_resume_contract", {
+            {"paused_session_id", warmup_session_id},
+            {"paused_generation", warmup_generation},
+            {"resumed_session_id", session.session_id},
+            {"resumed_generation", active_generation},
+            {"new_session", session.session_id != warmup_session_id},
+        }},
+        {"session_id", session.session_id},
+        {"session_created", session.created_event},
+        {"session_close", active_close},
+        {"sent_inputs", sent_count.load()},
+        {"terminal_responses", terminal_count},
+        {"content", collected.content},
+        {"saw_listen", collected.saw_listen},
+        {"saw_done", collected.saw_done},
+        {"first_fragment_latency_ms", collected.first_fragment_latency_ms},
+        {"completion_latency_ms", collected.completion_latency_ms},
+        {"post_close_generation", post_close_generation},
+        {"pending_trigger_depth_after_pause", pending_trigger.depth()},
+        {"parsed", parsed},
+        {"events", raw_events},
+    };
   } catch (...) {
     stop.store(true);
     producer_cv.notify_all();
@@ -246,50 +291,6 @@ nlohmann::json run_backend(const std::map<std::string, std::string> &options) {
     session.ws->close();
     throw;
   }
-
-  stop.store(true);
-  producer_cv.notify_all();
-  if (producer.joinable()) producer.join();
-  {
-    std::lock_guard<std::mutex> lock(producer_mutex);
-    if (!producer_error.empty()) throw std::runtime_error(producer_error);
-  }
-
-  const auto collected = collector.result();
-  const auto parsed =
-      aijarvis::official_o::validate_contract(collected.content, styles, budget);
-  const auto post_close_generation =
-      generation_fence.pause_and_invalidate(pending_trigger);
-  collector.clear();
-  const auto active_close = close_session(options, session.session_id, hard_timeout);
-  session.ws->close();
-
-  return {
-      {"transport", "/backend"},
-      {"warmup_session_id", warmup_session_id},
-      {"warmup_close", warmup_close},
-      {"pause_resume_contract", {
-          {"paused_session_id", warmup_session_id},
-          {"paused_generation", warmup_generation},
-          {"resumed_session_id", session.session_id},
-          {"resumed_generation", active_generation},
-          {"new_session", session.session_id != warmup_session_id},
-      }},
-      {"session_id", session.session_id},
-      {"session_created", session.created_event},
-      {"session_close", active_close},
-      {"sent_inputs", sent_count.load()},
-      {"terminal_responses", terminal_count},
-      {"content", collected.content},
-      {"saw_listen", collected.saw_listen},
-      {"saw_done", collected.saw_done},
-      {"first_fragment_latency_ms", collected.first_fragment_latency_ms},
-      {"completion_latency_ms", collected.completion_latency_ms},
-      {"post_close_generation", post_close_generation},
-      {"pending_trigger_depth_after_pause", pending_trigger.depth()},
-      {"parsed", parsed},
-      {"events", raw_events},
-  };
 }
 
 }  // namespace

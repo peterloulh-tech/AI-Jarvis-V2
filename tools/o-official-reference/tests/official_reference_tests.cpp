@@ -43,6 +43,29 @@ int main(int argc, char **argv) {
     using aijarvis::official_o::TriggerOfferDecision;
     using aijarvis::official_o::TriggerSource;
 
+    struct TimelineCase {
+      std::size_t sent;
+      std::size_t terminal;
+      bool saw_speak;
+      aijarvis::official_o::TimelineProgress expected;
+    };
+    const std::vector<TimelineCase> timeline_cases = {
+        {4, 4, true, aijarvis::official_o::TimelineProgress::Continue},
+        {33, 32, true, aijarvis::official_o::TimelineProgress::Continue},
+        {33, 33, false, aijarvis::official_o::TimelineProgress::MissingSpeak},
+        {33, 33, true, aijarvis::official_o::TimelineProgress::Complete},
+    };
+    for (const auto &test_case : timeline_cases) {
+      require(aijarvis::official_o::evaluate_timeline_progress(
+                  test_case.sent, test_case.terminal, 33, test_case.saw_speak) ==
+                  test_case.expected,
+              "official timeline completion rule changed");
+    }
+    require(!aijarvis::official_o::is_terminal_backend_event(
+                "response.output.delta", "listen") &&
+                aijarvis::official_o::is_terminal_backend_event("response.done", ""),
+            "official LISTEN delta and response.done were not classified as one terminal");
+
     struct TriggerCase {
       TriggerSource first_source;
       TriggerSource second_source;
@@ -118,6 +141,8 @@ int main(int argc, char **argv) {
     collector.feed(R"({"type":"response.output.delta","kind":"text","session_id":"official-session","response_id":"r1","text":"第一批"})", 17);
     collector.feed(R"({"type":"response.output.delta","kind":"text","session_id":"official-session","response_id":"r1","text":"第二批"})", 29);
     collector.feed(R"({"type":"response.done","session_id":"official-session","response_id":"r1","text":"第一批第二批","reason":"turn_end"})", 31);
+    collector.feed(R"({"type":"response.output.delta","kind":"listen","session_id":"official-session","response_id":"r2"})", 48);
+    collector.feed(R"({"type":"response.done","session_id":"official-session","response_id":"r2","text":"","reason":"turn_end"})", 49);
     const auto result = collector.result();
     require(result.session_id == "official-session", "backend session id changed");
     require(result.content == "第一批第二批", "backend text delta order changed");
@@ -125,7 +150,7 @@ int main(int argc, char **argv) {
     require(result.first_fragment_latency_ms == 17,
             "first-fragment latency must use the first content event");
     require(result.completion_latency_ms == 31,
-            "completion latency must end at official response.done");
+            "later LISTEN must not overwrite the SPEAK completion latency");
 
     aijarvis::official_o::BackendEventCollector listen_collector;
     listen_collector.feed(R"({"type":"session.created","session_id":"listen-session","mode":"full_duplex"})", 1);

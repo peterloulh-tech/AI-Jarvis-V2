@@ -185,8 +185,12 @@ try {
         --timeout-seconds ([string]$profileConfig.hard_timeout_seconds)
     if ($LASTEXITCODE -ne 0) { throw "official /backend evidence session failed" }
     $backendRun = ($runJson | Out-String) | ConvertFrom-Json
+    $expectedInputs = @($manifest.chunks).Count
     if ($backendRun.transport -ne "/backend" -or -not $backendRun.warmup_close.closed -or
-        -not $backendRun.session_close.closed -or [string]::IsNullOrWhiteSpace([string]$backendRun.content)) {
+        -not $backendRun.session_close.closed -or [string]::IsNullOrWhiteSpace([string]$backendRun.content) -or
+        [int]$backendRun.sent_inputs -ne $expectedInputs -or
+        [int]$backendRun.terminal_responses -ne $expectedInputs -or
+        -not $backendRun.pause_resume_contract.new_session) {
         throw "official /backend lifecycle evidence is incomplete"
     }
     Write-JsonUtf8 -Value $backendRun.events -Path (Join-Path $EvidenceRoot "backend-events.json")

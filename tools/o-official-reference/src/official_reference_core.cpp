@@ -133,6 +133,18 @@ std::string wav_pcm16_to_float32_bytes(const std::string &wav) {
 
 }  // namespace
 
+TimelineProgress evaluate_timeline_progress(std::size_t sent,
+                                            std::size_t terminal,
+                                            std::size_t expected,
+                                            bool saw_speak) {
+  if (sent < expected || terminal < expected) return TimelineProgress::Continue;
+  return saw_speak ? TimelineProgress::Complete : TimelineProgress::MissingSpeak;
+}
+
+bool is_terminal_backend_event(std::string_view type, std::string_view) {
+  return type == "response.done";
+}
+
 TriggerOfferDecision PendingTriggerSlot::offer(PendingTrigger trigger) {
   if (!pending_) {
     pending_ = std::move(trigger);
@@ -207,7 +219,7 @@ void BackendEventCollector::feed(std::string_view event_json, std::int64_t elaps
     const auto kind = event.value("kind", "");
     if (kind == "listen") {
       result_.saw_listen = true;
-      result_.completion_latency_ms = elapsed_ms;
+      if (!result_.saw_done) result_.completion_latency_ms = elapsed_ms;
       return;
     }
     if (kind == "text") {
@@ -226,10 +238,14 @@ void BackendEventCollector::feed(std::string_view event_json, std::int64_t elaps
   if (type == "response.done") {
     if (event.contains("text") && event.at("text").is_string()) {
       const auto complete = event.at("text").get<std::string>();
-      if (!complete.empty()) result_.content = complete;
+      if (!complete.empty()) {
+        result_.content = complete;
+        result_.completion_latency_ms = elapsed_ms;
+      } else if (result_.content.empty()) {
+        result_.completion_latency_ms = elapsed_ms;
+      }
     }
     result_.saw_done = true;
-    result_.completion_latency_ms = elapsed_ms;
   }
 }
 

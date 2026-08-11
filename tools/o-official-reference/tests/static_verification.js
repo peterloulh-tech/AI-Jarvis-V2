@@ -53,8 +53,6 @@ for (const required of [
   'url + "/backend"',
   "build_session_init_request",
   "build_input_append_request",
-  'type == "response.done"',
-  'kind\", \"\") == \"listen\"',
   '"/sessions/" + session_id + "/close"',
 ]) {
   requireCondition(adapter.includes(required), `adapter missing official backend primitive: ${required}`);
@@ -62,6 +60,9 @@ for (const required of [
 requireCondition(core.includes('"type", "session.init"') &&
   core.includes('"type", "input.append"') && core.includes('"audio_base64"') &&
   core.includes('"video_frames"'), "official backend payload builders are incomplete");
+requireCondition(core.includes('type == "response.done"') &&
+  core.includes('kind == "listen"') && core.includes("is_terminal_backend_event"),
+  "official backend terminal classification is incomplete");
 requireCondition(!adapter.includes("SseCollector") && !core.includes("SseCollector") &&
   !adapter.includes("/v1/stream/") && !core.includes("build_init_prefill_request"),
   "HTTP/SSE boundary remains active");

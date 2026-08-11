@@ -330,10 +330,28 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw "Official-First packaging failed" }
           $portable = Get-Content (Join-Path $packageRoot "portable-manifest.json") -Raw -Encoding UTF8 | ConvertFrom-Json
           if ($portable.runtime_commit -ne "09f5c3f1b484759f17b06fc63574f749c89c8761" -or
+              $portable.source_commit -ne $env:GITHUB_SHA -or
               $portable.transport -ne "/backend" -or
               $portable.models_included -ne 0 -or $portable.o_in_07_media_included -ne 0) {
             throw "Official-First portable manifest failed"
           }
+
+      - name: Verify packaged official tools
+        shell: pwsh
+        run: |
+          $packageRoot = Join-Path $env:GITHUB_WORKSPACE "build/artifact/$env:ARTIFACT_NAME"
+          $server = Join-Path $packageRoot "bin/llama-omni-server.exe"
+          & $server --version *> $null
+          if ($LASTEXITCODE -ne 0) { throw "Packaged llama-omni-server preflight failed" }
+
+          $emptyModels = Join-Path $env:RUNNER_TEMP "task93-empty-models"
+          New-Item -ItemType Directory -Path $emptyModels -Force | Out-Null
+          & (Join-Path $packageRoot "run-o-official-reference.ps1") `
+            -PackageRoot $packageRoot `
+            -ModelRoot $emptyModels `
+            -InputRoot (Join-Path $packageRoot "fixture/O-IN-07") `
+            -DryRun *> $null
+          if ($LASTEXITCODE -ne 0) { throw "Packaged thin adapter dry-run failed" }
 
       - name: Upload official reference Artifact
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02

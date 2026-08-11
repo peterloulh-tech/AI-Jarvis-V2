@@ -341,13 +341,21 @@ jobs:
         run: |
           $packageRoot = Join-Path $env:GITHUB_WORKSPACE "build/artifact/$env:ARTIFACT_NAME"
           $server = Join-Path $packageRoot "bin/llama-omni-server.exe"
-          $serverVersionOutput = @(& $server --version 2>&1)
-          $serverExitCode = $LASTEXITCODE
-          if ($serverExitCode -ne 0) {
-            $serverVersionText = ($serverVersionOutput | Out-String).Trim()
-            throw "Packaged llama-omni-server preflight failed with exit code ${serverExitCode}:`n$serverVersionText"
+          if (-not (Test-Path -LiteralPath $server -PathType Leaf)) {
+            throw "Packaged llama-omni-server is missing: $server"
           }
-          $serverVersionOutput | ForEach-Object { Write-Host $_ }
+          $nvidiaDriver = Join-Path $env:SystemRoot "System32\nvcuda.dll"
+          if (Test-Path -LiteralPath $nvidiaDriver -PathType Leaf) {
+            $serverVersionOutput = @(& $server --version 2>&1)
+            $serverExitCode = $LASTEXITCODE
+            if ($serverExitCode -ne 0) {
+              $serverVersionText = ($serverVersionOutput | Out-String).Trim()
+              throw "Packaged llama-omni-server preflight failed with exit code ${serverExitCode}:`n$serverVersionText"
+            }
+            $serverVersionOutput | ForEach-Object { Write-Host $_ }
+          } else {
+            Write-Host "Skipping CUDA server execution: hosted build runner has no NVIDIA driver (nvcuda.dll)."
+          }
 
           $emptyModels = Join-Path $env:RUNNER_TEMP "task93-empty-models"
           New-Item -ItemType Directory -Path $emptyModels -Force | Out-Null

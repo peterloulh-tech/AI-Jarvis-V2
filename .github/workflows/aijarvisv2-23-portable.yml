@@ -293,7 +293,8 @@ jobs:
             -G "Ninja Multi-Config" ^
             -DGGML_CUDA=ON -DGGML_CUDA_NCCL=OFF -DBUILD_SHARED_LIBS=OFF ^
             -DGGML_CUDA_CUB_3DOT2=ON -DGGML_NATIVE=OFF "-DCMAKE_CUDA_ARCHITECTURES=86;89;120" ^
-            -DLLAMA_BUILD_TESTS=OFF -DLLAMA_BUILD_EXAMPLES=OFF -DLLAMA_BUILD_SERVER=ON -DLLAMA_CURL=OFF
+            -DLLAMA_BUILD_TESTS=OFF -DLLAMA_BUILD_EXAMPLES=OFF -DLLAMA_BUILD_SERVER=ON ^
+            -DLLAMA_CURL=OFF -DLLAMA_OPENSSL=OFF
           if errorlevel 1 exit /b 1
           cmake --build build/task93-official-runtime --config Release --target llama-omni-server --parallel
           if errorlevel 1 exit /b 1
@@ -340,8 +341,13 @@ jobs:
         run: |
           $packageRoot = Join-Path $env:GITHUB_WORKSPACE "build/artifact/$env:ARTIFACT_NAME"
           $server = Join-Path $packageRoot "bin/llama-omni-server.exe"
-          & $server --version *> $null
-          if ($LASTEXITCODE -ne 0) { throw "Packaged llama-omni-server preflight failed" }
+          $serverVersionOutput = @(& $server --version 2>&1)
+          $serverExitCode = $LASTEXITCODE
+          if ($serverExitCode -ne 0) {
+            $serverVersionText = ($serverVersionOutput | Out-String).Trim()
+            throw "Packaged llama-omni-server preflight failed with exit code ${serverExitCode}:`n$serverVersionText"
+          }
+          $serverVersionOutput | ForEach-Object { Write-Host $_ }
 
           $emptyModels = Join-Path $env:RUNNER_TEMP "task93-empty-models"
           New-Item -ItemType Directory -Path $emptyModels -Force | Out-Null

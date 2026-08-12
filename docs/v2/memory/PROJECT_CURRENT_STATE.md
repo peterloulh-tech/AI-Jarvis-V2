@@ -24,7 +24,7 @@ AIJARVISV2-23 已冻结为 `Legacy Diagnostic PoC / 2026-08-09 Real-machine Base
 
 AIJARVISV2-25 已完成 V 候选 Official-First 静态筛选并经用户验收为 `done`。测试候选锁定为两个独立 profile：`V-C01` Qwen3-VL-4B-Instruct Q4_K_M + Q8 mmproj，以及 `V-C02` MiniCPM-V-4.6 Q4_K_M + F16 mmproj，均复用 `llama-server b10369@6e62ba5...`。任务 26 必须在同一测试包、同一 fixture/prompt/schema/评分口径下分别实测，当前不指定最终产品模型；每轮只允许一个服务和一份已加载权重。Windows/NVIDIA、1～3 图、8/12GB、结构质量、乱序/取消/复位、性能、完整离线包和再分发均未验证，见[任务卡](tasks/AIJARVISV2-25.md)。
 
-AIJARVISV2-26 已交付独立 V 多图测试包并在 Mac/Metal 顺序回放两个锁定 profile，Dashi 仍为 `in_progress` 且已形成阻塞里程碑：V-C01 因锁定 GGUF 架构标识与 b10369 冲突，加载失败且 0 次调用；V-C02 完成 9 次单请求，JSON/schema 9/9，但完整契约 0/9（emit 0/9、level 3/9），未达到“至少一个候选稳定返回协议字段”的硬门。Windows/NVIDIA、8/12GB 与正式许可语料全部保持 `UNCONFIRMED/BLOCKED`，任务 27/28 未启动；因未进入 `in_review`，本轮不创建任务卡或 README 索引。
+AIJARVISV2-26 已交付独立 V 多图测试包并在 Mac/Metal 顺序回放两个锁定 profile，Dashi 当前为 `blocked`：V-C01 因锁定 GGUF 架构标识与 b10369 冲突，加载失败且 0 次调用；V-C02 完成 9 次单请求，JSON/schema 9/9，但完整契约 0/9（emit 0/9、level 3/9），未达到“至少一个候选稳定返回协议字段”的硬门。Windows/NVIDIA、8/12GB 与正式许可语料全部保持 `UNCONFIRMED/BLOCKED`，任务 27/28 未启动；因未进入 `in_review`，本轮不创建任务卡或 README 索引。
 
 AIJARVISV2-92 已完成独立 Reference Harness v2、两个分离 profile、manifest 驱动的 33×1 秒/11×3 秒固定输入、streaming aggregation 与 completion 分层、三批 validator、离线 fixture/unit/static/dry-run、薄 Locked C API shim，以及既有 Windows/CUDA 构建链的最小接入准备，当前为 `done`，见[任务卡](tasks/AIJARVISV2-92.md)。
 

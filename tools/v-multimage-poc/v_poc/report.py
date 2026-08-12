@@ -46,7 +46,16 @@ def summarize_run(profile_id: str, results: list[dict[str, Any]]) -> dict[str, A
         "by_image_count": by_image_count,
         "model_calls": sum(result.get("model_call_count", 0) for result in results),
         "repair_calls": sum(result.get("repair_call_count", 0) for result in results),
-        "hard_gate": "PASS" if results and len(valid) == len(results) else "FAIL",
+        "hard_gate": (
+            "PASS"
+            if (
+                results
+                and len(valid) == len(results)
+                and len(emit_correct) == len(results)
+                and len(level_correct) == len(results)
+            )
+            else "FAIL"
+        ),
         "quality_threshold": "PENDING_CALIBRATION",
     }
 

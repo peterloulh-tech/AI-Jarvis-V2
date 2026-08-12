@@ -68,6 +68,26 @@ class ProfileTests(unittest.TestCase):
         self.assertEqual(summary["hard_gate"], "FAIL")
         self.assertEqual(summary["quality_threshold"], "PENDING_CALIBRATION")
 
+    def test_hard_gate_rejects_structurally_valid_but_wrong_decisions(self) -> None:
+        results = [
+            {
+                "case_id": "calm-1",
+                "image_count": 1,
+                "validation": {
+                    "classification": "VALID",
+                    "syntax_schema_valid": True,
+                },
+                "score": {"emit_correct": False, "level_correct": False},
+            }
+        ]
+
+        summary = summarize_run("V-C01", results)
+
+        self.assertEqual(summary["contract_valid"], {"numerator": 1, "denominator": 1})
+        self.assertEqual(summary["emit_correct"], {"numerator": 0, "denominator": 1})
+        self.assertEqual(summary["level_correct"], {"numerator": 0, "denominator": 1})
+        self.assertEqual(summary["hard_gate"], "FAIL")
+
 
 if __name__ == "__main__":
     unittest.main()

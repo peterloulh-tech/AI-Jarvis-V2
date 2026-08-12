@@ -1,6 +1,6 @@
 # AIJARVISV2-26 — 验证 V 多图单次结构化输出 PoC
 
-- 状态：`in_review`（2026-08-13 按用户退回修正 V-C02，等待重新验收）
+- 状态：`done`（2026-08-13 用户确认 Qwen 制品身份并重新验收）
 - 交付提交：`4805a5d15c9403090b93e69e4df0fdb3945d3735`；复核修正 `4f2dfb18e12af7134ce78f7dab9bc89cb0b7c137`；验收修正 `c8fab1c`
 - 直接依赖：[AIJARVISV2-25](AIJARVISV2-25.md)
 

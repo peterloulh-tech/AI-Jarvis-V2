@@ -6,7 +6,7 @@
 
 ## 最终结果与关键文件
 
-新增 [V 候选筛选](../../requirements/v-model-runtime-candidate-screening.md)与 [revision lock](../../requirements/v-model-runtime-candidate-lock.json)。经用户复核，锁定两个测试候选：`V-C01` 为 Qwen3-VL-4B-Instruct Q4_K_M + Q8 mmproj，`V-C02` 为 MiniCPM-V-4.6 Q4_K_M + F16 mmproj；二者复用同一 `llama-server b10369`，分别代表质量/综合能力与低资源/效率路线。当前不指定最终产品模型。
+新增 [V 候选筛选](../../requirements/v-model-runtime-candidate-screening.md)与 [revision lock](../../requirements/v-model-runtime-candidate-lock.json)。经用户复核，锁定两个测试候选：`V-C01` 为 Qwen3-VL-4B-Instruct Q4_K_M + Q8 mmproj，`V-C02` 为 MiniCPM-V-4.6 Q4_K_M + F16 mmproj；二者复用同一 `llama-server b10369`。任务 26 动态纠正 V-C01 精确 GGUF 为同一官方模型的 `1cd86af...`（`qwen3vl`），候选方向不变。当前不指定最终产品模型。
 
 ## 后续不得破坏的约束
 
@@ -14,6 +14,6 @@
 
 ## 验证与遗留
 
-已静态复核固定 revision、release digest、server 源码、模型卡和许可证；未执行 Windows/NVIDIA、8/12GB、1～3 图、结构质量、乱序、取消、复位、延迟、吞吐、长稳、完整离线包或再分发许可回放，全部留给任务 26/27 及后续发布门。
+已静态复核固定 revision、release digest、server 源码、模型卡和许可证；任务 26 已在 Mac/Metal 动态回放两个 profile：V-C01 通过功能硬门，V-C02 因智能沉默失败而停止。Windows/NVIDIA、8/12GB、真实语料质量、乱序、取消、复位、吞吐、长稳、完整离线包或再分发许可回放仍留给后续任务与发布门。
 
 - 检索关键词：V-C01，V-C02，Qwen3-VL-4B，MiniCPM-V-4.6，llama-server，A/B，shared slots，multi-image，JSON Schema，8GB/12GB

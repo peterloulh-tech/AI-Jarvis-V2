@@ -63,15 +63,15 @@
       "artifacts": [
         {
           "name": "MiniCPM-V-4_6-Q4_K_M.gguf",
-          "observed_size": "529 MB",
-          "sha256": null,
-          "verification": "UNCONFIRMED: record the upstream LFS oid before any fallback PoC"
+          "size_bytes": 529101504,
+          "sha256": "6b0c74962c44bc6bf4b655b9b02c13eda9d5a0491543ae976d1ac18e4b7892e2",
+          "verification": "VERIFIED: official artifact digest replayed by AIJARVISV2-26"
         },
         {
           "name": "mmproj-model-f16.gguf",
-          "observed_size": "1.11 GB",
-          "sha256": null,
-          "verification": "UNCONFIRMED: record the upstream LFS oid before any fallback PoC"
+          "size_bytes": 1108746944,
+          "sha256": "ca931d861d0801d9003e50697cd764721a334107c0e0415a51168ee1938462de",
+          "verification": "VERIFIED: official artifact digest replayed by AIJARVISV2-26"
         }
       ]
     }

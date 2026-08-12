@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "runtime": {
+    "name": "llama-server",
+    "release": "b10369",
+    "revision": "6e62ba538478202094edc6c100c782719e310aa3",
+    "license": "MIT",
+    "parallel_slots": 1,
+    "continuous_batching": true
+  },
+  "profiles": [
+    {
+      "id": "V-C01",
+      "model": "Qwen3-VL-4B-Instruct",
+      "quantization": "Q4_K_M",
+      "mmproj_quantization": "Q8_0",
+      "license": "Apache-2.0",
+      "source_revision": "96588727e44c78b25ba03ea03b8e12f7e64fd0da",
+      "base_revision": "ebb281ec70b05090aa6165b016eac8ec08e71b17",
+      "gguf_revision": "594171a9fa4ab2a90f017aa69a323b270cd8d24f",
+      "model_specific_visual_parameters": {},
+      "artifacts": [
+        {
+          "role": "model",
+          "name": "Qwen3VL-4B-Instruct-Q4_K_M.gguf",
+          "size_bytes": 2497281696,
+          "sha256": "ce6a2eac86eeb49ffacb19d580ddd26c0d42cd0a0386b311158a5bf4a6996ffe"
+        },
+        {
+          "role": "mmproj",
+          "name": "mmproj-Qwen3VL-4B-Instruct-Q8_0.gguf",
+          "size_bytes": 453974304,
+          "sha256": "30ba2c7dd3127a4561b6cba9d13d0f711c91bdb38742e2f56d73c8cb596bd06d"
+        }
+      ]
+    },
+    {
+      "id": "V-C02",
+      "model": "MiniCPM-V-4.6",
+      "quantization": "Q4_K_M",
+      "mmproj_quantization": "F16",
+      "license": "Apache-2.0",
+      "source_revision": "0dbb566de090067266abb76e702fb289f09934c5",
+      "base_revision": "8169864629825dc1d755a5aa1cd8b5935dcbc83f",
+      "gguf_revision": "78e02f066e9819a60573b78a4275df8a0c27f698",
+      "model_specific_visual_parameters": {
+        "upstream_processor_reference": {
+          "scale_resolution": 448,
+          "max_slice_nums": 9,
+          "use_image_id": true
+        },
+        "note": "recorded only; the shared 896x512 comparison fixture is unchanged"
+      },
+      "artifacts": [
+        {
+          "role": "model",
+          "name": "MiniCPM-V-4_6-Q4_K_M.gguf",
+          "size_bytes": 529101504,
+          "sha256": "6b0c74962c44bc6bf4b655b9b02c13eda9d5a0491543ae976d1ac18e4b7892e2"
+        },
+        {
+          "role": "mmproj",
+          "name": "mmproj-model-f16.gguf",
+          "size_bytes": 1108746944,
+          "sha256": "ca931d861d0801d9003e50697cd764721a334107c0e0415a51168ee1938462de"
+        }
+      ]
+    }
+  ]
+}

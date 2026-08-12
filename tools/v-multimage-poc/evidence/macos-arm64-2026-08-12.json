@@ -1,0 +1,83 @@
+{
+  "schema_version": 1,
+  "dashi_task": "AIJARVISV2-26",
+  "environment": {
+    "os": "macOS",
+    "arch": "arm64",
+    "cpu": "Apple M1 Pro",
+    "memory_bytes": 34359738368,
+    "windows_nvidia": "UNCONFIRMED",
+    "vram_8gb": "UNCONFIRMED",
+    "vram_12gb_plus": "UNCONFIRMED"
+  },
+  "runtime": {
+    "name": "llama-server",
+    "release": "b10369",
+    "revision": "6e62ba538478202094edc6c100c782719e310aa3",
+    "source_build": "PASS",
+    "backend": "Metal",
+    "server_instances_per_run": 1,
+    "parallel_slots": 1
+  },
+  "fixture": {
+    "version": "AIJARVISV2-26-synthetic-v1",
+    "manifest_sha256": "600b47a13757395770708ccb6f4bca7f7fd9edaa422e077d38cc0960d856d3a0",
+    "canvas": "896x512 contain-no-stretch",
+    "groups": 9,
+    "limitations": [
+      "synthetic protocol fixture, not a League of Legends quality gold corpus",
+      "single-author labels, not two-person production calibration"
+    ]
+  },
+  "profiles": {
+    "V-C01": {
+      "artifact_sha256_verified": true,
+      "model_calls": 0,
+      "repair_calls": 0,
+      "conclusion": "BLOCKED",
+      "failure_class": "LOCKED_MODEL_RUNTIME_CONFLICT",
+      "evidence": "locked GGUF general.architecture=Qwen3VLForConditionalGeneration; locked b10369 accepts qwen3vl and exits during load with unknown model architecture"
+    },
+    "V-C02": {
+      "artifact_sha256_verified": true,
+      "load_ms": 1533.713,
+      "cases_total": 9,
+      "model_calls": 9,
+      "repair_calls": 0,
+      "syntax_schema_valid": {"numerator": 9, "denominator": 9},
+      "contract_valid": {"numerator": 0, "denominator": 9},
+      "emit_correct": {"numerator": 0, "denominator": 9},
+      "level_correct": {"numerator": 3, "denominator": 9},
+      "failure_classes": {
+        "EMIT_INCOMPLETE": 3,
+        "SILENCE_INCONSISTENT": 6
+      },
+      "request_elapsed_ms": {
+        "min": 1738.051,
+        "max": 4475.192
+      },
+      "conclusion": "FAIL",
+      "failure_samples": {
+        "calm-1": {"emit": true, "event": "+", "level": "none", "comments": [], "summary": "简单的视觉元素布局"},
+        "ordinary-3": {"emit": false, "event": "", "level": "none", "comments": [], "summary": "蓝色圆点在网格中移动"},
+        "highlight-2": {"emit": false, "event": "", "level": "none", "comments": [], "summary": "黄色物体有扩散效果"}
+      },
+      "raw_response_sha256": {
+        "calm-1": "0f006130994f4b1db048d08ef6107fbe590ce9f6df84c5d8aefbccc242925882",
+        "calm-2": "c27d768dac773f3f1eef453965b5b4135fac77436b91cf22e8e360becee14608",
+        "calm-3": "838217f5115299924c85c6efc41eba0bcd0adede74088ec309daea8c47db48e4",
+        "ordinary-1": "aef25cc1c90c481b6a429b9a30afaf75d05fdc51d3bd67c0237d75c21e93bd57",
+        "ordinary-2": "85eb84e250454eacad2070174e8814270f0d414f6063ee37110877479512bca4",
+        "ordinary-3": "e827314257cfe3d4cf5ed0a0dc55921575597cfbed0979a67260b672f689f946",
+        "highlight-1": "5986fb0e9eaff93001663d2689242a982ecc9c1e441b543b866f17c7b56f81d9",
+        "highlight-2": "7c9c41801fd2c6b91f03120e0f822270e28fa50743b3838824a05d86fa3a84da",
+        "highlight-3": "01d139a35da216f463115eff7f9d8f912a19a8f98d0d18cd731155de280abae2"
+      }
+    }
+  },
+  "overall": {
+    "conclusion": "BLOCKED",
+    "acceptance_met": false,
+    "reason": "no locked candidate completed the full one-call contract; Windows/NVIDIA remains unavailable"
+  }
+}

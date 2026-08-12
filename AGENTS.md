@@ -41,6 +41,10 @@ ChatGPT 是第二审计人，负责复核正式需求、四方审计、成熟能
 
 当前项目代码没有保留特权。已完成、已提交、测试通过或投入较多都不能压过正式需求及更高优先级成熟实现；项目资产与当前官方冲突时官方优先，重复或冲突资产必须退出活动路线。只有相关 upstream、model、runtime、API 或环境发生变化，现有证据缺失或冲突，或可靠判断确需源码证据时才深入重审；不得重复审计整个项目。
 
+### V 代码与 O 产品语义隔离
+
+V 模型代码必须走独立 V 路线并执行四方审计；禁止依赖、导入或链接 O Runtime、Harness、Session、Worker 及其产品语义，也不得为了复用而把 O 代码改造成通用框架。V 默认从冻结需求和当前官方成熟实现出发；只有纯工具或经审计证明不含 O 语义的平台基础设施可以复用，正确隔离优先于表面代码复用率。详细边界见 [`DEC-V-RUNTIME-INDEPENDENCE-01`](docs/v2/memory/DECISIONS.md)，仅在 V 任务涉及 runtime、共享代码或架构边界时按需读取。
+
 ### 成熟能力、Reference Harness 与基础设施
 
 准备新增或重写 Runtime、Harness、Session Manager、Streaming boundary、Server、Adapter 架构、Scheduler、Process Manager、测试框架、构建体系、模型接入层或数据基础设施前，必须先以证据证明当前官方、原作者和已验证项目资产均不能满足，并存在明确正式需求；否则不得开发。模型、runtime、session 或 streaming 已有成熟官方实现时直接以官方实现为基础，不得为参考或测试方便另建平行实现。

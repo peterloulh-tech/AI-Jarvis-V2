@@ -56,5 +56,5 @@
 | AIJARVISV2-21 | V1 资产复用阶段门 | `done` | 主要参考、局部复用、白名单、黑名单、V2 缺口 | 合并源码、资源、许可和依赖审计，冻结最终复用边界、发布门及缺失能力责任。 | [tasks/AIJARVISV2-21.md](tasks/AIJARVISV2-21.md) |
 | AIJARVISV2-22 | O 模型与运行时候选 | `done` | MiniCPM-o、llama.cpp-omni、SPEAK/LISTEN、O-C01、Qwen HOLD | 以八项硬门筛选 O 组合，准入唯一 PoC 路径并冻结自主触发、TTS 关闭及 P1 取证计划。 | [tasks/AIJARVISV2-22.md](tasks/AIJARVISV2-22.md) |
 | AIJARVISV2-23 | O 双工与自主文字 PoC | `done` | Legacy Diagnostic PoC、2026-08-09 真机、streaming fragment、Official Baseline | 冻结 RTX 5070 Ti 16GB 现场证据、四方 Delta、官方基线与诊断资产；后继 Reference Harness 链为 92→93→24。 | [tasks/AIJARVISV2-23.md](tasks/AIJARVISV2-23.md) |
-| AIJARVISV2-25 | V 模型与运行时候选 | `in_review` | V-C01、Qwen3-VL-4B、llama-server、shared slots、multi-image | 推荐单模型共享 slots 的 Qwen3-VL/llama.cpp PoC 路线，固定官方 revision、淘汰边界与任务 26/27 动态验证方案。 | [tasks/AIJARVISV2-25.md](tasks/AIJARVISV2-25.md) |
+| AIJARVISV2-25 | V 模型与运行时候选 | `in_review` | V-C01/V-C02、Qwen3-VL-4B、MiniCPM-V-4.6、A/B、shared slots | 锁定 Qwen 与 MiniCPM 两个独立测试 profile，同一 V 测试包分别实测后再冻结最终模型。 | [tasks/AIJARVISV2-25.md](tasks/AIJARVISV2-25.md) |
 | AIJARVISV2-92 | O Reference Harness v2 | `done` | official-runtime-reference、v2-contract、aggregation、runtime boundary、DYNAMIC-ONLY | 建立独立参考链、固定输入与离线验证，复用 Windows/CUDA 构建基础；动态验收交由任务 93。 | [tasks/AIJARVISV2-92.md](tasks/AIJARVISV2-92.md) |

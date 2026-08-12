@@ -53,8 +53,8 @@
       ]
     },
     {
-      "id": "V-H01",
-      "decision": "HOLD",
+      "id": "V-C02",
+      "decision": "POC",
       "model": "MiniCPM-V-4.6",
       "upstream_source_revision": "0dbb566de090067266abb76e702fb289f09934c5",
       "base_model_revision": "8169864629825dc1d755a5aa1cd8b5935dcbc83f",

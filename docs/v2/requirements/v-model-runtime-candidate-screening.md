@@ -6,7 +6,7 @@
 >
 > revision 锁：[v-model-runtime-candidate-lock.json](v-model-runtime-candidate-lock.json)
 
-本文件只筛选进入任务 26/27 的 Local V 候选，不冻结最终模型、量化、分辨率、显存、延迟、吞吐或发布资格。当前为 macOS，无 Windows/NVIDIA 真机；文中 `DIRECT/MODIFY/V2-ONLY` 只表示静态能力归属，所有动态项目均为 `UNCONFIRMED`，不得写作真机 PASS。
+本文件只筛选进入任务 26/27 的 Local V 候选，不冻结最终产品模型、分辨率、显存、延迟、吞吐或发布资格。经 2026-08-12 用户复核，测试候选锁定为 Qwen3-VL-4B-Instruct 与 MiniCPM-V-4.6 两个固定量化 profile；二者必须在同一 V 测试包、同一输入与协议下分别实测，再按证据决定最终产品模型，不以静态筛选预选胜者。当前为 macOS，无 Windows/NVIDIA 真机；文中 `DIRECT/MODIFY/V2-ONLY` 只表示静态能力归属，所有动态项目均为 `UNCONFIRMED`，不得写作真机 PASS。
 
 ## 1. 正式门与四方审计结论
 
@@ -37,15 +37,15 @@
 
 | ID | 模型 + runtime | 1～3 图/输入策略 | 共享并发、取消、复位 | 资源与许可风险 | 结论 |
 |---|---|---|---|---|---|
-| V-C01 | Qwen3-VL-4B-Instruct Q4_K_M + Q8 mmproj + `llama-server b10369` | 模型卡原生多图；官方无单一推荐分辨率，按显存设 `min/max_pixels`。任务 26 先用 **896×512** 画布（均为 32 倍数）等比 fit + padding，一组 1/2/3 图一次请求；该尺寸只是 PoC 起点 | 一个 inference-mode 服务、同一权重、`--parallel 1/2/3`；独立响应允许乱序。客户端断开/reader stop 可取消；进程重启 + generation bump 才是产品全局复位 | 固定模型文件约 2.95GB 不是显存；权重 Apache-2.0、runtime MIT。8GB 为**高风险待测目标**，12GB+ 仅代表更有余量，不是 PASS | `POC`：任务 26 唯一首选；中文/视觉/结构质量与 8GB 均未验证 |
-| V-H01 | MiniCPM-V-4.6 Q4_K_M + F16 mmproj + 同一 server | 官方原生多图；图片建议 `max_slice_nums=36/use_image_id=true`，但为压低内存，fallback PoC 从 896×512 留边与较低 slice 开始，不能把降采样写成质量通过 | 使用同一官方 slots/cancel/reset 边界 | 固定文件约 1.64GB，静态资源风险较低；官方“4GB GPU”是厂商口径，不是 Windows PASS。0.8B 文本头对事件/高光/风格/摘要一体输出风险高；两项 LFS SHA 尚未回放 | `HOLD`：仅当 V-C01 触发硬门失败时，在任务 26 同一 fixture 下评审是否启用，不自动替补 |
+| V-C01 | Qwen3-VL-4B-Instruct Q4_K_M + Q8 mmproj + `llama-server b10369` | 模型卡原生多图；官方无单一推荐分辨率，按显存设 `min/max_pixels`。任务 26 先用 **896×512** 画布（均为 32 倍数）等比 fit + padding，一组 1/2/3 图一次请求；该尺寸只是 PoC 起点 | 一个 inference-mode 服务、同一权重、`--parallel 1/2/3`；独立响应允许乱序。客户端断开/reader stop 可取消；进程重启 + generation bump 才是产品全局复位 | 固定模型文件约 2.95GB 不是显存；权重 Apache-2.0、runtime MIT。8GB 为**高风险待测目标**，12GB+ 仅代表更有余量，不是 PASS | `POC`：质量/综合能力候选；必须与 V-C02 同场实测，尚非最终模型 |
+| V-C02 | MiniCPM-V-4.6 Q4_K_M + F16 mmproj + 同一 server | 官方原生多图；图片建议 `max_slice_nums=36/use_image_id=true`。任务 26 使用与 V-C01 相同的原始 fixture、1/2/3 图分组和 896×512 等比留边起点；模型特有参数必须单独记录，不能用不同输入掩盖差异 | 使用同一官方 slots/cancel/reset 边界；每轮只加载 V-C01 或 V-C02 之一 | 固定文件约 1.64GB，静态资源风险较低；官方“4GB GPU”是厂商口径，不是 Windows PASS。0.8B 文本头对事件/高光/风格/摘要一体输出风险高；两项 LFS SHA 尚未回放 | `POC`：低资源/效率候选；必须与 V-C01 同场实测，尚非最终模型 |
 | V-X01 | Gemma 3 4B + llama.cpp | 原生视觉，官方固定 896×896 | runtime 能力同上 | 模型权重受 Gemma 条款、门控和 Prohibited Use Policy 约束；离线再分发审计成本高且无能力优势证据 | `REJECT`：存在 Apache 候选时不引入额外许可门 |
 | V-X02 | Qwen/MiniCPM + vLLM、SGLang 或 Transformers 服务 | 模型可多图 | vLLM 官方不原生支持 Windows；未发现比 llama server 更直接的 Windows 单权重 1～3 slot 路线 | Python/CUDA 依赖与离线包更大 | `REJECT`：违反 Official-First 最短 Windows 路线 |
 | V-X03 | V1/Task93 O runtime、多个模型进程或联网 API | 不满足 V 一次多图边界或引入在线核心 | 无共享单权重槽位，或用多副本伪装并发；Task93 O session 不得修改 | 与任务 21 黑名单、核心离线或用户边界冲突 | `REJECT`：`CONFLICT/DUPLICATE` |
 
-### 3.1 V-C01 一次推理契约
+### 3.1 两候选共同的一次推理契约
 
-任务 26 只用一个请求生成受 JSON Schema 约束的对象：`emit`（智能沉默）、`event`（至多一个主要事件）、`level`（`ordinary/highlight`）、`comments`（当前提交时固定风格的一个批次）及可选 `summary`（`maxLength: 30`）。`emit=false` 时业务字段为空；变化分数不进入 `level` 判断。schema 负责语法/枚举/长度上界，V2 薄校验器负责中文字符计数、时效、代次和字段一致性；失败只丢弃并留原始哈希，不得 OCR、分类、摘要或格式修复补调用。
+任务 26 对 V-C01、V-C02 使用同一请求契约：每组只用一个请求生成受 JSON Schema 约束的对象，包括 `emit`（智能沉默）、`event`（至多一个主要事件）、`level`（`ordinary/highlight`）、`comments`（当前提交时固定风格的一个批次）及可选 `summary`（`maxLength: 30`）。`emit=false` 时业务字段为空；变化分数不进入 `level` 判断。schema 负责语法/枚举/长度上界，V2 薄校验器负责中文字符计数、时效、代次和字段一致性；失败只丢弃并留原始哈希，不得 OCR、分类、摘要或格式修复补调用。
 
 `style_id` 在提交时固定；每个请求携带 `task_id/captured_at/run_generation` 和最多一条最近有效客观摘要。各 slot 独立结束，消费者按 `task_id` 接收乱序结果；只有更晚 `captured_at` 的当前代次有效摘要可更新状态。全局复位终止唯一 server、清空所有 slot/缓冲并提升 generation，旧结果一律失效；不启动备用模型副本。
 
@@ -57,17 +57,17 @@
 
 ### 任务 26：V 原生多图 PoC
 
-1. 只下载 lock 中 V-C01 两个模型文件并校验 SHA；使用 b10369 官方 Windows CUDA 12.4 资产，断网启动一个 `llama-server --parallel 1`。不写产品 adapter、不启用 V-H01。
-2. 复用 V-IN-04/05：同一许可事件分别生成 1/2/3 图组，先统一成 896×512 等比留边画布，每组一个 request/call id；同时保留原始尺寸、缩放和 padding 记录。
-3. 普通、高光、智能沉默各至少一组；保存 schema、prompt、原始响应哈希、解析结果、模型调用数、网络/进程/权重实例数。硬门是：原生多图可解码、一次调用完成完整结构、无额外模型/调用/网络；质量只作金标校准输入。
-4. 在 8GB 与 12GB+ Windows/NVIDIA 分组分别记录加载、成功/失败/超时、峰值显存和 GPU；没有对应硬件就记 `BLOCKED/UNCONFIRMED`。V-C01 发生不支持多图、无法单次结构输出或 8GB OOM 等硬失败后，才提交是否用 V-H01 重跑同一 fixture 的评审。
+1. 测试包同时包含 lock 中 V-C01、V-C02 两个独立 profile，补齐并校验全部实际文件 SHA；使用同一 b10369 官方 Windows CUDA 12.4 资产。每轮断网只启动一个 `llama-server --parallel 1`、只加载一个候选，不同时驻留、不混合结果、不写产品 adapter。
+2. 复用 V-IN-04/05：同一许可事件分别生成 1/2/3 图组，统一以 896×512 等比留边画布为共同起点，每组一个 request/call id；保留原始尺寸、缩放、padding 和模型特有视觉参数记录。若某模型需不同输入参数才能正常工作，追加成可追溯子组，不替换共同对照组。
+3. 两候选都执行相同的普通、高光、智能沉默、复杂/含糊场景和风格批次；保存 schema、prompt、原始响应哈希、解析结果、模型调用数、网络/进程/权重实例数。比较事件正确性、高光/沉默判断、弹幕质量与多样性、摘要事实性、结构有效率及失败类型。硬门仍是原生多图可解码、一次调用完成完整结构、无额外模型/调用/网络。
+4. 在可取得的 8GB 与 12GB+ Windows/NVIDIA 分组，对两个候选分别记录加载、成功/失败/超时、峰值显存和 GPU；没有对应硬件就记 `BLOCKED/UNCONFIRMED`，不得用厂商数字代替。任一候选硬失败即记录为淘汰证据，不阻止另一个候选完成测试。
 
 ### 任务 27：共享权重并发基准
 
-1. 固定任务 26 通过的同一模型、量化、server 与 896×512 输入策略；分别重启为 `--parallel 1/2/3`，每组确认始终一个 PID、一个 model load/权重标识，禁止 router mode 和多进程。
+1. 对任务 26 通过硬门的每个候选，分别固定其量化、同一 server 与 896×512 共同输入策略并重启为 `--parallel 1/2/3`；每组确认始终一个 PID、一个 model load/权重标识，禁止 router mode、多进程及两个候选同时驻留。若某候选已在任务 26 硬失败，任务 27 不再为其制造无意义并发数据。
 2. 复用 V-IN-01/06/07/08：长短任务交错以强制乱序；分别注入客户端取消、服务退出和全局复位，核对 slot 释放、旧 generation 丢弃、摘要与风格不回滚。
 3. 每个 `vram_class × slots × image_count` 独立 sample group，记录成功/失败/超时/取消/过期分母、min/max/P50/P95、吞吐、显存/GPU 时序、加载次数和实例数。8GB/12GB+ 不设提前承诺，硬超时与连续重启保护只产出评审数据。
 
 ## 5. 结论与未验证项
 
-推荐 `V-C01` 作为任务 26 唯一首选：它以当前官方 Windows/CUDA release 直接复用单模型多 slot、multimodal 与受约束 JSON，V2 Delta 最小；`V-H01` 只保留低资源 fallback。已确认的是 revision、源码结构、发布资产、模型卡接口和许可证声明；**未验证**的是 Windows/NVIDIA 实际启动、1～3 图正确性、896×512 质量、稳定结构输出、智能沉默/高光准确率、取消/乱序/复位动态行为、8/12GB 显存、延迟、吞吐、长稳、完全离线包和最终再分发材料。任务 25 结论为静态筛选 `READY FOR POC`，不是模型或产品 `PASS`。
+锁定 `V-C01` 与 `V-C02` 共同进入 V 测试包：Qwen3-VL-4B 是质量/综合能力候选，MiniCPM-V-4.6 是低资源/效率候选；静态证据不指定最终产品模型。任务 26 负责同场功能与质量 PoC，任务 27 对通过硬门的候选分别完成共享权重 1～3 路动态基准，任务 29 再依据许可、质量、显存、延迟、吞吐和故障证据冻结唯一产品选型。已确认的是 revision、源码结构、发布资产、模型卡接口和许可证声明；**未验证**的是 Windows/NVIDIA 实际启动、1～3 图正确性、896×512 质量、稳定结构输出、智能沉默/高光准确率、取消/乱序/复位动态行为、8/12GB 显存、延迟、吞吐、长稳、完全离线包和最终再分发材料。任务 25 结论为双候选静态筛选 `READY FOR POC`，不是任一模型或产品 `PASS`。

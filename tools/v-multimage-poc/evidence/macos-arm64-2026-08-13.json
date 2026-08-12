@@ -1,0 +1,127 @@
+{
+  "schema_version": 2,
+  "dashi_task": "AIJARVISV2-26",
+  "environment": {
+    "os": "macOS",
+    "arch": "arm64",
+    "cpu": "Apple M1 Pro",
+    "memory_bytes": 34359738368,
+    "windows_nvidia": "UNCONFIRMED",
+    "vram_8gb": "UNCONFIRMED",
+    "vram_12gb_plus": "UNCONFIRMED"
+  },
+  "runtime": {
+    "name": "llama-server",
+    "release": "b10369",
+    "revision": "6e62ba538478202094edc6c100c782719e310aa3",
+    "backend": "Metal",
+    "server_instances": 1,
+    "weight_instances": 1,
+    "parallel_slots": 1,
+    "candidate_overlap": false
+  },
+  "fixture": {
+    "version": "AIJARVISV2-26-synthetic-v3",
+    "manifest_sha256": "8fb471dccb29af7b1586470f9058cb1bc54456c18a88cd90b5c4c2f3834e622c",
+    "canvas": "896x512 contain-no-stretch",
+    "groups": 9,
+    "change": "calm scene contains background/UI only; ordinary scene retains the blue subject"
+  },
+  "request_contract": {
+    "prompt_version": "AIJARVISV2-26-zh-CN-v3",
+    "field_order": ["level", "emit", "event", "comments", "summary"],
+    "allow_silence": "oneOf exact silence branch or complete emitted branch",
+    "placeholder_events_rejected": true,
+    "model_calls_per_case": 1,
+    "repair_calls": 0
+  },
+  "profiles": {
+    "V-C01": {
+      "model": "Qwen3-VL-4B-Instruct Q4_K_M + Q8 mmproj",
+      "artifact_sha256_verified": true,
+      "artifact_verification_event": "formal model directory acquisition",
+      "contract_version": "AIJARVISV2-26-zh-CN-v3",
+      "load_ms": 1291.972,
+      "cases_total": 9,
+      "model_calls": 9,
+      "repair_calls": 0,
+      "syntax_schema_valid": {"numerator": 9, "denominator": 9},
+      "contract_valid": {"numerator": 9, "denominator": 9},
+      "emit_correct": {"numerator": 9, "denominator": 9},
+      "level_correct": {"numerator": 9, "denominator": 9},
+      "required_mode_contract_valid": {"numerator": 6, "denominator": 6},
+      "allow_silence_contract_valid": {"numerator": 3, "denominator": 3},
+      "request_elapsed_ms": {"min": 3581.487, "max": 6136.623},
+      "by_image_count": {
+        "1": {"contract_valid": "3/3", "mean_ms": 4050.543},
+        "2": {"contract_valid": "3/3", "mean_ms": 3930.061},
+        "3": {"contract_valid": "3/3", "mean_ms": 5643.466}
+      },
+      "hard_gate": "PASS",
+      "quality_threshold": "PENDING_CALIBRATION",
+      "observations": [
+        "all three calm cases returned the exact silence object",
+        "all emitted cases contained a visible subject and concrete state or action",
+        "all summaries stayed within 30 Han characters"
+      ],
+      "raw_response_sha256": {
+        "calm-1": "421eabc7ec7ec41bf4415ccf4b650da58a2897420054a0df3bc9dc6c791c70ff",
+        "calm-2": "421eabc7ec7ec41bf4415ccf4b650da58a2897420054a0df3bc9dc6c791c70ff",
+        "calm-3": "2a3724d4143c45466a882bf0a0ac67cde6b2901b0a600b28661e2f7795ecdbb4",
+        "ordinary-1": "ebda9eb8c2224ebaad695c30f66bc16487f38589b160fd2796d61a10350e2fca",
+        "ordinary-2": "051c2c77f532faf1a0fb190549fd6fbb7772317b2c85b6d607a2ffa46a0c2abc",
+        "ordinary-3": "d2d7acdae25de70c15a57b67bc7386b0884961e5f44d455084c96cb94bf93787",
+        "highlight-1": "cf93698865d82497be713989f6cf9d8ea7278f94ab3008591a06b567a895eba9",
+        "highlight-2": "9ade95b8ef6b297d6fcbde32d5246e04582f376990391627e9db4f80e2f697a5",
+        "highlight-3": "968d9ba32ea8d3c25518505cbfb61563263eccb6bd0dcfe4ed250da8da9634d8"
+      }
+    },
+    "V-C02": {
+      "model": "MiniCPM-V-4.6 Q4_K_M + F16 mmproj",
+      "artifact_verification_mode": "fast_identity",
+      "load_ms": 1538.006,
+      "cases_total": 9,
+      "model_calls": 9,
+      "repair_calls": 0,
+      "syntax_schema_valid": {"numerator": 9, "denominator": 9},
+      "contract_valid": {"numerator": 9, "denominator": 9},
+      "emit_correct": {"numerator": 9, "denominator": 9},
+      "level_correct": {"numerator": 9, "denominator": 9},
+      "required_mode_contract_valid": {"numerator": 6, "denominator": 6},
+      "allow_silence_contract_valid": {"numerator": 3, "denominator": 3},
+      "request_elapsed_ms": {"min": 1867.337, "max": 4593.624},
+      "by_image_count": {
+        "1": {"contract_valid": "3/3", "mean_ms": 2021.204},
+        "2": {"contract_valid": "3/3", "mean_ms": 3260.302},
+        "3": {"contract_valid": "3/3", "mean_ms": 4489.143}
+      },
+      "hard_gate": "PASS",
+      "quality_threshold": "PENDING_CALIBRATION",
+      "observations": [
+        "all three calm cases returned the exact silence object",
+        "all ordinary cases described the visible blue subject or its movement",
+        "all highlight cases described focus, collision or expansion and selected highlight",
+        "no placeholder event passed validation and every summary stayed within 30 Han characters"
+      ],
+      "raw_response_sha256": {
+        "calm-1": "2a3724d4143c45466a882bf0a0ac67cde6b2901b0a600b28661e2f7795ecdbb4",
+        "calm-2": "d3e5c7a018690226560c7739637e4d73397e683b003bd9c05354832d3f2ddf89",
+        "calm-3": "d3e5c7a018690226560c7739637e4d73397e683b003bd9c05354832d3f2ddf89",
+        "ordinary-1": "bf30870453108b9db6e13aafd19d0dd7bbf50b599e3a5b19c4afad6d53d99411",
+        "ordinary-2": "e244f0df21d459c7ee057006f5214e9b0a1ace6ff6f0666cf607f36e439a1fe0",
+        "ordinary-3": "ae01d3ab1ce4e0e81dfd3a4058a30a2f3cbb001d470b7609565a8d6ff63a24b0",
+        "highlight-1": "979d1af39adfb11ab3731beb31ee4e3a46176f9a319c8bd8db0238dd6179b685",
+        "highlight-2": "050a8fe7583d7784fa05e729d943d74ca755b2cd755a4e210aa183c2d3abd24e",
+        "highlight-3": "59a64f2d6003af07e0b248124b75669b0718930c0f9f44138a80f8db73c4e853"
+      }
+    }
+  },
+  "overall": {
+    "conclusion": "READY_FOR_REVIEW",
+    "v_c01_regression": "PASS",
+    "v_c02_regression": "PASS",
+    "windows_nvidia": "UNCONFIRMED",
+    "real_corpus_quality": "UNCONFIRMED",
+    "note": "Mac functional PoC evidence only; it is not Windows/NVIDIA or product acceptance"
+  }
+}

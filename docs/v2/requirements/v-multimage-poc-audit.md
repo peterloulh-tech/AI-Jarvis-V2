@@ -16,6 +16,8 @@ V05/V06 与任务 26 要求同一候选对 1/2/3 图各一次推理，同时产�
 
 在 Apple M1 Pro/32GB、锁定 b10369 Metal build 上严格顺序执行，两个候选从未同时驻留。首轮发现 Qwen 官方 metadata-only commit `594171a` 把 GGUF architecture 改成 b10369 不识别的 `Qwen3VLForConditionalGeneration`。经用户批准回退到同一官方模型、同一 Q4_K_M 的前一官方文件 `1cd86af`（`qwen3vl`，SHA `66358c...a0a`），以 `changed-artifact` 准入一次后成功加载；未修改模型或 runtime。
 
-测试契约按真实产品开关分为两个单次请求模式：普通/高光 `required` 强制输出，平静 `allow_silence` 才允许智能沉默；schema 同时强制 required 分支的 `emit=true`、非空 event、ordinary/highlight 与至少一条 comment。fixture 修正单图不评价运动、红色高光主体不可被目标遮挡。V-C01 为 JSON/schema 9/9、完整契约 9/9、emit/level 均 9/9，模型调用 9、修复 0，PoC 硬门 `PASS`；1/2/3 图平均请求耗时分别为 3345.090/3391.228/5012.569 ms。V-C02 为 JSON/schema 9/9；6 个 required 用例完整有效，但 3 个 allow-silence 平静用例均错误 emit，完整契约 6/9，硬门 `FAIL`；1/2/3 图平均为 1782.794/2935.326/4109.590 ms。耗时只作本机相对成本观察。这证明主动要求输出有效，也证明 MiniCPM 的智能沉默仍不可靠。
+测试契约按真实产品开关分为两个单次请求模式：普通/高光 `required` 强制输出，平静 `allow_silence` 才允许智能沉默。V-C02 首轮失败的根因不是 runtime 或权重损坏，而是生成顺序与 fixture 边界：模型在理解场景前先生成 `emit=true`，旧平静图又保留了可被视作事件的蓝点。最小修正把 `level` 调到首字段、把静默/发言定义成两个完整互斥 schema 分支、清除平静图主体，并要求主要事件包含可见主体及具体动作/状态且拒绝占位词；没有增加模型调用或第二模型。
 
-仓库证据摘要为 [`macos-arm64-2026-08-12.json`](../../../tools/v-multimage-poc/evidence/macos-arm64-2026-08-12.json)。V-C01 已通过任务 26 的 Mac 功能 PoC 硬门；V-C02 未通过。Windows/NVIDIA、8GB/12GB+、GPU/显存、真实英雄联盟许可语料、双人金标及质量阈值仍为 `UNCONFIRMED/BLOCKED`，不得把 Mac 结果外推为真机或产品 PASS。
+2026-08-13 在同一 Apple M1 Pro/32GB、同一锁定 b10369 Metal build 上严格顺序重跑两个 profile。V-C01 与 V-C02 的 JSON/schema、完整契约、emit、level 均 9/9，required 各 6/6、智能沉默各 3/3，每个 profile 模型调用 9、修复 0，PoC 硬门均为 `PASS`。V-C01 的 1/2/3 图平均请求耗时为 4050.543/3930.061/5643.466 ms，V-C02 为 2021.204/3260.302/4489.143 ms；只作本机相对观察。原始输出复核未见占位事件。
+
+仓库保留[首轮证据](../../../tools/v-multimage-poc/evidence/macos-arm64-2026-08-12.json)和[修正证据](../../../tools/v-multimage-poc/evidence/macos-arm64-2026-08-13.json)。Windows/NVIDIA、8GB/12GB+、GPU/显存、真实英雄联盟许可语料、双人金标及质量阈值仍为 `UNCONFIRMED/BLOCKED`，不得把 Mac 结果外推为真机或产品 PASS。

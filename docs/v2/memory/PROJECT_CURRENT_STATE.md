@@ -1,6 +1,6 @@
 # AI Jarvis V2 当前状态
 
-> 快照日期：2026-08-12。任务状态以 Dashi 项目 `ai-jarvis-v2` 的当前回读为准。
+> 快照日期：2026-08-13。任务状态以 Dashi 项目 `ai-jarvis-v2` 的当前回读为准。
 
 ## 当前阶段与进度
 
@@ -24,7 +24,7 @@ AIJARVISV2-23 已冻结为 `Legacy Diagnostic PoC / 2026-08-09 Real-machine Base
 
 AIJARVISV2-25 已完成 V 候选 Official-First 静态筛选并经用户验收为 `done`。测试候选为两个独立 profile：`V-C01` Qwen3-VL-4B-Instruct Q4_K_M + Q8 mmproj，以及 `V-C02` MiniCPM-V-4.6 Q4_K_M + F16 mmproj，均复用 `llama-server b10369@6e62ba5...`；任务 26 动态纠正 V-C01 精确 GGUF 为同一官方模型的 `1cd86af...`（`qwen3vl`），候选方向不变。最终产品模型仍未冻结，见[任务卡](tasks/AIJARVISV2-25.md)。
 
-AIJARVISV2-26 已交付独立 V 多图测试包并经用户验收为 `done`。普通/高光 `required` schema 主动强制完整输出，只有平静 `allow_silence`；fixture 修正单图运动误标和高光主体遮挡。Mac/Metal 严格顺序实测 V-C01 JSON/schema、完整契约、emit、level 均 9/9，硬门 `PASS`；V-C02 required 6/6，但智能沉默 0/3，整体 6/9、硬门 `FAIL`。两候选各 9 次调用、修复调用 0，未同时驻留；验收复核将硬门收紧为结构、emit 与 level 必须同时正确，26/26 单测通过。Windows/NVIDIA、8/12GB、真实许可语料、双人金标和质量阈值保持 `UNCONFIRMED`，任务 27/28 未启动，见[任务卡](tasks/AIJARVISV2-26.md)。
+AIJARVISV2-26 因用户退回 V-C02 6/9 后完成根因修正，当前为 `in_review`。根因是模型在理解画面前先生成 emit 的决策偏置，以及旧平静 fixture 仍含可见主体；v3 改为 level 首字段、静默/发言完整互斥 schema、无主体平静图、具体事件提示与占位事件拒绝。Mac/Metal 严格顺序重跑 V-C01/V-C02：两个 profile 的 JSON/schema、完整契约、emit、level 均 9/9，required 各 6/6、智能沉默各 3/3，每个 profile 模型调用 9、修复 0，硬门均为 `PASS`。Qwen 锁定旧版官方文件已重新保存到正式模型目录并在首次保存时校验一次既有 SHA。Windows/NVIDIA、8/12GB、真实许可语料、双人金标和质量阈值保持 `UNCONFIRMED`，任务 27/28 未启动，见[任务卡](tasks/AIJARVISV2-26.md)。
 
 AIJARVISV2-92 已完成独立 Reference Harness v2、两个分离 profile、manifest 驱动的 33×1 秒/11×3 秒固定输入、streaming aggregation 与 completion 分层、三批 validator、离线 fixture/unit/static/dry-run、薄 Locked C API shim，以及既有 Windows/CUDA 构建链的最小接入准备，当前为 `done`，见[任务卡](tasks/AIJARVISV2-92.md)。
 
@@ -61,7 +61,7 @@ AIJARVISV2-93 当前为 `in_progress`，活动架构锁定 `llama.cpp-omni maste
 
 - O-C01 仍是唯一 PoC 准入组合；Official-First `llama-omni-server` Windows/CUDA binary、thin adapter 和便携 Artifact 已构建并通过 workflow/package/static 门，但 GitHub hosted runner 无 NVIDIA 真机能力。官方 Runtime/Session、startup LISTEN、自主 LISTEN/SPEAK、延迟、显存、session reuse 与 process cleanup 仍为 `DYNAMIC_ONLY`，尚无 Windows/NVIDIA PASS；Qwen2.5-Omni 候补边界不变。
 - 2026-08-09 已批准的 Online V1 需求已同步为当前正式基线（功能 `270e0b1f...c90`、非功能 `f65950be...7b5`）；Task93 已据此建立 Local O 能力矩阵。Task90/91 原有新 SHA 引用保持不变，未批量改写历史 Dashi 任务。
-- V-C01 已在 Mac/Metal 通过任务 26 单次 1～3 图结构硬门，但合成图词项诊断仅 5/11，不能代替真实英雄联盟语料质量；V-C02 的 required 输出可被约束，但智能沉默仍失败。Windows/NVIDIA 8GB/12GB+、正式许可回放/双人金标、乱序/取消/复位、吞吐、显存和 GPU 数据仍无证据。
+- V-C01/V-C02 已在共同 v3 合同下通过 Mac/Metal 单次 1～3 图功能硬门 9/9，但合成图不能代替真实英雄联盟语料质量。Windows/NVIDIA 8GB/12GB+、正式许可回放/双人金标、乱序/取消/复位、吞吐、显存和 GPU 数据仍无证据。
 - O/V 共用语料、许可、脱敏、时间轴和金标格式已定义，但实际授权资产与双人标注尚待制作；事件、高光、相关性和质量阈值仍待选型后校准。
 - 真机代表组合和记录入口已编排，但 Windows 11/NVIDIA 8/12/16GB 机器、1080P/2K/4K × 五档缩放、音频设备、Overlay 点击穿透、系统电源事件、断网及英雄联盟同机负载均待执行；英雄联盟与主机完全断网的兼容执行方式尚未确认。
 - 4 小时是 P0 正式稳定性窗口；8 小时只是内部压力目标。加载、首弹幕、P50/P95、吞吐、资源峰值/斜率、恢复/停止耗时和 V 并发数据未形成最终门槛。
@@ -72,4 +72,4 @@ AIJARVISV2-93 当前为 `in_progress`，活动架构锁定 `llama.cpp-omni maste
 
 ## 下一步注意事项
 
-O 路线继续只推进 AIJARVISV2-93 的 RTX 5070 Ti 16GB 动态验收，动态 PASS 前不得删除 Legacy Harness、宣称 O-C01 正式可行或启动 AIJARVISV2-24。V 路线唯一下一步是另开线程执行 AIJARVISV2-27，且只让通过硬门的 V-C01 进入共享权重 1～3 路并发基准。项目不再设置 ChatGPT 第二审核流程；不得提前启动任务 28 或产品开发。
+O 路线继续只推进 AIJARVISV2-93 的 RTX 5070 Ti 16GB 动态验收，动态 PASS 前不得删除 Legacy Harness、宣称 O-C01 正式可行或启动 AIJARVISV2-24。V 路线先由用户重新验收 AIJARVISV2-26；验收完成前不得启动任务 27/28 或产品开发。项目不再设置 ChatGPT 第二审核流程。

@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 from typing import Any
 
-from .contract import SCHEMA
+from .contract import schema_for_mode
 
 
 CASES = [
@@ -42,8 +42,11 @@ def plan_profile(profile: dict[str, Any]) -> dict[str, Any]:
         "canvas": {"width": 896, "height": 512, "fit": "contain-no-stretch"},
         "cases": CASES,
         "request_contract": {
-            "prompt_version": "AIJARVISV2-26-zh-CN-v2",
-            "schema": SCHEMA,
+            "prompt_version": "AIJARVISV2-26-zh-CN-v3",
+            "schemas": {
+                "required": schema_for_mode("required"),
+                "allow_silence": schema_for_mode("allow_silence"),
+            },
             "style_id": "friendly-witty-v1",
             "model_calls_per_case": 1,
             "repair_calls": 0,

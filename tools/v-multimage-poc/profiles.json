@@ -39,7 +39,7 @@
     },
     {
       "id": "V-C02",
-      "task26_result": "HARD_GATE_FAIL",
+      "task26_result": "PASS_TO_REVIEW",
       "model": "MiniCPM-V-4.6",
       "quantization": "Q4_K_M",
       "mmproj_quantization": "F16",

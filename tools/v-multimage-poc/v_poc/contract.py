@@ -9,11 +9,11 @@ from typing import Any
 SCHEMA = {
     "type": "object",
     "additionalProperties": False,
-    "required": ["emit", "event", "level", "comments", "summary"],
+    "required": ["level", "emit", "event", "comments", "summary"],
     "properties": {
+        "level": {"type": "string", "enum": ["none", "ordinary", "highlight"]},
         "emit": {"type": "boolean"},
         "event": {"type": "string"},
-        "level": {"type": "string", "enum": ["none", "ordinary", "highlight"]},
         "comments": {"type": "array", "items": {"type": "string"}, "maxItems": 3},
         "summary": {"type": "string", "maxLength": 30},
     },
@@ -27,7 +27,24 @@ def schema_for_mode(output_mode: str) -> dict[str, Any]:
         schema["properties"]["level"] = {"type": "string", "enum": ["ordinary", "highlight"]}
         schema["properties"]["event"]["minLength"] = 1
         schema["properties"]["comments"]["minItems"] = 1
-    elif output_mode != "allow_silence":
+    elif output_mode == "allow_silence":
+        silence = deepcopy(schema)
+        silence["properties"]["emit"] = {"const": False}
+        silence["properties"]["event"] = {"const": ""}
+        silence["properties"]["level"] = {"const": "none"}
+        silence["properties"]["comments"] = {"const": []}
+        silence["properties"]["summary"] = {"const": ""}
+
+        emitted = deepcopy(schema)
+        emitted["properties"]["emit"] = {"const": True}
+        emitted["properties"]["event"]["minLength"] = 1
+        emitted["properties"]["level"] = {
+            "type": "string",
+            "enum": ["ordinary", "highlight"],
+        }
+        emitted["properties"]["comments"]["minItems"] = 1
+        schema = {"oneOf": [silence, emitted]}
+    else:
         raise ValueError(f"unsupported output mode: {output_mode}")
     return schema
 
@@ -52,7 +69,12 @@ def build_payload(
     elif output_mode == "allow_silence":
         mode_instruction = (
             "本次允许智能沉默：只有画面确实平静且没有值得评论的事件时才返回 emit=false；"
-            "此时 event/summary 必须为空、level=none、comments=[]。"
+            "空画面、静态背景、只有装饰或界面但没有动作或交互，都不算事件，必须沉默；"
+            "不得把 empty、background 或静态界面本身当作事件。"
+            "沉默时 event/summary 必须为空、level=none、comments=[]。\n"
+            '空画面或静态背景示例={"emit":false,"event":"","level":"none","comments":[],"summary":""}\n'
+            '有动作或交互示例={"emit":true,"event":"角色完成一次跳跃","level":"ordinary",'
+            '"comments":["这一跳很稳"],"summary":"角色完成跳跃"}'
         )
     else:
         raise ValueError(f"unsupported output mode: {output_mode}")
@@ -64,6 +86,10 @@ style_id={style_id}
 最近一条有效客观摘要={previous_summary or '无'}
 输出模式={output_mode}
 {mode_instruction}
+
+事件描述必须包含可见主体及其具体动作或状态，禁止使用 #main_event、#事件发生、
+object interaction、main event 或“某事件”等占位文本。明确命中、碰撞或爆发光圈属于
+highlight；仅有主体出现、位置或普通移动属于 ordinary。不得用变化量直接代替事件等级。
 
 只输出一个 JSON 对象，字段必须完整：
 - emit：严格按上述输出模式；required 必须为 true，allow_silence 仅在平静且无事件时可为 false。
@@ -90,6 +116,17 @@ style_id={style_id}
 
 def _han_count(value: str) -> int:
     return len(re.findall(r"[\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff]", value))
+
+
+def _is_event_placeholder(value: str) -> bool:
+    normalized = re.sub(r"[\s#_\-]+", "", value.casefold())
+    return normalized in {
+        "mainevent",
+        "eventoccurred",
+        "objectinteraction",
+        "事件发生",
+        "某事件",
+    }
 
 
 def classify_response(raw: str) -> dict[str, Any]:
@@ -127,6 +164,13 @@ def classify_response(raw: str) -> dict[str, Any]:
             **base,
             "syntax_schema_valid": True,
             "classification": "EMIT_INCOMPLETE",
+            "parsed": value,
+        }
+    if value["emit"] is True and _is_event_placeholder(value["event"]):
+        return {
+            **base,
+            "syntax_schema_valid": True,
+            "classification": "EVENT_PLACEHOLDER",
             "parsed": value,
         }
     if _han_count(value["summary"]) > 30:

@@ -20,6 +20,22 @@ def png_size(path: Path) -> tuple[int, int]:
     return struct.unpack(">II", data[16:24])
 
 
+def png_pixel(path: Path, x: int, y: int) -> tuple[int, int, int]:
+    data = path.read_bytes()
+    offset = 8
+    compressed = bytearray()
+    while offset < len(data):
+        length = struct.unpack(">I", data[offset : offset + 4])[0]
+        kind = data[offset + 4 : offset + 8]
+        if kind == b"IDAT":
+            compressed.extend(data[offset + 8 : offset + 8 + length])
+        offset += 12 + length
+    raw = zlib.decompress(bytes(compressed))
+    row_size = 1 + 896 * 3
+    index = y * row_size + 1 + x * 3
+    return tuple(raw[index : index + 3])
+
+
 class FixtureTests(unittest.TestCase):
     def test_builds_deterministic_1_2_3_image_groups_on_common_canvas(self) -> None:
         with tempfile.TemporaryDirectory() as first, tempfile.TemporaryDirectory() as second:
@@ -27,7 +43,7 @@ class FixtureTests(unittest.TestCase):
             second_manifest = build_fixtures(Path(second))
 
             self.assertEqual(first_manifest, second_manifest)
-            self.assertEqual(first_manifest["fixture_version"], "AIJARVISV2-26-synthetic-v2")
+            self.assertEqual(first_manifest["fixture_version"], "AIJARVISV2-26-synthetic-v3")
             groups = first_manifest["groups"]
             self.assertEqual(len(groups), 9)
             self.assertEqual(
@@ -55,6 +71,15 @@ class FixtureTests(unittest.TestCase):
             on_disk = json.loads((Path(first) / "fixture-manifest.json").read_text(encoding="utf-8"))
             self.assertEqual(on_disk, first_manifest)
             self.assertEqual(first_manifest["license"]["third_party_content"], False)
+
+            self.assertEqual(
+                png_pixel(Path(first) / "images/calm-1.png", 196, 360),
+                (30, 42, 58),
+            )
+            self.assertEqual(
+                png_pixel(Path(first) / "images/ordinary-3.png", 596, 360),
+                (74, 144, 226),
+            )
 
     def test_png_payloads_are_valid_zlib_streams(self) -> None:
         with tempfile.TemporaryDirectory() as output:

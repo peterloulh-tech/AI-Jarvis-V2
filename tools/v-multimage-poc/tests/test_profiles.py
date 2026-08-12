@@ -8,6 +8,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
+from v_poc.contract import schema_for_mode  # noqa: E402
 from v_poc.profiles import load_profiles, plan_profile  # noqa: E402
 from v_poc.report import summarize_run, write_blocked_evidence  # noqa: E402
 
@@ -21,7 +22,15 @@ class ProfileTests(unittest.TestCase):
         self.assertEqual(first["runtime"], second["runtime"])
         self.assertEqual(first["cases"], second["cases"])
         self.assertEqual(first["request_contract"], second["request_contract"])
-        self.assertEqual(first["request_contract"]["prompt_version"], "AIJARVISV2-26-zh-CN-v2")
+        self.assertEqual(first["request_contract"]["prompt_version"], "AIJARVISV2-26-zh-CN-v3")
+        self.assertEqual(
+            first["request_contract"]["schemas"]["required"],
+            schema_for_mode("required"),
+        )
+        self.assertEqual(
+            first["request_contract"]["schemas"]["allow_silence"],
+            schema_for_mode("allow_silence"),
+        )
         self.assertEqual(first["canvas"], {"width": 896, "height": 512, "fit": "contain-no-stretch"})
         self.assertEqual(len(first["cases"]), 9)
         modes = {case["scene"]: case["output_mode"] for case in first["cases"]}

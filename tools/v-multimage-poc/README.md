@@ -6,7 +6,7 @@
 
 `profiles.json` 固定两个独立 profile：V-C01（Qwen3-VL-4B-Instruct Q4_K_M + Q8 mmproj）和 V-C02（MiniCPM-V-4.6 Q4_K_M + F16 mmproj）。每次 CLI 只能选择一个 profile；运行锁保证同一输出根目录不能同时驻留两个候选。server 命令固定 `--parallel 1`、一个 `--model`、一个 `--mmproj`，只绑定 `127.0.0.1`，请求只含本地 base64 图片。
 
-同一确定性 CC0 合成 fixture 覆盖平静、普通、高光 × 1/2/3 图，共 9 组；每张图为 896×512 `contain-no-stretch` 对照画布。普通/高光使用 `required`，由 schema 强制 `emit=true`、事件、等级和至少一条弹幕；只有平静组使用 `allow_silence` 评价智能沉默。两个候选使用同一 prompt/schema/评分；每组一个 HTTP 请求、零格式修复和零补调用。单图只评价当前可见状态，多图才评价运动；合成 fixture 不代替尚缺的英雄联盟许可录像、双人金标或质量阈值。
+同一确定性 CC0 合成 fixture 覆盖平静、普通、高光 × 1/2/3 图，共 9 组；每张图为 896×512 `contain-no-stretch` 对照画布。普通/高光使用 `required`；平静组使用 `allow_silence` 的两个互斥 schema 分支，沉默分支固定为 `level=none, emit=false, event="", comments=[], summary=""`。字段先输出 `level` 再输出 `emit`，让模型先理解场景再决定是否发言。两个候选使用同一 prompt/schema/评分；每组一个 HTTP 请求、零格式修复和零补调用。单图只评价当前可见状态，多图才评价运动；合成 fixture 不代替尚缺的英雄联盟许可录像、双人金标或质量阈值。
 
 ## 命令
 
@@ -35,9 +35,9 @@ V-C01 完全退出、日志出现 cleanup 且进程枚举无 `llama-server.exe` 
 ## 失败分类与停止条件
 
 - `MALFORMED_JSON` / `SCHEMA_FIELDS` / `SCHEMA_TYPES`：JSON 或 schema 失败。
-- `SILENCE_INCONSISTENT` / `EMIT_INCOMPLETE` / `SUMMARY_TOO_LONG`：业务一致性失败。
+- `SILENCE_INCONSISTENT` / `EMIT_INCOMPLETE` / `EVENT_PLACEHOLDER` / `SUMMARY_TOO_LONG`：业务一致性失败；占位事件不能冒充主要事件。
 - `RUNTIME_ARTIFACT_UNAVAILABLE` / `MODEL_ARTIFACT_UNAVAILABLE`：制品缺失、文件名/字节数不符，或显式准入时 SHA 不匹配，0 次调用。
 - `SERVER_OR_INFERENCE_FAILURE`：加载、HTTP 或推理失败；保留 server 日志。
 - `LOCKED_MODEL_RUNTIME_CONFLICT`：锁定模型与锁定 runtime 直接冲突，不得偷换 revision。
 
-任何失败只记录并停止；禁止 OCR、分类/摘要模型、格式修复补调用、在线核心服务或第二模型副本。当前 Mac 证据见 `evidence/macos-arm64-2026-08-12.json`：V-C01 9/9 完整契约并通过 PoC 硬门；V-C02 的 6 个 required 用例全部输出，但 3 个平静组未正确沉默，整体硬门失败。这不是 Windows/NVIDIA 或产品 PASS。
+任何失败只记录并停止；禁止 OCR、分类/摘要模型、格式修复补调用、在线核心服务或第二模型副本。历史首轮证据见 `evidence/macos-arm64-2026-08-12.json`；修正证据见 `evidence/macos-arm64-2026-08-13.json`。V-C01 和 V-C02 在共同 v3 fixture/prompt/schema/评分下，JSON/schema、完整契约、emit、level 均为 9/9，3 个平静组全部精确沉默，两个 profile 硬门均为 `PASS`；每个 profile 9 次调用、修复 0，且严格顺序加载。所有 Mac 结果均不是 Windows/NVIDIA 或产品 PASS。

@@ -27,7 +27,14 @@ class ContractTests(unittest.TestCase):
         self.assertEqual(payload["top_k"], 1)
         self.assertEqual(payload["stream"], False)
         self.assertEqual(payload["chat_template_kwargs"], {"enable_thinking": False})
-        self.assertEqual(payload["json_schema"]["required"], ["emit", "event", "level", "comments", "summary"])
+        self.assertEqual(
+            payload["json_schema"]["required"],
+            ["level", "emit", "event", "comments", "summary"],
+        )
+        self.assertEqual(
+            list(payload["json_schema"]["properties"]),
+            ["level", "emit", "event", "comments", "summary"],
+        )
         self.assertEqual(payload["json_schema"]["properties"]["emit"], {"const": True})
         self.assertEqual(payload["json_schema"]["properties"]["level"]["enum"], ["ordinary", "highlight"])
         self.assertEqual(payload["json_schema"]["properties"]["comments"]["minItems"], 1)
@@ -36,6 +43,11 @@ class ContractTests(unittest.TestCase):
         self.assertIn("style_id=friendly-witty-v1", prompt)
         self.assertIn("最多30个中文字", prompt)
         self.assertIn("本次必须输出", prompt)
+        self.assertIn("主体及其具体动作或状态", prompt)
+        self.assertIn("#main_event", prompt)
+        self.assertIn("object interaction", prompt)
+        self.assertIn("明确命中、碰撞或爆发光圈", prompt)
+        self.assertIn("仅有主体出现、位置或普通移动", prompt)
         self.assertNotIn("平静或无可描述事件时为 false", prompt)
         self.assertNotIn("http://", json.dumps(payload, ensure_ascii=False))
         self.assertNotIn("https://", json.dumps(payload, ensure_ascii=False))
@@ -50,8 +62,38 @@ class ContractTests(unittest.TestCase):
             previous_summary="",
             output_mode="allow_silence",
         )
-        self.assertEqual(payload["json_schema"]["properties"]["emit"], {"type": "boolean"})
-        self.assertIn("允许智能沉默", payload["messages"][0]["content"][0]["text"])
+        branches = payload["json_schema"]["oneOf"]
+        self.assertEqual(len(branches), 2)
+        silence, emitted = branches
+        self.assertEqual(
+            silence["required"], ["level", "emit", "event", "comments", "summary"]
+        )
+        self.assertEqual(
+            list(silence["properties"]),
+            ["level", "emit", "event", "comments", "summary"],
+        )
+        self.assertEqual(silence["properties"]["emit"], {"const": False})
+        self.assertEqual(silence["properties"]["event"], {"const": ""})
+        self.assertEqual(silence["properties"]["level"], {"const": "none"})
+        self.assertEqual(silence["properties"]["comments"], {"const": []})
+        self.assertEqual(silence["properties"]["summary"], {"const": ""})
+        self.assertEqual(emitted["properties"]["emit"], {"const": True})
+        self.assertEqual(emitted["properties"]["event"]["minLength"], 1)
+        self.assertEqual(emitted["properties"]["level"]["enum"], ["ordinary", "highlight"])
+        self.assertEqual(emitted["properties"]["comments"]["minItems"], 1)
+        prompt = payload["messages"][0]["content"][0]["text"]
+        self.assertIn("允许智能沉默", prompt)
+        self.assertIn("空画面、静态背景、只有装饰或界面", prompt)
+        self.assertIn("不算事件，必须沉默", prompt)
+        self.assertIn("不得把 empty、background 或静态界面本身当作事件", prompt)
+        self.assertIn(
+            '空画面或静态背景示例={"emit":false,"event":"","level":"none","comments":[],"summary":""}',
+            prompt,
+        )
+        self.assertIn(
+            '有动作或交互示例={"emit":true,"event":"角色完成一次跳跃","level":"ordinary"',
+            prompt,
+        )
 
     def test_accepts_emit_and_silence_contracts(self) -> None:
         ordinary = classify_response(json.dumps({
@@ -87,6 +129,14 @@ class ContractTests(unittest.TestCase):
             json.dumps({
                 "emit": True, "event": "", "level": "none", "comments": [], "summary": ""
             }, ensure_ascii=False): "EMIT_INCOMPLETE",
+            json.dumps({
+                "emit": True, "event": "#main_event", "level": "ordinary",
+                "comments": ["继续观察"], "summary": "",
+            }, ensure_ascii=False): "EVENT_PLACEHOLDER",
+            json.dumps({
+                "emit": True, "event": "object interaction", "level": "ordinary",
+                "comments": ["发生互动"], "summary": "",
+            }, ensure_ascii=False): "EVENT_PLACEHOLDER",
         }
         for raw, expected in cases.items():
             with self.subTest(expected=expected):
@@ -95,7 +145,10 @@ class ContractTests(unittest.TestCase):
                 self.assertEqual(result["repair_calls"], 0)
                 self.assertEqual(
                     result["syntax_schema_valid"],
-                    expected in {"SILENCE_INCONSISTENT", "SUMMARY_TOO_LONG", "EMIT_INCOMPLETE"},
+                    expected in {
+                        "SILENCE_INCONSISTENT", "SUMMARY_TOO_LONG", "EMIT_INCOMPLETE",
+                        "EVENT_PLACEHOLDER",
+                    },
                 )
 
     def test_scores_same_objective_fields_for_each_scene(self) -> None:

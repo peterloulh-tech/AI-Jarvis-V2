@@ -1,7 +1,7 @@
 # AIJARVISV2-25 — 筛选 V 模型与运行时候选
 
-- 状态：`in_progress`（Dashi 于 2026-08-12 回读；本轮完成证据评论后移至 `in_review`）
-- 交付提交：待本轮提交后回填
+- 状态：`in_review`（Dashi 于 2026-08-12 回读）
+- 交付提交：`244c63f6792f8f421b268aa2c645b938067ed53b`；状态收口提交见本任务后续 Git 记录
 - 直接依赖：[AIJARVISV2-21](AIJARVISV2-21.md)
 
 ## 最终结果与关键文件

@@ -22,7 +22,7 @@ AIJARVISV2-22 已筛选 4 个 O 模型/运行时组合，唯一准入任务 23 �
 
 AIJARVISV2-23 已冻结为 `Legacy Diagnostic PoC / 2026-08-09 Real-machine Baseline` 并完成：RTX 5070 Ti 16GB Windows/NVIDIA 完整运行确认 73/73 result `ok:true`、69 LISTEN/4 SPEAK，连续 4 个 SPEAK fragment 拼接为未闭合 multi-batch JSON 前缀；同时保留 Locked 官方基线、四方 Delta、33×1 秒输入与零 GPU fixture/hash 验证。新任务链为 AIJARVISV2-23 → AIJARVISV2-92 Reference Harness 离线重建 → AIJARVISV2-93 Windows/NVIDIA 动态验收 → AIJARVISV2-24；任务 24 保持 `backlog`，见[任务卡](tasks/AIJARVISV2-23.md)。
 
-AIJARVISV2-25 已完成 V 候选 Official-First 静态筛选，当前仍为 `in_progress`，本轮待证据评论后移入评审：首选 `V-C01` 固定 Qwen3-VL-4B-Instruct Q4_K_M、Q8 mmproj 与 `llama-server b10369@6e62ba5...`，直接复用官方单模型 inference mode、共享 1～3 slots、multimodal、JSON Schema 与 Windows CUDA release；MiniCPM-V-4.6 保持低资源 `HOLD`。Windows/NVIDIA、1～3 图、8/12GB、结构质量、乱序/取消/复位、性能、完整离线包和再分发均未验证，见[任务卡](tasks/AIJARVISV2-25.md)。
+AIJARVISV2-25 已完成 V 候选 Official-First 静态筛选并进入 `in_review`：首选 `V-C01` 固定 Qwen3-VL-4B-Instruct Q4_K_M、Q8 mmproj 与 `llama-server b10369@6e62ba5...`，直接复用官方单模型 inference mode、共享 1～3 slots、multimodal、JSON Schema 与 Windows CUDA release；MiniCPM-V-4.6 保持低资源 `HOLD`。Windows/NVIDIA、1～3 图、8/12GB、结构质量、乱序/取消/复位、性能、完整离线包和再分发均未验证，见[任务卡](tasks/AIJARVISV2-25.md)。
 
 AIJARVISV2-92 已完成独立 Reference Harness v2、两个分离 profile、manifest 驱动的 33×1 秒/11×3 秒固定输入、streaming aggregation 与 completion 分层、三批 validator、离线 fixture/unit/static/dry-run、薄 Locked C API shim，以及既有 Windows/CUDA 构建链的最小接入准备，当前为 `done`，见[任务卡](tasks/AIJARVISV2-92.md)。
 

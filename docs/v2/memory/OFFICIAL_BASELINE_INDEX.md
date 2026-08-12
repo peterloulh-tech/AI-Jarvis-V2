@@ -1,8 +1,10 @@
 # Official Baseline Index
 
-> 审计日期：2026-08-09。对应 Dashi 任务：`AIJARVISV2-23`。本文件只覆盖当前 Local O 路线，不代表未来模型选型。
+> 审计日期：Local O 为 2026-08-09，Local V 为 2026-08-12。对应 Dashi 任务：`AIJARVISV2-23/25`。第 1～5 节覆盖当前 Local O 路线，第 6 节覆盖 Task25 Local V 候选；两条路线互不替代，也不代表最终模型选型。
 
 > Task93 于 2026-08-11 按已批准的 Official-First 架构锁定当前维护基线：`tc-mb/llama.cpp-omni master@09f5c3f1b484759f17b06fc63574f749c89c8761` 与 `OpenBMB/MiniCPM-o-Demo main@d0a002093615b7f1d4d0f87a03fc01cb39bef3f6`；Demo 当前 C++ backend 默认取 `master/origin/master` 并构建 `llama-omni-server`。精确来源、许可与使用组件见 [`tools/o-official-reference/upstream-lock.json`](../../../tools/o-official-reference/upstream-lock.json)；下文 `b9d15b8` 与 `feat/web-demo@5202b7b2...` 只保留为 Legacy/冲突路线历史。
+
+> Task25 于 2026-08-12 新增独立 Local V 候选基线；它不修改或替代上述 O 路线。V 的精确来源、revision 与 release digest 见 [`v-model-runtime-candidate-lock.json`](../requirements/v-model-runtime-candidate-lock.json) 和第 6 节。
 
 ## 0. 使用规则
 
@@ -311,3 +313,9 @@ Locked V2 当前直接相关参数：模型三路径、`n_ctx/n_batch/n_ubatch/n
 6. 有具体理由怀疑官方已修复或改变某个直接相关行为。
 
 其余情况默认使用本文件和锁定源码，只读取当前任务相关模块；不得为了执行 Reuse-First 再做一次全项目或全官网审计。
+
+## 6. Local V Task25 Official Baseline
+
+V 首选候选为 `Qwen3-VL-4B-Instruct Q4_K_M + Q8 mmproj + llama-server b10369`。运行时固定 [`ggml-org/llama.cpp b10369@6e62ba5`](https://github.com/ggml-org/llama.cpp/tree/6e62ba538478202094edc6c100c782719e310aa3)，模型源码固定 [`QwenLM/Qwen3-VL@9658872`](https://github.com/QwenLM/Qwen3-VL/tree/96588727e44c78b25ba03ea03b8e12f7e64fd0da)，base/GGUF 固定为 `ebb281e...` / `594171a...`。当前官方 server 的 inference mode 由一个 `server_context` 持有主模型与多个 slots，直接支持 `--parallel`、continuous batching、multimodal 和 JSON Schema；不得切换 router 多实例或用多个进程冒充共享权重。
+
+固定结论仅为静态候选准入：官方多媒体数组路径存在，但 b10369 视觉单测仍标有 multiple-images TODO；Windows CUDA release 存在也不代表目标 NVIDIA、8/12GB、完全离线或便携依赖通过。V2 只允许补等比留边、提交时风格、`task_id/captured_at/run_generation`、结果校验和单进程全局复位；禁止新增 runtime/server、OCR、分类/摘要模型或在线核心服务。完整候选矩阵、许可边界、淘汰理由和任务 26/27 方案见 [`v-model-runtime-candidate-screening.md`](../requirements/v-model-runtime-candidate-screening.md)。

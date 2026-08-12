@@ -46,5 +46,7 @@
 - [v1-runtime-model-third-party-license-audit.md](v1-runtime-model-third-party-license-audit.md)：AIJARVISV2-19 分离 V1 代码、vendor、MiniCPM 权重和桌面依赖的许可结论，登记商业/离线分发义务与阻断门。
 - [dependency-governance-sbom-and-replacement-strategy.md](dependency-governance-sbom-and-replacement-strategy.md)：AIJARVISV2-20 定义五类依赖准入、来源锁定、CycloneDX SBOM、vendor/patch、许可与漏洞门及替换策略。
 - [v1-open-source-asset-reuse-final-audit.md](v1-open-source-asset-reuse-final-audit.md)：AIJARVISV2-21 合并源码、UI/资源、许可与依赖审计，冻结最终白名单、修改/参考/重写清单、许可门和 V2 缺失能力。
+- [v-model-runtime-candidate-screening.md](v-model-runtime-candidate-screening.md)：AIJARVISV2-25 按 Official-First 筛选 V 模型/runtime，冻结候选矩阵、淘汰理由及任务 26/27 最小验证方案。
+- [v-model-runtime-candidate-lock.json](v-model-runtime-candidate-lock.json)：AIJARVISV2-25 实际检查的模型、runtime、源码、release 资产 revision 与 digest 锁。
 
 任何后续工作发现候选验收与冻结需求不一致时，必须以功能冻结 V1.0、非功能冻结 V1.0 为准，并记录评审，不得直接改变范围。

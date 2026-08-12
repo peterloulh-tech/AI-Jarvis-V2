@@ -261,6 +261,7 @@ def run(args: argparse.Namespace) -> int:
                         run_generation=1,
                         style_id="friendly-witty-v1",
                         previous_summary="",
+                        output_mode=group["output_mode"],
                     )
                     case = execute_case(
                         transport=UrllibTransport(),
@@ -274,6 +275,7 @@ def run(args: argparse.Namespace) -> int:
                             "case_id": group["case_id"],
                             "scene": group["scene"],
                             "image_count": group["image_count"],
+                            "output_mode": group["output_mode"],
                             "image_sha256": [image["sha256"] for image in group["images"]],
                             "captured_at": captured_at,
                         }

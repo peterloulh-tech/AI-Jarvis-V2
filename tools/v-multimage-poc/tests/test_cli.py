@@ -35,6 +35,16 @@ class CliTests(unittest.TestCase):
             self.assertEqual(len(plan["cases"]), 9)
             self.assertEqual(len(manifest["groups"]), 9)
 
+    def test_qwen_profile_uses_official_pre_metadata_change_artifact(self) -> None:
+        profile = run_v_poc.load_profiles(run_v_poc.PROFILE_FILE)["V-C01"]
+        model = next(item for item in profile["artifacts"] if item["role"] == "model")
+        self.assertEqual(model["size_bytes"], 2497281664)
+        self.assertEqual(
+            model["sha256"],
+            "66358cb18bb6b3b1b6675aa412c7a88ef01d228f481184d13668e5201c730a0a",
+        )
+        self.assertEqual(model["gguf_architecture"], "qwen3vl")
+
     def test_check_without_artifacts_records_blocked_evidence(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             output = Path(directory) / "evidence"

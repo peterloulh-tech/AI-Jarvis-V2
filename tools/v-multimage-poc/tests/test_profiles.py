@@ -21,8 +21,11 @@ class ProfileTests(unittest.TestCase):
         self.assertEqual(first["runtime"], second["runtime"])
         self.assertEqual(first["cases"], second["cases"])
         self.assertEqual(first["request_contract"], second["request_contract"])
+        self.assertEqual(first["request_contract"]["prompt_version"], "AIJARVISV2-26-zh-CN-v2")
         self.assertEqual(first["canvas"], {"width": 896, "height": 512, "fit": "contain-no-stretch"})
         self.assertEqual(len(first["cases"]), 9)
+        modes = {case["scene"]: case["output_mode"] for case in first["cases"]}
+        self.assertEqual(modes, {"calm": "allow_silence", "ordinary": "required", "highlight": "required"})
         self.assertEqual(first["server_instances"], 1)
         self.assertEqual(first["weight_instances"], 1)
         self.assertEqual(first["parallel_slots"], 1)

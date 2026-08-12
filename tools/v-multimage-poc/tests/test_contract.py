@@ -19,6 +19,7 @@ class ContractTests(unittest.TestCase):
             run_generation=1,
             style_id="friendly-witty-v1",
             previous_summary="蓝色圆点正在移动",
+            output_mode="required",
         )
         content = payload["messages"][0]["content"]
         self.assertEqual([item["type"] for item in content], ["text", "image_url", "image_url"])
@@ -27,12 +28,30 @@ class ContractTests(unittest.TestCase):
         self.assertEqual(payload["stream"], False)
         self.assertEqual(payload["chat_template_kwargs"], {"enable_thinking": False})
         self.assertEqual(payload["json_schema"]["required"], ["emit", "event", "level", "comments", "summary"])
+        self.assertEqual(payload["json_schema"]["properties"]["emit"], {"const": True})
+        self.assertEqual(payload["json_schema"]["properties"]["level"]["enum"], ["ordinary", "highlight"])
+        self.assertEqual(payload["json_schema"]["properties"]["comments"]["minItems"], 1)
         prompt = content[0]["text"]
         self.assertIn("task_id=ordinary-2", prompt)
         self.assertIn("style_id=friendly-witty-v1", prompt)
         self.assertIn("最多30个中文字", prompt)
+        self.assertIn("本次必须输出", prompt)
+        self.assertNotIn("平静或无可描述事件时为 false", prompt)
         self.assertNotIn("http://", json.dumps(payload, ensure_ascii=False))
         self.assertNotIn("https://", json.dumps(payload, ensure_ascii=False))
+
+    def test_allow_silence_keeps_emit_false_branch_available(self) -> None:
+        payload = build_payload(
+            image_data_urls=["data:image/png;base64,AAA"],
+            task_id="calm-1",
+            captured_at="2026-08-12T00:00:00Z",
+            run_generation=1,
+            style_id="friendly-witty-v1",
+            previous_summary="",
+            output_mode="allow_silence",
+        )
+        self.assertEqual(payload["json_schema"]["properties"]["emit"], {"type": "boolean"})
+        self.assertIn("允许智能沉默", payload["messages"][0]["content"][0]["text"])
 
     def test_accepts_emit_and_silence_contracts(self) -> None:
         ordinary = classify_response(json.dumps({

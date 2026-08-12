@@ -14,8 +14,8 @@ V05/V06 与任务 26 要求同一候选对 1/2/3 图各一次推理，同时产�
 
 ## Mac 动态结果与边界
 
-在 Apple M1 Pro/32GB、锁定 b10369 Metal build 上严格顺序执行，两个候选从未同时驻留。V-C01 精确锁定文件 SHA 均通过，但 model 的 `general.architecture=Qwen3VLForConditionalGeneration`，b10369 只接受 `qwen3vl`，加载即退出，0 次调用：`LOCKED_MODEL_RUNTIME_CONFLICT/BLOCKED`。旧 main/ModelScope Qwen blob 的 architecture 不同，未偷换使用。
+在 Apple M1 Pro/32GB、锁定 b10369 Metal build 上严格顺序执行，两个候选从未同时驻留。首轮发现 Qwen 官方 metadata-only commit `594171a` 把 GGUF architecture 改成 b10369 不识别的 `Qwen3VLForConditionalGeneration`。经用户批准回退到同一官方模型、同一 Q4_K_M 的前一官方文件 `1cd86af`（`qwen3vl`，SHA `66358c...a0a`），以 `changed-artifact` 准入一次后成功加载；未修改模型或 runtime。
 
-V-C02 首次准入 SHA 通过并完成平静/普通/高光 × 1/2/3 图共 9 次单请求。诊断发现默认 thinking 会耗尽 384 tokens；按 b10369 官方 `chat_template_kwargs.enable_thinking=false` 最小修正并 TDD 固化后，9/9 均为可解析且字段/类型完整 JSON，但完整业务契约 0/9：`EMIT_INCOMPLETE` 3、`SILENCE_INCONSISTENT` 6；emit 判断 0/9、level 判断 3/9，模型调用 9、修复调用 0。请求耗时仅作 Mac 观察值（1,738.051～4,475.192 ms），不得外推 Windows/NVIDIA。
+测试契约按真实产品开关分为两个单次请求模式：普通/高光 `required` 强制输出，平静 `allow_silence` 才允许智能沉默；schema 同时强制 required 分支的 `emit=true`、非空 event、ordinary/highlight 与至少一条 comment。fixture 修正单图不评价运动、红色高光主体不可被目标遮挡。V-C01 为 JSON/schema 9/9、完整契约 9/9、emit/level 均 9/9，模型调用 9、修复 0，PoC 硬门 `PASS`；1/2/3 图平均请求耗时分别为 3345.090/3391.228/5012.569 ms。V-C02 为 JSON/schema 9/9；6 个 required 用例完整有效，但 3 个 allow-silence 平静用例均错误 emit，完整契约 6/9，硬门 `FAIL`；1/2/3 图平均为 1782.794/2935.326/4109.590 ms。耗时只作本机相对成本观察。这证明主动要求输出有效，也证明 MiniCPM 的智能沉默仍不可靠。
 
-仓库证据摘要为 [`macos-arm64-2026-08-12.json`](../../../tools/v-multimage-poc/evidence/macos-arm64-2026-08-12.json)。当前没有可通过任务 26 硬门的锁定候选；Windows/NVIDIA、8GB/12GB+、GPU/显存、真实英雄联盟许可语料、双人金标及质量阈值全部为 `UNCONFIRMED/BLOCKED`。任务 27/28 和产品开发不得开始。
+仓库证据摘要为 [`macos-arm64-2026-08-12.json`](../../../tools/v-multimage-poc/evidence/macos-arm64-2026-08-12.json)。V-C01 已通过任务 26 的 Mac 功能 PoC 硬门；V-C02 未通过。Windows/NVIDIA、8GB/12GB+、GPU/显存、真实英雄联盟许可语料、双人金标及质量阈值仍为 `UNCONFIRMED/BLOCKED`，不得把 Mac 结果外推为真机或产品 PASS。

@@ -27,6 +27,7 @@ class FixtureTests(unittest.TestCase):
             second_manifest = build_fixtures(Path(second))
 
             self.assertEqual(first_manifest, second_manifest)
+            self.assertEqual(first_manifest["fixture_version"], "AIJARVISV2-26-synthetic-v2")
             groups = first_manifest["groups"]
             self.assertEqual(len(groups), 9)
             self.assertEqual(
@@ -35,6 +36,13 @@ class FixtureTests(unittest.TestCase):
             )
             for group in groups:
                 self.assertEqual(len(group["images"]), group["image_count"])
+                self.assertEqual(
+                    group["output_mode"],
+                    "allow_silence" if group["scene"] == "calm" else "required",
+                )
+                if group["image_count"] == 1:
+                    self.assertNotIn("移动", group["gold"]["required_event_terms"])
+                    self.assertNotIn("中央", group["gold"]["required_event_terms"])
                 for image in group["images"]:
                     path = Path(first) / image["path"]
                     self.assertEqual(png_size(path), (896, 512))

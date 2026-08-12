@@ -9,7 +9,12 @@ from .contract import SCHEMA
 
 
 CASES = [
-    {"case_id": f"{scene}-{image_count}", "scene": scene, "image_count": image_count}
+    {
+        "case_id": f"{scene}-{image_count}",
+        "scene": scene,
+        "image_count": image_count,
+        "output_mode": "allow_silence" if scene == "calm" else "required",
+    }
     for scene in ("calm", "ordinary", "highlight")
     for image_count in (1, 2, 3)
 ]
@@ -37,7 +42,7 @@ def plan_profile(profile: dict[str, Any]) -> dict[str, Any]:
         "canvas": {"width": 896, "height": 512, "fit": "contain-no-stretch"},
         "cases": CASES,
         "request_contract": {
-            "prompt_version": "AIJARVISV2-26-zh-CN-v1",
+            "prompt_version": "AIJARVISV2-26-zh-CN-v2",
             "schema": SCHEMA,
             "style_id": "friendly-witty-v1",
             "model_calls_per_case": 1,

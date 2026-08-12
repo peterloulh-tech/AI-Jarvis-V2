@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import re
+from copy import deepcopy
 from typing import Any
 
 
@@ -19,6 +20,18 @@ SCHEMA = {
 }
 
 
+def schema_for_mode(output_mode: str) -> dict[str, Any]:
+    schema = deepcopy(SCHEMA)
+    if output_mode == "required":
+        schema["properties"]["emit"] = {"const": True}
+        schema["properties"]["level"] = {"type": "string", "enum": ["ordinary", "highlight"]}
+        schema["properties"]["event"]["minLength"] = 1
+        schema["properties"]["comments"]["minItems"] = 1
+    elif output_mode != "allow_silence":
+        raise ValueError(f"unsupported output mode: {output_mode}")
+    return schema
+
+
 def build_payload(
     *,
     image_data_urls: list[str],
@@ -27,18 +40,33 @@ def build_payload(
     run_generation: int,
     style_id: str,
     previous_summary: str,
+    output_mode: str,
 ) -> dict[str, Any]:
     if not 1 <= len(image_data_urls) <= 3:
         raise ValueError("each request requires 1 to 3 images")
+    if output_mode == "required":
+        mode_instruction = (
+            "本次必须输出：emit 必须为 true；根据当前可见画面描述一个主要事件或状态，"
+            "选择 ordinary/highlight，并生成至少一条友好、机智、简短的中文弹幕。不得选择沉默。"
+        )
+    elif output_mode == "allow_silence":
+        mode_instruction = (
+            "本次允许智能沉默：只有画面确实平静且没有值得评论的事件时才返回 emit=false；"
+            "此时 event/summary 必须为空、level=none、comments=[]。"
+        )
+    else:
+        raise ValueError(f"unsupported output mode: {output_mode}")
     prompt = f"""你是本地视觉事件分析器。一次且仅一次分析以下按时间顺序排列的图像。
 task_id={task_id}
 captured_at={captured_at}
 run_generation={run_generation}
 style_id={style_id}
 最近一条有效客观摘要={previous_summary or '无'}
+输出模式={output_mode}
+{mode_instruction}
 
 只输出一个 JSON 对象，字段必须完整：
-- emit：平静或无可描述事件时为 false；否则为 true。
+- emit：严格按上述输出模式；required 必须为 true，allow_silence 仅在平静且无事件时可为 false。
 - event：最多一个主要可见事件；emit=false 时必须为空字符串。
 - level：emit=false 时为 none；普通事件为 ordinary；明显高光为 highlight。不要用画面变化量直接判断高光。
 - comments：当前 style_id 的一个弹幕批次，0至3条；emit=false 时必须为空数组。不得侮辱、歧视、引战、编造事实或承诺胜利。
@@ -55,7 +83,7 @@ style_id={style_id}
         "stream": False,
         "max_tokens": 384,
         "chat_template_kwargs": {"enable_thinking": False},
-        "json_schema": SCHEMA,
+        "json_schema": schema_for_mode(output_mode),
         "messages": [{"role": "user", "content": content}],
     }
 

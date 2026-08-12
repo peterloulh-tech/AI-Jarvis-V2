@@ -72,4 +72,4 @@ AIJARVISV2-93 当前为 `in_progress`，活动架构锁定 `llama.cpp-omni maste
 
 ## 下一步注意事项
 
-O 路线继续只推进 AIJARVISV2-93 的 RTX 5070 Ti 16GB 动态验收，动态 PASS 前不得删除 Legacy Harness、宣称 O-C01 正式可行或启动 AIJARVISV2-24。V 路线唯一下一步是第二审核 AIJARVISV2-26；验收后另开线程执行任务 27，且只让通过硬门的 V-C01 进入共享权重并发基准。不得提前启动任务 28 或产品开发。
+O 路线继续只推进 AIJARVISV2-93 的 RTX 5070 Ti 16GB 动态验收，动态 PASS 前不得删除 Legacy Harness、宣称 O-C01 正式可行或启动 AIJARVISV2-24。V 路线唯一下一步是由用户直接验收 AIJARVISV2-26；验收后另开线程执行任务 27，且只让通过硬门的 V-C01 进入共享权重并发基准。项目不再设置 ChatGPT 第二审核流程；不得提前启动任务 28 或产品开发。

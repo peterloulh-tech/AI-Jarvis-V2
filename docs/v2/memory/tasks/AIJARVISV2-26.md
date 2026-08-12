@@ -1,7 +1,7 @@
 # AIJARVISV2-26 — 验证 V 多图单次结构化输出 PoC
 
-- 状态：`in_review`（Dashi 回读 2026-08-12，version 10）
-- 交付提交：`4805a5d15c9403090b93e69e4df0fdb3945d3735`；复核修正 `4f2dfb18e12af7134ce78f7dab9bc89cb0b7c137`
+- 状态：`done`（用户于 2026-08-12 明确验收，Dashi 同轮收口）
+- 交付提交：`4805a5d15c9403090b93e69e4df0fdb3945d3735`；复核修正 `4f2dfb18e12af7134ce78f7dab9bc89cb0b7c137`；验收修正 `c8fab1c`
 - 直接依赖：[AIJARVISV2-25](AIJARVISV2-25.md)
 
 ## 最终结果与关键文件
@@ -14,6 +14,6 @@
 
 ## 验证与遗留
 
-25/25 单测、compileall、JSON、静态隔离门通过；两 profile 各 9 次本地推理，原始响应哈希和失败分类已保存。Windows/NVIDIA、8/12GB、显存/GPU、真实许可英雄联盟语料、双人金标和质量阈值仍为 `UNCONFIRMED`，Mac 数据不是产品或真机 PASS。
+验收复核将硬门收紧为结构、emit 与 level 必须同时正确，26/26 单测、compileall、JSON、静态隔离门通过；两 profile 各 9 次本地推理，原始响应哈希和失败分类已保存。Windows/NVIDIA、8/12GB、显存/GPU、真实许可英雄联盟语料、双人金标和质量阈值仍为 `UNCONFIRMED`，Mac 数据不是产品或真机 PASS。
 
 - 检索关键词：V-C01，V-C02，required，allow_silence，Qwen3-VL，MiniCPM-V，multi-image，JSON Schema

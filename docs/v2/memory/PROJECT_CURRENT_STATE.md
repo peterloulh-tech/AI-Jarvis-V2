@@ -24,7 +24,7 @@ AIJARVISV2-23 已冻结为 `Legacy Diagnostic PoC / 2026-08-09 Real-machine Base
 
 AIJARVISV2-25 已完成 V 候选 Official-First 静态筛选并经用户验收为 `done`。测试候选为两个独立 profile：`V-C01` Qwen3-VL-4B-Instruct Q4_K_M + Q8 mmproj，以及 `V-C02` MiniCPM-V-4.6 Q4_K_M + F16 mmproj，均复用 `llama-server b10369@6e62ba5...`；任务 26 动态纠正 V-C01 精确 GGUF 为同一官方模型的 `1cd86af...`（`qwen3vl`），候选方向不变。最终产品模型仍未冻结，见[任务卡](tasks/AIJARVISV2-25.md)。
 
-AIJARVISV2-26 已交付独立 V 多图测试包，Dashi 当前为 `in_review`。普通/高光 `required` schema 主动强制完整输出，只有平静 `allow_silence`；fixture 修正单图运动误标和高光主体遮挡。Mac/Metal 严格顺序实测 V-C01 JSON/schema、完整契约、emit、level 均 9/9，硬门 `PASS`；V-C02 required 6/6，但智能沉默 0/3，整体 6/9、硬门 `FAIL`。两候选各 9 次调用、修复调用 0，未同时驻留。Windows/NVIDIA、8/12GB、真实许可语料、双人金标和质量阈值保持 `UNCONFIRMED`，任务 27/28 未启动，见[任务卡](tasks/AIJARVISV2-26.md)。
+AIJARVISV2-26 已交付独立 V 多图测试包并经用户验收为 `done`。普通/高光 `required` schema 主动强制完整输出，只有平静 `allow_silence`；fixture 修正单图运动误标和高光主体遮挡。Mac/Metal 严格顺序实测 V-C01 JSON/schema、完整契约、emit、level 均 9/9，硬门 `PASS`；V-C02 required 6/6，但智能沉默 0/3，整体 6/9、硬门 `FAIL`。两候选各 9 次调用、修复调用 0，未同时驻留；验收复核将硬门收紧为结构、emit 与 level 必须同时正确，26/26 单测通过。Windows/NVIDIA、8/12GB、真实许可语料、双人金标和质量阈值保持 `UNCONFIRMED`，任务 27/28 未启动，见[任务卡](tasks/AIJARVISV2-26.md)。
 
 AIJARVISV2-92 已完成独立 Reference Harness v2、两个分离 profile、manifest 驱动的 33×1 秒/11×3 秒固定输入、streaming aggregation 与 completion 分层、三批 validator、离线 fixture/unit/static/dry-run、薄 Locked C API shim，以及既有 Windows/CUDA 构建链的最小接入准备，当前为 `done`，见[任务卡](tasks/AIJARVISV2-92.md)。
 
@@ -72,4 +72,4 @@ AIJARVISV2-93 当前为 `in_progress`，活动架构锁定 `llama.cpp-omni maste
 
 ## 下一步注意事项
 
-O 路线继续只推进 AIJARVISV2-93 的 RTX 5070 Ti 16GB 动态验收，动态 PASS 前不得删除 Legacy Harness、宣称 O-C01 正式可行或启动 AIJARVISV2-24。V 路线唯一下一步是由用户直接验收 AIJARVISV2-26；验收后另开线程执行任务 27，且只让通过硬门的 V-C01 进入共享权重并发基准。项目不再设置 ChatGPT 第二审核流程；不得提前启动任务 28 或产品开发。
+O 路线继续只推进 AIJARVISV2-93 的 RTX 5070 Ti 16GB 动态验收，动态 PASS 前不得删除 Legacy Harness、宣称 O-C01 正式可行或启动 AIJARVISV2-24。V 路线唯一下一步是另开线程执行 AIJARVISV2-27，且只让通过硬门的 V-C01 进入共享权重 1～3 路并发基准。项目不再设置 ChatGPT 第二审核流程；不得提前启动任务 28 或产品开发。

@@ -57,5 +57,5 @@
 | AIJARVISV2-22 | O 模型与运行时候选 | `done` | MiniCPM-o、llama.cpp-omni、SPEAK/LISTEN、O-C01、Qwen HOLD | 以八项硬门筛选 O 组合，准入唯一 PoC 路径并冻结自主触发、TTS 关闭及 P1 取证计划。 | [tasks/AIJARVISV2-22.md](tasks/AIJARVISV2-22.md) |
 | AIJARVISV2-23 | O 双工与自主文字 PoC | `done` | Legacy Diagnostic PoC、2026-08-09 真机、streaming fragment、Official Baseline | 冻结 RTX 5070 Ti 16GB 现场证据、四方 Delta、官方基线与诊断资产；后继 Reference Harness 链为 92→93→24。 | [tasks/AIJARVISV2-23.md](tasks/AIJARVISV2-23.md) |
 | AIJARVISV2-25 | V 模型与运行时候选 | `done` | V-C01/V-C02、Qwen3-VL-4B、MiniCPM-V-4.6、A/B、shared slots | 锁定 Qwen 与 MiniCPM 两个独立测试 profile，同一 V 测试包分别实测后再冻结最终模型。 | [tasks/AIJARVISV2-25.md](tasks/AIJARVISV2-25.md) |
-| AIJARVISV2-26 | V 多图单次结构化输出 PoC | `in_review` | required、allow_silence、Qwen、MiniCPM、1/2/3 图 | Qwen 9/9 通过 Mac 功能硬门；MiniCPM required 6/6、智能沉默 0/3，Windows/NVIDIA 与真实语料待验证。 | [tasks/AIJARVISV2-26.md](tasks/AIJARVISV2-26.md) |
+| AIJARVISV2-26 | V 多图单次结构化输出 PoC | `done` | required、allow_silence、Qwen、MiniCPM、1/2/3 图 | Qwen 9/9 通过 Mac 功能硬门；MiniCPM required 6/6、智能沉默 0/3，Windows/NVIDIA 与真实语料待验证。 | [tasks/AIJARVISV2-26.md](tasks/AIJARVISV2-26.md) |
 | AIJARVISV2-92 | O Reference Harness v2 | `done` | official-runtime-reference、v2-contract、aggregation、runtime boundary、DYNAMIC-ONLY | 建立独立参考链、固定输入与离线验证，复用 Windows/CUDA 构建基础；动态验收交由任务 93。 | [tasks/AIJARVISV2-92.md](tasks/AIJARVISV2-92.md) |

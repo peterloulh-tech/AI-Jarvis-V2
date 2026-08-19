@@ -15,20 +15,18 @@
 
 ## 最小读取路径
 
-任务启动时先读仓库 `AGENTS.md`、[`PROJECT_CURRENT_STATE.md`](PROJECT_CURRENT_STATE.md)、当前 Dashi 任务及相关评论和任务明确列出的直接依赖，再根据编号、链接或实际需要读取命中的少量任务卡、需求文件和代码。
+恢复规则以仓库根目录 `AGENTS.md` 为准。默认读取 `AGENTS.md`、[`PROJECT_CURRENT_STATE.md`](PROJECT_CURRENT_STATE.md)、当前 Dashi 任务和直接依赖；只有需要查找历史或定位来源时才打开本索引和少量任务卡。
 
-已知当前任务编号、直接依赖和相关文件时，不必读取本索引。需要查找历史任务、定位来源、按关键词寻找摘要，或当前任务缺少明确依赖时才读取本索引；命中后只打开少量相关任务卡，不批量读取全部任务卡。
-
-任务进入 `in_review` 时，用 [`TASK_TEMPLATE.md`](TASK_TEMPLATE.md) 创建或更新卡片；用户正式通过后只更新状态等必要字段。跨任务决定才进入 [`DECISIONS.md`](DECISIONS.md)。
+任务卡只在进入 `in_review` 或 `done` 时维护；跨任务决定才进入 [`DECISIONS.md`](DECISIONS.md)。
 
 ## 文档分类
 
-- `DAILY`：启动任务时可能需要的入口；默认只读本文件、`PROJECT_CURRENT_STATE.md`、`AGENTS.md` 和当前 Dashi 任务。
+- `DAILY`：入口和当前快照；默认只读 `AGENTS.md`、`PROJECT_CURRENT_STATE.md` 和当前 Dashi 任务。
 - `TASK-SPECIFIC`：命中当前任务后才读取的需求、验收、模型、runtime、Windows、隐私或测试资料。
 - `FROZEN`：冻结需求、编号、决定、官方基线和正式验收规则；不得因整理文档而改写。
 - `REFERENCE`：历史审计、Legacy 资产和已完成任务的证据；只在需要追溯时读取。
 
-最小读取集只限制无关上下文，不豁免适用任务的正式需求、四方审计、Official-First 或证据核对。普通 commit、临时失败和不改变阶段/阻塞/活动路线/唯一下一步的尝试不写入本索引。
+分类只用于控制上下文，不豁免适用任务的正式需求、四方审计、Official-First 或证据核对。
 
 ## 文件职责
 
@@ -40,12 +38,12 @@
 
 ## 活动任务入口
 
-| 任务编号 | 模块 | 状态 | 一句话摘要 |
-|---|---|---|---|
-| AIJARVISV2-94 | 文档规则 | `in_review` | 完成基础规则索引、状态摘要和最小读取路径的第一阶段整理。 |
-| AIJARVISV2-93 | O 动态验收 | `in_progress` | Official-First O Reference Harness Windows/NVIDIA 动态验收。 |
-| AIJARVISV2-27 | V 并发基线 | `backlog` | 验证候选 V 共享权重 1～3 路并发，等待前置条件。 |
-| AIJARVISV2-24 | O 性能基线 | `backlog` | 验证 O 16GB 模型独占性能，等待 Task93。 |
+| 任务编号 | 模块 | 状态 | 一句话摘要 | 任务卡 |
+|---|---|---|---|---|
+| AIJARVISV2-94 | 文档规则 | `in_progress` | 基础规则、状态摘要和最小读取路径二次精简。 | [AIJARVISV2-94.md](tasks/AIJARVISV2-94.md) |
+| AIJARVISV2-93 | O 动态验收 | `in_progress` | Official-First O Reference Harness Windows/NVIDIA 动态验收。 | — |
+| AIJARVISV2-27 | V 并发基线 | `backlog` | 候选 V 共享权重 1～3 路并发基线，等待前置条件。 | — |
+| AIJARVISV2-24 | O 性能基线 | `backlog` | O 16GB 模型独占性能基线，等待 Task93。 | — |
 
 ## 最近关键完成项
 

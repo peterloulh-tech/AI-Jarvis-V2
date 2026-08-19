@@ -1,14 +1,18 @@
 # AI Jarvis V2 需求资料索引
 
-本目录保存 V2 冻结需求、验收规划、度量记录和按需参考资料。本文只做导航，不新增需求；正式任务按命中范围读取，禁止批量加载。
+本目录保存 V2 正式基线、候选验收、任务资料和历史参考。本文只做导航，不新增需求；正式任务按命中范围读取，禁止批量加载。当前基线身份和 SHA-256 以 [`baseline-manifest.md`](baseline-manifest.md) 为唯一来源；其他文件中的哈希仅代表其创建时记录，不用于判断当前基线。
 
-## 冻结基线与范围
+## 正式基线、编号与范围
 
-[baseline-manifest.md](baseline-manifest.md) · [requirements-catalog.md](requirements-catalog.md) · [traceability-matrix.md](traceability-matrix.md) · [acceptance-baseline-v1.0.md](acceptance-baseline-v1.0.md) · [scope-exclusions.md](scope-exclusions.md) · [nfr-classification-and-traceability.md](nfr-classification-and-traceability.md) · [nfr-engineering-appendix-manifest-v1.0.md](nfr-engineering-appendix-manifest-v1.0.md) · [nfr-stage-gate-review.md](nfr-stage-gate-review.md)
+[baseline-manifest.md](baseline-manifest.md) · [requirements-catalog.md](requirements-catalog.md) · [traceability-matrix.md](traceability-matrix.md) · [scope-exclusions.md](scope-exclusions.md) · [nfr-classification-and-traceability.md](nfr-classification-and-traceability.md)
+
+## 候选验收与阶段记录
+
+[acceptance-baseline-v1.0.md](acceptance-baseline-v1.0.md) · [nfr-engineering-appendix-manifest-v1.0.md](nfr-engineering-appendix-manifest-v1.0.md) · [nfr-stage-gate-review.md](nfr-stage-gate-review.md) · [calibration-register.md](calibration-register.md) · [nfr-open-risks-and-pending-validation.md](nfr-open-risks-and-pending-validation.md)
 
 ## 度量、校准与开放项
 
-[calibration-register.md](calibration-register.md) · [nfr-metrics-framework.md](nfr-metrics-framework.md) · [nfr-measurement-points.md](nfr-measurement-points.md) · [nfr-open-risks-and-pending-validation.md](nfr-open-risks-and-pending-validation.md) · [update-observability-fields.md](update-observability-fields.md)
+[nfr-metrics-framework.md](nfr-metrics-framework.md) · [nfr-measurement-points.md](nfr-measurement-points.md) · [update-observability-fields.md](update-observability-fields.md)
 
 ## 性能、可靠性与恢复
 

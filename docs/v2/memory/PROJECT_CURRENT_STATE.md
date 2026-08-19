@@ -6,7 +6,7 @@
 
 - 当前阶段：**04 O/V 模型与运行时选型**。
 - `AIJARVISV2-93`：`in_progress`，O Reference Harness v2 Windows/NVIDIA 动态验收。
-- `AIJARVISV2-94`：`in_review`，基础规则文档索引与快速读取方案已按用户确认完成第一阶段。
+- `AIJARVISV2-94`：`in_progress`，基础规则文档索引、规则入口和快速读取方案二次精简。
 - `AIJARVISV2-27`：`backlog`，V 共享权重 1～3 路并发基线；等待 V 动态前置条件。
 - `AIJARVISV2-24`：`backlog`，O 16GB 模型独占性能基线；等待 Task93。
 - AIJARVISV2-1～26、92 的已完成摘要和证据入口见 [`memory/README.md`](README.md)、Dashi 与对应任务卡。
@@ -48,16 +48,12 @@
 
 - O：继续执行 `AIJARVISV2-93` RTX 5070 Ti 16GB Windows/NVIDIA 动态验收；动态 PASS 前不得启动 Task24、删除 Legacy Harness 或宣称 O-C01 正式可行。
 - V：Task26 通过的候选按既定顺序进入 Task27；不得提前启动 Task28 或产品开发。
-- 文档：`AIJARVISV2-94` 等待用户评审本轮索引和状态压缩结果；普通任务不再扩展文档治理层。
+- 文档：`AIJARVISV2-94` 正在执行本轮基础规则精简；普通任务不再扩展文档治理层。
 
 ## 新会话恢复
 
-1. 阅读 `AGENTS.md` 和本文件。
-2. 回读 `taskctl context current`、当前 Dashi 任务及直接评论。
-3. 执行 `git status --short --branch` 和 `git log -1 --oneline --decorate`。
-4. 只读取当前任务明确命中的需求、源码、测试和证据；不批量读取历史任务或全部 `requirements/`。
-5. 按本文件“唯一下一步”继续；任务状态以 Dashi 为准。
+遵循根目录 `AGENTS.md` 的最小恢复路径；本文件只提供当前事实，不重复任务流程、历史摘要或完整需求。
 
 ## 维护
 
-只有阶段、主任务、活动路线、阻塞状态或唯一下一步变化时更新本文件。普通 commit、临时失败、重复测试和不改变结论的聊天不写入长期状态。
+只有阶段、主任务、活动路线、阻塞状态或唯一下一步变化时更新本文件；普通 commit、临时失败、重复测试和聊天不写入长期状态。

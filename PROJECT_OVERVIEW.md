@@ -1,5 +1,7 @@
 # AI 贾维斯项目说明
 
+> 文档定位：面向产品和用户的概览，不是 V2 冻结需求、验收基线或当前动态能力证据。开发规则以 `AGENTS.md`、`docs/v2/memory/PROJECT_CURRENT_STATE.md` 和 `docs/v2/requirements/baseline-manifest.md` 为准。
+
 ## 1. 项目简介
 
 AI 贾维斯是一款面向 Windows 的本地桌面 AI 助手。它可以持续理解当前屏幕内容和系统播放的声音，判断用户所处的使用场景，并以桌宠气泡、游戏弹幕或课程笔记等方式提供帮助。

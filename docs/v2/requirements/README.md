@@ -2,6 +2,18 @@
 
 本目录是 AI Jarvis V2 冻结需求基线、追踪关系和统一非功能度量框架的入口。
 
+## 阅读方式
+
+本目录不是每次任务启动时的批量阅读清单。先确认当前 Dashi 任务和直接需求，再只读取命中的文件；冻结基线和编号保持不变，详细矩阵与模板按任务需要使用。
+
+| 分类 | 用途 | 读取规则 |
+|---|---|---|
+| `FROZEN` | 基线、编号、范围、正式决定和验收出口 | 作为权威来源，不能因文档整理改写 |
+| `TASK-SPECIFIC` | 性能、可靠性、隐私、安装、Windows、O/V 和验收执行 | 只有任务命中时读取 |
+| `REFERENCE` | V1 资产审计、历史候选和已完成证据 | 仅在复用、追溯或复核时读取 |
+
+索引中的重复基线说明不产生新的需求或哈希；正式内容仍以对应冻结文件和 [`baseline-manifest.md`](baseline-manifest.md) 为准。
+
 - [baseline-manifest.md](baseline-manifest.md)：三份文档、哈希、状态、优先级、冲突规则及 upstream 基线。
 - [requirements-catalog.md](requirements-catalog.md)：统一的 FR/NFR/AC 稳定编号目录与 24 章覆盖。
 - [traceability-matrix.md](traceability-matrix.md)：需求到后续 Dashi 任务以及任务到需求选择器的双向追踪。

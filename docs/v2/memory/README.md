@@ -21,6 +21,15 @@
 
 任务进入 `in_review` 时，用 [`TASK_TEMPLATE.md`](TASK_TEMPLATE.md) 创建或更新卡片；用户正式通过后只更新状态等必要字段。跨任务决定才进入 [`DECISIONS.md`](DECISIONS.md)。
 
+## 文档分类
+
+- `DAILY`：启动任务时可能需要的入口；默认只读本文件、`PROJECT_CURRENT_STATE.md`、`AGENTS.md` 和当前 Dashi 任务。
+- `TASK-SPECIFIC`：命中当前任务后才读取的需求、验收、模型、runtime、Windows、隐私或测试资料。
+- `FROZEN`：冻结需求、编号、决定、官方基线和正式验收规则；不得因整理文档而改写。
+- `REFERENCE`：历史审计、Legacy 资产和已完成任务的证据；只在需要追溯时读取。
+
+最小读取集只限制无关上下文，不豁免适用任务的正式需求、四方审计、Official-First 或证据核对。普通 commit、临时失败和不改变阶段/阻塞/活动路线/唯一下一步的尝试不写入本索引。
+
 ## 文件职责
 
 - [`PROJECT_CURRENT_STATE.md`](PROJECT_CURRENT_STATE.md)：当前有效阶段、冻结基线、公共约定、开放风险和下一步注意事项。

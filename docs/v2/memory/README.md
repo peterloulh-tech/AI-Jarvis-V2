@@ -40,7 +40,7 @@
 
 | 任务编号 | 模块 | 状态 | 一句话摘要 | 任务卡 |
 |---|---|---|---|---|
-| AIJARVISV2-94 | 文档规则 | `in_progress` | 基础规则、状态摘要和最小读取路径二次精简。 | [AIJARVISV2-94.md](tasks/AIJARVISV2-94.md) |
+| AIJARVISV2-94 | 文档规则 | `in_review` | 基础规则、状态摘要和最小读取路径已完成精简。 | [AIJARVISV2-94.md](tasks/AIJARVISV2-94.md) |
 | AIJARVISV2-93 | O 动态验收 | `in_progress` | Official-First O Reference Harness Windows/NVIDIA 动态验收。 | — |
 | AIJARVISV2-27 | V 并发基线 | `backlog` | 候选 V 共享权重 1～3 路并发基线，等待前置条件。 | — |
 | AIJARVISV2-24 | O 性能基线 | `backlog` | O 16GB 模型独占性能基线，等待 Task93。 | — |

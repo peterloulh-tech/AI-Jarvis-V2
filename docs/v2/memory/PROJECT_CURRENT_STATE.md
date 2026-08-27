@@ -1,15 +1,14 @@
 # AI Jarvis V2 当前状态
 
-> 更新日期：2026-08-19。任务状态以 Dashi 项目 `ai-jarvis-v2` 当前回读为准；本文件只保留当前快照，不替代 Dashi、Git 或实际验证证据。
+> 更新日期：2026-08-27。任务状态以 Dashi 项目 `ai-jarvis-v2` 当前回读为准；本文件只保留当前快照，不替代 Dashi、Git 或实际验证证据。
 
 ## 当前阶段与活动任务
 
 - 当前阶段：**04 O/V 模型与运行时选型**。
 - `AIJARVISV2-93`：`in_progress`，O Reference Harness v2 Windows/NVIDIA 动态验收。
-- `AIJARVISV2-94`：`in_review`，基础规则文档索引、规则入口和快速读取方案已完成二次精简。
 - `AIJARVISV2-27`：`backlog`，V 共享权重 1～3 路并发基线；等待 V 动态前置条件。
 - `AIJARVISV2-24`：`backlog`，O 16GB 模型独占性能基线；等待 Task93。
-- AIJARVISV2-1～26、92 的已完成摘要和证据入口见 [`memory/README.md`](README.md)、Dashi 与对应任务卡。
+- AIJARVISV2-1～26、92、94 的已完成摘要和证据入口见 [`memory/README.md`](README.md)、Dashi 与对应任务卡。
 
 ## 活动技术路线
 
@@ -48,7 +47,6 @@
 
 - O：继续执行 `AIJARVISV2-93` RTX 5070 Ti 16GB Windows/NVIDIA 动态验收；动态 PASS 前不得启动 Task24、删除 Legacy Harness 或宣称 O-C01 正式可行。
 - V：Task26 通过的候选按既定顺序进入 Task27；不得提前启动 Task28 或产品开发。
-- 文档：`AIJARVISV2-94` 等待用户验收本轮基础规则精简；普通任务不再扩展文档治理层。
 
 ## 新会话恢复
 

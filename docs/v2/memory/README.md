@@ -40,13 +40,13 @@
 
 | 任务编号 | 模块 | 状态 | 一句话摘要 | 任务卡 |
 |---|---|---|---|---|
-| AIJARVISV2-94 | 文档规则 | `in_review` | 基础规则、状态摘要和最小读取路径已完成精简。 | [AIJARVISV2-94.md](tasks/AIJARVISV2-94.md) |
 | AIJARVISV2-93 | O 动态验收 | `in_progress` | Official-First O Reference Harness Windows/NVIDIA 动态验收。 | — |
 | AIJARVISV2-27 | V 并发基线 | `backlog` | 候选 V 共享权重 1～3 路并发基线，等待前置条件。 | — |
 | AIJARVISV2-24 | O 性能基线 | `backlog` | O 16GB 模型独占性能基线，等待 Task93。 | — |
 
 ## 最近关键完成项
 
+- AIJARVISV2-94：基础规则、状态摘要和最小读取路径完成精简；证据见 [任务卡](tasks/AIJARVISV2-94.md)。
 - AIJARVISV2-92：Reference Harness v2 离线重建完成，动态验收由 Task93 承接。
 - AIJARVISV2-26：V-C01/V-C02 共同 v3 功能硬门完成，Windows/NVIDIA 和正式语料仍待验证。
 - AIJARVISV2-23：Legacy Diagnostic PoC 与 2026-08-09 Windows 基线完成，不能替代正式 Product Adapter。

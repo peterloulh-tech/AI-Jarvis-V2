@@ -66,6 +66,8 @@ jobs:
           foreach ($file in @("bin/llama-server.exe", "bin/cudart64_12.dll", "bin/cublas64_12.dll", "bin/cublasLt64_12.dll", "python/python.exe", "run_v_poc.py", "Run-Task27-Matrix.ps1", "Fixtures/fixture/fixture-manifest.json")) {
             if (-not (Test-Path (Join-Path $root $file) -PathType Leaf)) { throw "missing packaged file: $file" }
           }
+          & (Join-Path $root "python/python.exe") -c "import v_poc; print('v_poc import ok')"
+          if ($LASTEXITCODE -ne 0) { throw "embedded Python cannot import v_poc from package root" }
           $manifest = Get-Content (Join-Path $root "package-manifest.json") -Raw | ConvertFrom-Json
           if ($manifest.models_included -ne 0 -or $manifest.test_media_included -ne 0) { throw "models/media must remain operator-provided" }
 

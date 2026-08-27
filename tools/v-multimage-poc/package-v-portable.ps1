@@ -69,6 +69,14 @@ try {
 
     New-Item -ItemType Directory -Path (Join-Path $PackageRoot "python") -Force | Out-Null
     Get-ChildItem -LiteralPath $pythonExtract -Force | Copy-Item -Destination (Join-Path $PackageRoot "python") -Recurse -Force
+    # The embeddable distribution enables isolated mode through python*._pth.
+    # Add the package root so the bundled script can import the sibling v_poc package.
+    $pth = @(Get-ChildItem -LiteralPath (Join-Path $PackageRoot "python") -File -Filter "python*._pth")
+    if ($pth.Count -ne 1) { throw "expected one embedded Python _pth file, found $($pth.Count)" }
+    $pthLines = @(Get-Content -LiteralPath $pth[0].FullName)
+    if ($pthLines -notcontains "..") {
+        Add-Content -LiteralPath $pth[0].FullName -Value ".." -Encoding ascii
+    }
 
     $toolRoot = Join-Path $RepositoryRoot "tools\v-multimage-poc"
     foreach ($file in @("run_v_poc.py", "run-v-poc.ps1", "Run-Task27-Matrix.ps1", "profiles.json", "README.md", "README-Windows-Package.md")) {

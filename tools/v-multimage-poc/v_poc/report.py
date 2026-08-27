@@ -1,9 +1,88 @@
 from __future__ import annotations
 
+import csv
 import json
 from collections import Counter
 from pathlib import Path
 from typing import Any
+
+
+BENCHMARK_SAMPLE_FIELDS = (
+    "schema_version",
+    "scenario_run_id",
+    "scenario_id",
+    "sample_group",
+    "run_id",
+    "run_generation",
+    "mode",
+    "app_version",
+    "model_id",
+    "model_version",
+    "quantization",
+    "runtime_version",
+    "hardware_profile_id",
+    "driver_version",
+    "config_snapshot_hash",
+    "input_asset_hash",
+    "concurrency",
+    "image_count",
+    "tier",
+    "budget_chars",
+    "timeout_limit_s",
+    "route",
+    "event_name",
+    "task_id",
+    "event_id",
+    "batch_id",
+    "slot_id",
+    "monotonic_timestamp_us",
+    "utc_timestamp",
+    "outcome",
+    "error_code",
+    "duration_us",
+    "throughput_window_us",
+    "throughput_valid_count",
+    "vram_mib",
+    "ram_mib",
+    "handle_count",
+    "gpu_percent",
+    "queue_depth",
+    "queue_limit",
+    "content_age_ms",
+    "evidence_ref",
+    "review_status",
+)
+
+
+def write_benchmark_artifacts(
+    output: Path,
+    *,
+    samples: list[dict[str, Any]],
+    events: list[dict[str, Any]],
+    summary: dict[str, Any],
+) -> dict[str, Path]:
+    output.mkdir(parents=True, exist_ok=True)
+    samples_path = output / "samples.csv"
+    with samples_path.open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=BENCHMARK_SAMPLE_FIELDS, extrasaction="ignore")
+        writer.writeheader()
+        writer.writerows(samples)
+
+    events_path = output / "events.jsonl"
+    with events_path.open("w", encoding="utf-8") as handle:
+        for event in events:
+            handle.write(json.dumps(event, ensure_ascii=False) + "\n")
+
+    summary_path = output / "summary.json"
+    summary_path.write_text(
+        json.dumps(summary, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    return {
+        "samples_csv": samples_path,
+        "events_jsonl": events_path,
+        "summary_json": summary_path,
+    }
 
 
 def _ratio(numerator: int, denominator: int) -> dict[str, int]:

@@ -6,14 +6,14 @@
 
 - 当前阶段：**04 O/V 模型与运行时选型**。
 - `AIJARVISV2-93`：`in_progress`，O Reference Harness v2 Windows/NVIDIA 动态验收。
-- `AIJARVISV2-27`：`backlog`，V 共享权重 1～3 路并发基线；等待 V 动态前置条件。
+- `AIJARVISV2-27`：`blocked`，V 共享权重 1～3 路基准工具已实现并通过本地回归；等待真实 Windows/NVIDIA 8GB 与 12GB+ 双候选完整矩阵。
 - `AIJARVISV2-24`：`backlog`，O 16GB 模型独占性能基线；等待 Task93。
 - AIJARVISV2-1～26、92、94 的已完成摘要和证据入口见 [`memory/README.md`](README.md)、Dashi 与对应任务卡。
 
 ## 活动技术路线
 
 - **O**：活动路线为官方 `llama.cpp-omni` `llama-omni-server /backend` 与薄适配层；正式首版禁用 TTS。Task93 的 Windows/NVIDIA Runtime、Session、LISTEN/SPEAK、延迟、显存、复用和清理仍为 `DYNAMIC_ONLY`，未形成产品 PASS。
-- **V**：V-C01 Qwen3-VL 与 V-C02 MiniCPM-V 保持独立 profile 和独立运行路线。Mac/Metal 共同 v3 功能硬门已通过；Windows/NVIDIA、正式许可语料、并发、取消/复位、吞吐和质量阈值仍未确认。
+- **V**：V-C01 Qwen3-VL 与 V-C02 MiniCPM-V 保持独立 profile 和独立运行路线。Mac/Metal 共同 v3 功能硬门已通过；单 `llama-server`/单权重的 1/2/3 slots 基准与取消/复位证据工具已就绪。Windows/NVIDIA 8GB/12GB+ 动态矩阵、正式许可语料、吞吐和质量阈值仍未确认。
 - `tools/o-reference-harness-v2` 保持 `LEGACY / RETIRED-PENDING-NEW-ROUTE-VALIDATION`，不进入活动实现。
 
 ## 冻结基线
@@ -38,7 +38,7 @@
 ## 开放风险
 
 - O 的 Windows/NVIDIA 动态 Runtime/Session、自主 LISTEN/SPEAK、延迟、显存、session reuse 和 process cleanup 尚无 PASS。
-- V 的 Windows/NVIDIA、8/12GB 资源、正式许可回放、双人金标、并发/取消/乱序/复位、吞吐和质量阈值尚无完整证据。
+- V 的 Windows/NVIDIA 8GB/12GB+ 双候选矩阵、真实 b10369 CUDA 日志/清理、正式许可回放、双人金标、吞吐和质量阈值尚无完整证据；Mac fake-server 回归不能替代动态证据。
 - O/V 授权语料、脱敏、时间轴、金标和断网执行方式仍有缺口。
 - 4 小时是正式稳定性窗口，8 小时是内部压力目标；性能、资源斜率、恢复/停止耗时和 V 并发门槛尚未最终校准。
 - vendor provider、桌面依赖、CUDA/npm/Python 来源和完整发布许可材料仍未全部准入；规划资产不得当作发布通过。
@@ -46,7 +46,7 @@
 ## 唯一下一步
 
 - O：继续执行 `AIJARVISV2-93` RTX 5070 Ti 16GB Windows/NVIDIA 动态验收；动态 PASS 前不得启动 Task24、删除 Legacy Harness 或宣称 O-C01 正式可行。
-- V：Task26 通过的候选按既定顺序进入 Task27；不得提前启动 Task28 或产品开发。
+- V：在真实 Windows/NVIDIA 8GB 与 12GB+ 环境分别执行 Task27 的 V-C01/V-C02 1/2/3 slots × 1/2/3 图矩阵和故障组；证据完整前保持阻塞，不得启动 Task28 或产品开发。
 
 ## 新会话恢复
 

@@ -1,12 +1,17 @@
 from __future__ import annotations
 
 import hashlib
+import http.client
 import json
 import os
+import re
+import socket
+import threading
 import time
 import urllib.request
 from pathlib import Path
 from typing import Any, Protocol
+from urllib.parse import urlsplit
 
 from .contract import classify_response, score_result
 
@@ -15,8 +20,23 @@ class ArtifactError(RuntimeError):
     pass
 
 
+def inspect_server_log(path: Path) -> dict[str, int | None]:
+    value = path.read_text(encoding="utf-8", errors="replace")
+    slot_matches = re.findall(r"\bn_slots\s*=\s*(\d+)", value)
+    return {
+        "observed_model_loads": value.count("srv load_model: loading model"),
+        "observed_slot_count": int(slot_matches[-1]) if slot_matches else None,
+    }
+
+
 class Transport(Protocol):
     def post_json(self, url: str, payload: dict, timeout_s: float) -> dict: ...
+
+
+class CancellableTransport(Protocol):
+    def post_json(
+        self, task_id: str, url: str, payload: dict, timeout_s: float
+    ) -> dict: ...
 
 
 class UrllibTransport:
@@ -29,6 +49,73 @@ class UrllibTransport:
         )
         with urllib.request.urlopen(request, timeout=timeout_s) as response:
             return json.loads(response.read().decode("utf-8"))
+
+
+class CancellableHttpTransport:
+    def __init__(self) -> None:
+        self._connections: dict[str, http.client.HTTPConnection] = {}
+        self._lock = threading.Lock()
+
+    @property
+    def active_task_ids(self) -> set[str]:
+        with self._lock:
+            return set(self._connections)
+
+    def post_json(
+        self,
+        task_id: str,
+        url: str,
+        payload: dict[str, Any],
+        timeout_s: float,
+    ) -> dict[str, Any]:
+        target = urlsplit(url)
+        if target.scheme != "http" or target.hostname not in {"127.0.0.1", "localhost", "::1"}:
+            raise ValueError("benchmark transport only permits loopback HTTP")
+        connection = http.client.HTTPConnection(
+            target.hostname,
+            target.port or 80,
+            timeout=timeout_s,
+        )
+        with self._lock:
+            if task_id in self._connections:
+                raise RuntimeError(f"task already has an active connection: {task_id}")
+            self._connections[task_id] = connection
+        try:
+            body = json.dumps(payload, ensure_ascii=False).encode("utf-8")
+            path = target.path or "/"
+            if target.query:
+                path += "?" + target.query
+            connection.request(
+                "POST",
+                path,
+                body=body,
+                headers={"Content-Type": "application/json"},
+            )
+            response = connection.getresponse()
+            raw = response.read()
+            if response.status < 200 or response.status >= 300:
+                raise RuntimeError(f"llama-server HTTP status {response.status}")
+            parsed = json.loads(raw.decode("utf-8"))
+            if not isinstance(parsed, dict):
+                raise RuntimeError("llama-server response is not a JSON object")
+            return parsed
+        finally:
+            with self._lock:
+                self._connections.pop(task_id, None)
+            connection.close()
+
+    def cancel(self, task_id: str) -> bool:
+        with self._lock:
+            connection = self._connections.get(task_id)
+        if connection is None:
+            return False
+        try:
+            if connection.sock is not None:
+                connection.sock.shutdown(socket.SHUT_RDWR)
+        except OSError:
+            pass
+        connection.close()
+        return True
 
 
 def file_sha256(path: Path) -> str:
@@ -77,8 +164,16 @@ def verify_artifact_identity(
 
 
 def build_server_command(
-    *, server: Path, model: Path, mmproj: Path, host: str, port: int
+    *,
+    server: Path,
+    model: Path,
+    mmproj: Path,
+    host: str,
+    port: int,
+    parallel_slots: int = 1,
 ) -> list[str]:
+    if parallel_slots not in {1, 2, 3}:
+        raise ValueError("parallel_slots must be 1, 2, or 3")
     return [
         str(server),
         "--model",
@@ -90,7 +185,7 @@ def build_server_command(
         "--port",
         str(port),
         "--parallel",
-        "1",
+        str(parallel_slots),
         "--cont-batching",
         "--ctx-size",
         "8192",
@@ -109,6 +204,27 @@ def _extract_content(response: dict[str, Any]) -> str:
     return content
 
 
+def _evaluate_response(
+    response: dict[str, Any], *, gold: dict[str, Any], elapsed_ms: float
+) -> dict[str, Any]:
+    raw = _extract_content(response)
+    validation = classify_response(raw)
+    score = None
+    if validation.get("syntax_schema_valid") is True:
+        score = score_result(validation["parsed"], gold)
+    return {
+        "model_call_count": 1,
+        "repair_call_count": 0,
+        "request_elapsed_ms": elapsed_ms,
+        "raw_response_sha256": hashlib.sha256(raw.encode("utf-8")).hexdigest(),
+        "raw_response": raw,
+        "validation": validation,
+        "score": score,
+        "server_usage": response.get("usage"),
+        "finish_reason": response.get("choices", [{}])[0].get("finish_reason"),
+    }
+
+
 def execute_case(
     *,
     transport: Transport,
@@ -122,22 +238,35 @@ def execute_case(
         endpoint.rstrip("/") + "/v1/chat/completions", payload, timeout_s
     )
     completed_ns = time.monotonic_ns()
-    raw = _extract_content(response)
-    validation = classify_response(raw)
-    score = None
-    if validation.get("syntax_schema_valid") is True:
-        score = score_result(validation["parsed"], gold)
-    return {
-        "model_call_count": 1,
-        "repair_call_count": 0,
-        "request_elapsed_ms": round((completed_ns - started_ns) / 1_000_000, 3),
-        "raw_response_sha256": hashlib.sha256(raw.encode("utf-8")).hexdigest(),
-        "raw_response": raw,
-        "validation": validation,
-        "score": score,
-        "server_usage": response.get("usage"),
-        "finish_reason": response.get("choices", [{}])[0].get("finish_reason"),
-    }
+    return _evaluate_response(
+        response,
+        gold=gold,
+        elapsed_ms=round((completed_ns - started_ns) / 1_000_000, 3),
+    )
+
+
+def execute_benchmark_case(
+    *,
+    transport: CancellableTransport,
+    task_id: str,
+    endpoint: str,
+    payload: dict[str, Any],
+    gold: dict[str, Any],
+    timeout_s: float,
+) -> dict[str, Any]:
+    started_ns = time.monotonic_ns()
+    response = transport.post_json(
+        task_id,
+        endpoint.rstrip("/") + "/v1/chat/completions",
+        payload,
+        timeout_s,
+    )
+    completed_ns = time.monotonic_ns()
+    return _evaluate_response(
+        response,
+        gold=gold,
+        elapsed_ms=round((completed_ns - started_ns) / 1_000_000, 3),
+    )
 
 
 class RunLock:

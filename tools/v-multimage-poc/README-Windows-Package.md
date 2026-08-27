@@ -20,10 +20,9 @@ Disconnect external networking, then run:
 ```powershell
 .\Run-Task27-Matrix.ps1 `
   -HardwareProfileId "win11-<gpu>-8gb-machine-a" `
-  -PowerPolicy high-performance-ac `
-  -PrepareRuntime
+  -PowerPolicy high-performance-ac
 ```
 
 For the 12GB+ machine, change only `HardwareProfileId`. Do not use a 16GB result as 8GB evidence. The script runs each profile separately: 9 normal groups (`slots 1/2/3` by `images 1/2/3`) plus three `slots=3/images=3` fault groups. Every group writes immutable evidence below `Evidence/`.
 
-`Prepare-V-Windows-Test.ps1` is idempotent. After its first successful run, omit `-PrepareRuntime` from the matrix command. Do not copy any executable, DLL, fixture, or model from the Task93 O package into this directory.
+`Prepare-V-Windows-Test.ps1` is idempotent. `Run-Task27-Matrix.ps1 -PrepareRuntime` is available for diagnostics, but formal evidence must keep online preparation and disconnected execution as separate steps. Do not copy any executable, DLL, fixture, or model from the Task93 O package into this directory.

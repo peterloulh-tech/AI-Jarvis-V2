@@ -23,9 +23,18 @@ param(
 
 $ErrorActionPreference = "Stop"
 $Root = Split-Path -Parent $MyInvocation.MyCommand.Path
-if ($PrepareRuntime) { & (Join-Path $Root "Prepare-V-Windows-Test.ps1") }
+$env:PYTHONPATH = $Root
+if ($PrepareRuntime) {
+    throw "This package is self-contained. Do not download runtime assets on the test machine."
+}
 
-$RuntimeState = Get-Content -LiteralPath (Join-Path $Root "prepared-runtime.json") -Raw | ConvertFrom-Json
+$RuntimeState = [pscustomobject]@{
+    python = Join-Path $Root "python\python.exe"
+    server = Join-Path $Root "bin\llama-server.exe"
+}
+foreach ($path in @($RuntimeState.python, $RuntimeState.server)) {
+    if (-not (Test-Path -LiteralPath $path -PathType Leaf)) { throw "Missing packaged runtime file: $path" }
+}
 $OutputDir = Join-Path $Root "Evidence"
 New-Item -ItemType Directory -Force -Path $OutputDir | Out-Null
 

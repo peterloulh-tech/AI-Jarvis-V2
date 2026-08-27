@@ -19,7 +19,7 @@ python run_v_poc.py prepare --profile V-C01 --output evidence
 python run_v_poc.py prepare --profile V-C02 --output evidence
 ```
 
-Windows/NVIDIA 必须使用任务 25 固定的官方 `llama-b10369-bin-win-cuda-12.4-x64.zip`（SHA-256 `5eca96bb...642642`）和 `cudart` 包（SHA-256 `8c79a9b2...ae1d6`），先在受控准备环境下载并验包，再断网执行。普通 `check/run/benchmark` 只检查 runtime 路径、文件名和非零字节数，以及模型的锁定文件名与字节数，不重复计算大型制品 SHA-256。
+Windows/NVIDIA 发布包由 GitHub Actions 按任务 25 锁定的官方 `llama-b10369-bin-win-cuda-12.4-x64.zip`（SHA-256 `5eca96bb...642642`）和 `cudart` 包（SHA-256 `8c79a9b2...ae1d6`）组装，并把 `llama-server.exe`、CUDA DLL、便携 Python 和脚本直接放入 ZIP。网吧保持联网即可运行；不需要 Visual Studio、CUDA Toolkit、Git 或现场下载。普通 `check/run/benchmark` 只检查包内 runtime 路径、文件名和非零字节数，以及模型的锁定文件名与字节数，不重复计算大型制品 SHA-256。
 
 ```powershell
 .\run-v-poc.ps1 `

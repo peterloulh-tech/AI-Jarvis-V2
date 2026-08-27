@@ -1,0 +1,78 @@
+name: AIJARVISV2-27 V Windows portable package
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - codex/aijarvisv2-27
+    paths:
+      - .github/workflows/aijarvisv2-27-v-portable.yml
+      - tools/v-multimage-poc/**
+      - docs/v2/requirements/v-model-runtime-candidate-lock.json
+
+permissions:
+  contents: read
+
+env:
+  ARTIFACT_NAME: AIJARVISV2-27-v-windows-x64-cuda-portable
+  RUNTIME_URL: https://github.com/ggml-org/llama.cpp/releases/download/b10369/llama-b10369-bin-win-cuda-12.4-x64.zip
+  CUDART_URL: https://github.com/ggml-org/llama.cpp/releases/download/b10369/cudart-llama-bin-win-cuda-12.4-x64.zip
+  RUNTIME_SHA256: 5eca96bb069281deda8e882843193a605a7b0687c659c6b4123715a4f1642642
+  CUDART_SHA256: 8c79a9b226de4b3cacfd1f83d24f962d0773be79f1e7b75c6af4ded7e32ae1d6
+  PYTHON_SHA256: 009d6bf7e3b2ddca3d784fa09f90fe54336d5b60f0e0f305c37f400bf83cfd3b
+
+jobs:
+  package:
+    runs-on: windows-2022
+    timeout-minutes: 30
+    steps:
+      - name: Check out pinned source
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
+      - name: Download locked official runtime assets
+        shell: pwsh
+        run: |
+          $download = Join-Path $env:RUNNER_TEMP "task27-downloads"
+          New-Item -ItemType Directory -Path $download -Force | Out-Null
+          $runtime = Join-Path $download "llama-b10369-bin-win-cuda-12.4-x64.zip"
+          $cudart = Join-Path $download "cudart-llama-bin-win-cuda-12.4-x64.zip"
+          Invoke-WebRequest -Uri $env:RUNTIME_URL -OutFile $runtime
+          Invoke-WebRequest -Uri $env:CUDART_URL -OutFile $cudart
+          if ((Get-FileHash $runtime -Algorithm SHA256).Hash.ToLowerInvariant() -ne $env:RUNTIME_SHA256) { throw "llama runtime SHA-256 mismatch" }
+          if ((Get-FileHash $cudart -Algorithm SHA256).Hash.ToLowerInvariant() -ne $env:CUDART_SHA256) { throw "cudart SHA-256 mismatch" }
+          $python = Join-Path $download "python-3.11.9-embed-amd64.zip"
+          Invoke-WebRequest -Uri "https://www.python.org/ftp/python/3.11.9/python-3.11.9-embed-amd64.zip" -OutFile $python
+          if ((Get-FileHash $python -Algorithm SHA256).Hash.ToLowerInvariant() -ne $env:PYTHON_SHA256) { throw "embedded Python SHA-256 mismatch" }
+          "TASK27_DOWNLOAD=$download" | Out-File $env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: Assemble package
+        shell: pwsh
+        run: |
+          $root = Join-Path $env:GITHUB_WORKSPACE "build/artifact/$env:ARTIFACT_NAME"
+          ./tools/v-multimage-poc/package-v-portable.ps1 `
+            -RepositoryRoot $env:GITHUB_WORKSPACE `
+            -PackageRoot $root `
+            -RuntimeArchive (Join-Path $env:TASK27_DOWNLOAD "llama-b10369-bin-win-cuda-12.4-x64.zip") `
+            -CudartArchive (Join-Path $env:TASK27_DOWNLOAD "cudart-llama-bin-win-cuda-12.4-x64.zip") `
+            -PythonArchive (Join-Path $env:TASK27_DOWNLOAD "python-3.11.9-embed-amd64.zip") `
+            -SourceCommit $env:GITHUB_SHA `
+            -ArtifactName $env:ARTIFACT_NAME
+          Compress-Archive -Path (Join-Path $root "*") -DestinationPath (Join-Path $env:GITHUB_WORKSPACE "$env:ARTIFACT_NAME.zip") -CompressionLevel Optimal
+
+      - name: Verify package layout
+        shell: pwsh
+        run: |
+          $root = Join-Path $env:GITHUB_WORKSPACE "build/artifact/$env:ARTIFACT_NAME"
+          foreach ($file in @("bin/llama-server.exe", "bin/cudart64_12.dll", "bin/cublas64_12.dll", "bin/cublasLt64_12.dll", "python/python.exe", "run_v_poc.py", "Run-Task27-Matrix.ps1", "Fixtures/fixture/fixture-manifest.json")) {
+            if (-not (Test-Path (Join-Path $root $file) -PathType Leaf)) { throw "missing packaged file: $file" }
+          }
+          $manifest = Get-Content (Join-Path $root "package-manifest.json") -Raw | ConvertFrom-Json
+          if ($manifest.models_included -ne 0 -or $manifest.test_media_included -ne 0) { throw "models/media must remain operator-provided" }
+
+      - name: Upload V package ZIP
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: ${{ env.ARTIFACT_NAME }}
+          path: ${{ env.ARTIFACT_NAME }}.zip
+          if-no-files-found: error
+          retention-days: 14
